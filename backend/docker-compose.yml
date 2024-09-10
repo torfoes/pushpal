@@ -1,0 +1,14 @@
+services:
+  backend:
+    image: paulinewade/csce431:latest
+    container_name: notifyme_backend
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_USER: test_app
+      DATABASE_PASSWORD: test_password
+    volumes:
+      - ./backend:/csce431
+    platform: linux/amd64
+    stdin_open: true
+    tty: true
