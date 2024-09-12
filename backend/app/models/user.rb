@@ -1,9 +1,9 @@
 class User < ApplicationRecord
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+  authenticates_with_sorcery!
 
-  enum role: { attendee: 0, organizer: 1, admin: 2 }
-
+  # Add validations
+  validates :password, length: { minimum: 8 }, if: -> { new_record? || changes[:crypted_password] }
+  validates :password, confirmation: true, if: -> { new_record? || changes[:crypted_password] }
+  validates :password_confirmation, presence: true, if: -> { new_record? || changes[:crypted_password] }
+  validates :email, uniqueness: true
 end
