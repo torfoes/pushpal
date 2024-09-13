@@ -3,6 +3,9 @@ class User < ApplicationRecord
 
   authenticates_with_sorcery!
 
+  has_many :memberships, dependent: :destroy
+  has_many :organizations, through: :memberships
+
   # Add validations
   # validates :uin, presence: false, uniqueness: true, length: { is: 9 }, numericality: { only_integer: true }
   validates :password, length: { minimum: 8 }, if: -> { new_record? || changes[:crypted_password] }
