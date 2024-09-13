@@ -1,4 +1,4 @@
-<%= form_with(model: attendance) do |form| %>
+<%= form_with(model: attendance, local: true) do |form| %>
   <% if attendance.errors.any? %>
     <div style="color: red">
       <h2><%= pluralize(attendance.errors.count, "error") %> prohibited this attendance from being saved:</h2>
@@ -12,13 +12,13 @@
   <% end %>
 
   <div>
-    <%= form.label :user, style: "display: block" %>
-    <%= form.text_field :user %>
+    <%= form.label :user_id, "Select User", style: "display: block" %>
+    <%= form.collection_select :user_id, User.all, :id, :name, prompt: "Select a user" %>
   </div>
 
   <div>
-    <%= form.label :event, style: "display: block" %>
-    <%= form.text_field :event %>
+    <%= form.label :event_id, "Select Event", style: "display: block" %>
+    <%= form.collection_select :event_id, Event.all, :id, :name, prompt: "Select an event" %>
   </div>
 
   <div>
@@ -27,11 +27,11 @@
   </div>
 
   <div>
-    <%= form.label :status, style: "display: block" %>
-    <%= form.number_field :status %>
+    <%= form.label :status, "Attendance Status", style: "display: block" %>
+    <%= form.select :status, Attendance.statuses.keys.map { |status| [status.humanize, status] } %>
   </div>
 
   <div>
-    <%= form.submit %>
+    <%= form.submit "Create Attendance" %>
   </div>
 <% end %>
