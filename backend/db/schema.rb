@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_09_13_042429) do
+ActiveRecord::Schema[7.0].define(version: 2024_09_13_051620) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -84,7 +84,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_13_042429) do
   end
 
   create_table "push_subscriptions", force: :cascade do |t|
-    t.uuid "user_id", null: false
+    t.uuid "user_id"
     t.string "endpoint", null: false
     t.string "p256dh_key", null: false
     t.string "auth_key", null: false
