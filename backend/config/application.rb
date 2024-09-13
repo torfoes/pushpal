@@ -12,6 +12,9 @@ module Notifyme
     config.load_defaults 7.0
     config.active_record.primary_key = :uuid
 
+    config.generators do |g|
+      g.orm :active_record, primary_key_type: :uuid
+    end
     # config.api_only = true
 
     # Configuration for the application, engines, and railties goes here.

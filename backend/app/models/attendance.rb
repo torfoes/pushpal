@@ -4,5 +4,5 @@ class Attendance < ApplicationRecord
 
   enum status: { invited: 0, rsvped: 1, checked_in: 2, cancelled: 3 }
 
-  validates :status, presence: true
+  validates :user_id, uniqueness: { scope: :event_id, message: "has already been added to this event" }
 end
