@@ -1,7 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { subscribeUser, unsubscribeUser, sendNotification } from './actions'
+import { subscribeUser, unsubscribeUser } from './actions'
+
+function arrayBufferToBase64Url(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  bytes.forEach((b) => binary += String.fromCharCode(b));
+  const base64 = btoa(binary);
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -52,7 +60,7 @@ function InstallPrompt() {
             {' '}
                 ⎋{' '}
           </span>
-              and then "Add to Home Screen"
+              and then &quot;Add to Home Screen&quot;
               <span role="img" aria-label="plus icon">
             {' '}
                 ➕{' '}
@@ -104,7 +112,19 @@ function PushNotificationManager() {
       ),
     })
     setSubscription(sub)
-    await subscribeUser(sub)
+
+    const p256dhBuffer = sub.getKey('p256dh');
+    const authBuffer = sub.getKey('auth');
+
+    if (!p256dhBuffer || !authBuffer) {
+      throw new Error('Missing p256dh or auth keys in the subscription.');
+    }
+
+    // Convert the ArrayBuffers to Base64 URL-encoded strings
+    const p256dh = arrayBufferToBase64Url(p256dhBuffer);
+    const auth = arrayBufferToBase64Url(authBuffer);
+
+    await subscribeUser(p256dh, auth, sub.endpoint)
   }
 
   async function unsubscribeFromPush() {
@@ -115,7 +135,7 @@ function PushNotificationManager() {
 
   async function sendTestNotification() {
     if (subscription) {
-      await sendNotification(message)
+      // await sendNotification(message)
       setMessage('')
     }
   }
