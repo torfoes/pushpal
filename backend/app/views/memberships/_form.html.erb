@@ -12,18 +12,18 @@
   <% end %>
 
   <div>
-    <%= form.label :user_id, style: "display: block" %>
-    <%= form.text_field :user_id %>
+    <%= form.label :user_id, "Select User", style: "display: block" %>
+    <%= form.collection_select :user_id, User.all, :id, :name, prompt: "Select a user" %>
   </div>
 
   <div>
-    <%= form.label :organization_id, style: "display: block" %>
-    <%= form.text_field :organization_id %>
+    <%= form.label :organization_id, "Select Organization", style: "display: block" %>
+    <%= form.collection_select :organization_id, Organization.all, :id, :name, prompt: "Select an organization" %>
   </div>
 
   <div>
-    <%= form.label :role, style: "display: block" %>
-    <%= form.number_field :role %>
+    <%= form.label :role, "Select Role", style: "display: block" %>
+    <%= form.select :role, Membership.roles.keys.map { |role| [role.humanize, role] } %>
   </div>
 
   <div>
