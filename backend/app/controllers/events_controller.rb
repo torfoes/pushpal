@@ -8,6 +8,7 @@ class EventsController < ApplicationController
 
   # GET /events/1 or /events/1.json
   def show
+    @attendances = @event.attendances.includes(:user)
   end
 
   # GET /events/new
