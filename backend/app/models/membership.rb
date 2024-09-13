@@ -4,5 +4,5 @@ class Membership < ApplicationRecord
 
   enum role: { member: 0, admin: 1 }
 
-  validates :role, presence: true
+  validates :user_id, :organization_id, :role, presence: true
 end
