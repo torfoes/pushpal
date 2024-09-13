@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   resources :attendances
   resources :events
   resources :organizations
+  resources :push_subscriptions, only: [:create]
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
   resources :users, only: [:create, :index, :show]
