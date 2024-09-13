@@ -7,6 +7,7 @@ class User < ApplicationRecord
   has_many :organizations, through: :memberships
 
   has_many :push_subscriptions, dependent: :destroy
+  has_many :notifications, dependent: :nullify
 
   # Add validations
   # validates :uin, presence: false, uniqueness: true, length: { is: 9 }, numericality: { only_integer: true }
