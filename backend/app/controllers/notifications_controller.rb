@@ -25,6 +25,8 @@ class NotificationsController < ApplicationController
 
     respond_to do |format|
       if @notification.save
+        PushNotificationJob.perform_later(@notification.id)
+
         format.html { redirect_to notification_url(@notification), notice: "Notification was successfully created." }
         format.json { render :show, status: :created, location: @notification }
       else
@@ -65,6 +67,6 @@ class NotificationsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def notification_params
-      params.require(:notification).permit(:user, :event, :message, :send_type, :message_type, :sent_at)
+      params.require(:notification).permit(:user_id, :event_id, :message, :send_type, :message_type, :sent_at)
     end
 end
