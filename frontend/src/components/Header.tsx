@@ -1,3 +1,5 @@
+"use client";
+
 import Link from 'next/link';
 import { Bell, Menu } from 'lucide-react';
 import {
@@ -9,36 +11,42 @@ import {
     SheetClose,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import AvatarDropdown from "@/components/AvatarDropdown";
+import { Session } from 'next-auth';
 
-export default function Header() {
+interface HeaderProps {
+    session: Session;
+}
+
+export default function Header({ session }: HeaderProps) {
     return (
         <header className="px-4 lg:px-6 h-14 flex items-center justify-between">
             {/* Logo */}
-            <Link className="flex items-center justify-center" href="#">
+
+
+            <Link className="flex items-center justify-center" href="./">
                 <Bell className="h-6 w-6 text-white" />
                 <span className="ml-2 text-2xl font-bold text-white">PushPal</span>
             </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex gap-4 sm:gap-6">
-                <Link
-                    className="text-sm font-medium hover:underline underline-offset-4"
-                    href="#"
-                >
-                    Features
-                </Link>
-                <Link
-                    className="text-sm font-medium hover:underline underline-offset-4"
-                    href="#"
-                >
-                    Pricing
-                </Link>
-                <Link
-                    className="text-sm font-medium hover:underline underline-offset-4"
-                    href="#"
-                >
-                    About
-                </Link>
+                {session.user ? (
+                    <AvatarDropdown user={session.user} />
+                ) : (
+                    <>
+                        <Link href="/login">
+                            <Button>
+                                Log In
+                            </Button>
+                        </Link>
+                        <Link href="/login">
+                            <Button variant="secondary">
+                                Sign Up
+                            </Button>
+                        </Link>
+                    </>
+                )}
             </nav>
 
             {/* Mobile Menu */}
@@ -49,7 +57,7 @@ export default function Header() {
                             <Menu className="h-6 w-6" />
                         </Button>
                     </SheetTrigger>
-                    <SheetContent side="left" className="p-4">
+                    <SheetContent side="right" className="p-4 bg-black">
                         <SheetHeader>
                             <SheetTitle>Menu</SheetTitle>
                             <SheetClose />
@@ -57,21 +65,19 @@ export default function Header() {
                         <nav className="mt-4 flex flex-col gap-4">
                             <Link
                                 className="text-sm font-medium hover:underline underline-offset-4"
-                                href="#"
+                                href="./install"
                             >
-                                Features
+                                Install
                             </Link>
-                            <Link
-                                className="text-sm font-medium hover:underline underline-offset-4"
-                                href="#"
-                            >
-                                Pricing
+                            <Link href="/login">
+                                <Button>
+                                    Log In
+                                </Button>
                             </Link>
-                            <Link
-                                className="text-sm font-medium hover:underline underline-offset-4"
-                                href="#"
-                            >
-                                About
+                            <Link href="/login">
+                                <Button variant="secondary">
+                                    Sign Up
+                                </Button>
                             </Link>
                         </nav>
                     </SheetContent>
