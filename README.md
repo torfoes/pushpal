@@ -1,10 +1,14 @@
 ### Backend (Ruby on Rails)
 **Prerequisites:** Make sure you have Docker installed. If not, go install that first.
 
+
+
 **Start the Backend:**
 ```sh
 cd backend
-docker-compose up
+docker-compose up -d
+docker exec -it notifyme_backend /bin/bash
+cd csce431
 ```
 
 ### Frontend (Node.js)
