@@ -98,6 +98,9 @@ GEM
     hkdf (0.3.0)
     i18n (1.14.5)
       concurrent-ruby (~> 1.0)
+    immutable-ruby (0.2.0)
+      concurrent-ruby (~> 1.1)
+      sorted_set (~> 1.0)
     importmap-rails (2.0.1)
       actionpack (>= 6.0.0)
       activesupport (>= 6.0.0)
@@ -109,6 +112,9 @@ GEM
     jbuilder (2.12.0)
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
+    jose (1.2.0)
+      base64
+      immutable-ruby
     jwt (2.8.2)
       base64
     loofah (2.22.0)
@@ -178,6 +184,7 @@ GEM
       thor (~> 1.0)
       zeitwerk (~> 2.5)
     rake (13.2.1)
+    rbtree (0.4.6)
     rdoc (6.7.0)
       psych (>= 4.0.0)
     regexp_parser (2.9.2)
@@ -189,6 +196,10 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 3.0)
       websocket (~> 1.0)
+    set (1.1.0)
+    sorted_set (1.0.3)
+      rbtree
+      set (~> 1.0)
     sprockets (4.2.1)
       concurrent-ruby (~> 1.0)
       rack (>= 2.2.4, < 4)
@@ -233,6 +244,7 @@ DEPENDENCIES
   dotenv-rails
   importmap-rails
   jbuilder
+  jose
   jwt
   pg (~> 1.1)
   puma (~> 5.0)
