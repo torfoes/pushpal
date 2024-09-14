@@ -15,7 +15,7 @@ import AvatarDropdown from "@/components/AvatarDropdown";
 import { Session } from 'next-auth';
 
 interface HeaderProps {
-    session: Session;
+    session: Session | null;
 }
 
 export default function Header({ session }: HeaderProps) {
@@ -31,7 +31,7 @@ export default function Header({ session }: HeaderProps) {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex gap-4 sm:gap-6">
-                {session.user ? (
+                {session && session.user ? (
                     <AvatarDropdown user={session.user} />
                 ) : (
                     <>
