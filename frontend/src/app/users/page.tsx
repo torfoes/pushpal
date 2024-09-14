@@ -1,19 +1,24 @@
 import React from 'react';
-import {columns} from "@/app/users/columns";
+import { columns, User } from "@/app/users/columns";
 import {DataTable} from "@/app/users/data-table";
+import { cookies } from 'next/headers'
+import {redirect} from "next/navigation";
 
-type User = {
-    id: string;
-    name: string;
-    email: string;
-    uin: string;
-    status: "active" | "inactive";
-};
 
-async function getData(): Promise<User[]> {
+async function getUsers(): Promise<User[]> {
+    const cookieStore = cookies()
+
+    const sessionToken = cookieStore.get('authjs.session-token')?.value;
+
+    if (!sessionToken) {
+        redirect('./login')
+    }
+    // console.log(sessionToken);
+
     const res = await fetch('http://localhost:3000/users', {
         method: 'GET',
         headers: {
+            'Authorization': `Bearer ${sessionToken}`,
             'Content-Type': 'application/json',
         },
         cache: 'no-store',
@@ -27,14 +32,12 @@ async function getData(): Promise<User[]> {
 }
 
 const Page = async () => {
-    const users = await getData()
-    // console.log(users);
+    const users = await getUsers()
 
     return (
         <div>
             <h1>Users List</h1>
             <ul>
-
                 <DataTable columns={columns} data={users}/>
             </ul>
         </div>
