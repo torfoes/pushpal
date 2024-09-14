@@ -24,3 +24,12 @@ npm install
 ```sh
 npm run dev
 ```
+
+
+## NOTE
+The frontend and backend MUST share the same AUTH_SECRET enviroment variable. This is how we authenticate requests.
+
+Send me a DM and I can hook you up with the .env values needed to run the application. 
+
+
+
