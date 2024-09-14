@@ -3,8 +3,8 @@ import LoginCard from "@/app/login/LoginCard";
 
 const Page = () => {
     return (
-        <div className="min-h-screen flex items-center justify-center">
-            <LoginCard />
+        <div className="flex items-center justify-center w-full min-h-[60vh]">
+            <LoginCard/>
         </div>
     );
 };
