@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'NotifyMe',
-        short_name: 'NotifyMe',
+        name: 'PushPal',
+        short_name: 'PushPal',
         description: 'A Progressive Web App built with Next.js',
         start_url: '/',
         display: 'standalone',
