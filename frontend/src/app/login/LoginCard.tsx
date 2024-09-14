@@ -1,7 +1,7 @@
-// components/LoginCard.jsx
+'use client';
 
-import React from 'react';
-import { Input } from "@/components/ui/input";
+import React, { useState } from 'react';
+import { signIn } from 'next-auth/react';
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -11,43 +11,39 @@ import {
     CardContent,
 } from "@/components/ui/card";
 
+
 const LoginCard = () => {
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleGoogleSignIn = async () => {
+        setIsLoading(true);
+        try {
+            await signIn('google', { callbackUrl: '/dashboard' });
+        } catch (error) {
+            console.error('Google sign-in error:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md shadow-md">
             <CardHeader>
                 <CardTitle>Sign In</CardTitle>
                 <CardDescription>
-                    Enter your email to sign in to your account
+                    Sign in with your Google account to access PushPal
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-                <form className="space-y-4">
-                    <div className="space-y-2">
-                        <Input
-                            id="email"
-                            placeholder="m@example.com"
-                            required
-                            type="email"
-                        />
-                    </div>
-                    <Button className="w-full" type="submit">
-                        Sign In with Email
-                    </Button>
-                </form>
-                <div className="relative my-6">
-                    <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                    <span className="px-2 bg-white text-muted-foreground">
-                      Or continue with
-                    </span>
-                    </div>
-                </div>
-
-                <div className="flex justify-center">
-                    <Button variant="outline" className="w-full">
-                        Continue with Google
+            <CardContent className="space-y-6">
+                <div className="flex flex-col items-center">
+                    <Button
+                        variant="outline"
+                        className="w-full flex items-center justify-center gap-2"
+                        onClick={handleGoogleSignIn}
+                        disabled={isLoading}
+                        aria-label="Sign in with Google"
+                    >
+                        {isLoading ? 'Signing In...' : 'Continue with Google'}
                     </Button>
                 </div>
             </CardContent>
