@@ -5,6 +5,9 @@ ruby "3.1.2"
 
 gem 'sorcery'
 
+gem 'jwt'
+gem 'rack-cors'
+
 gem 'webpush'
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
