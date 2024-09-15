@@ -37,3 +37,7 @@ Send me a DM and I can hook you up with the .env values needed to run the applic
 https://ui.shadcn.com/docs/components/form
 
 This is a good guide for implementing forms with validation. You guys might check out this tutorial
+
+
+Also, if you are confused about routing and anything regarding routing or nextjs,
+https://nextjs.org/docs/
