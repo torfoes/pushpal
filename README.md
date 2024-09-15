@@ -32,4 +32,8 @@ The frontend and backend MUST share the same AUTH_SECRET enviroment variable. Th
 Send me a DM and I can hook you up with the .env values needed to run the application. 
 
 
+## Additional Notes
 
+https://ui.shadcn.com/docs/components/form
+
+This is a good guide for implementing forms with validation. You guys might check out this tutorial
