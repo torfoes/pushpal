@@ -4,58 +4,79 @@ class OrganizationsController < ApplicationController
   # GET /organizations or /organizations.json
   def index
     @organizations = Organization.all
+    render json: @organizations, status: :ok
   end
 
   # GET /organizations/1 or /organizations/1.json
   def show
+    members = @organization.memberships.includes(:user).map do |membership|
+      {
+        id: membership.user.id,
+        name: membership.user.name,
+        email: membership.user.email,
+        role: membership.role
+      }
+    end
+
+    response = {
+      organization: {
+        id: @organization.id,
+        name: @organization.name,
+        description: @organization.description,
+        member_count: @organization.memberships.count, # it is possible that this will be slow. we will need to experiment
+      },
+      members: members
+    }
+
+    render json: response, status: :ok
   end
 
   # GET /organizations/new
   def new
     @organization = Organization.new
+    render json: @organization, status: :ok
   end
 
   # GET /organizations/1/edit
   def edit
+    render json: @organization, status: :ok
   end
 
   # POST /organizations or /organizations.json
   def create
     @organization = Organization.new(organization_params)
 
-    respond_to do |format|
+    ActiveRecord::Base.transaction do
       if @organization.save
-        format.html { redirect_to organization_url(@organization), notice: "Organization was successfully created." }
-        format.json { render :show, status: :created, location: @organization }
+        Membership.create!(
+          user: @current_user,
+          organization: @organization,
+          role: :creator
+        )
+
+        render json: @organization, status: :created, location: @organization
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @organization.errors, status: :unprocessable_entity }
+        render json: @organization.errors, status: :unprocessable_entity
       end
     end
   end
 
+
   # PATCH/PUT /organizations/1 or /organizations/1.json
   def update
-    respond_to do |format|
-      if @organization.update(organization_params)
-        format.html { redirect_to organization_url(@organization), notice: "Organization was successfully updated." }
-        format.json { render :show, status: :ok, location: @organization }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @organization.errors, status: :unprocessable_entity }
-      end
+    if @organization.update(organization_params)
+      render json: @organization, status: :ok
+    else
+      render json: @organization.errors, status: :unprocessable_entity
     end
   end
 
   # DELETE /organizations/1 or /organizations/1.json
   def destroy
     @organization.destroy
-
-    respond_to do |format|
-      format.html { redirect_to organizations_url, notice: "Organization was successfully destroyed." }
-      format.json { head :no_content }
-    end
+    render json: { message: 'Organization was successfully destroyed.' }, status: :no_content
   end
+
 
   private
     # Use callbacks to share common setup or constraints between actions.
@@ -67,5 +88,4 @@ class OrganizationsController < ApplicationController
     def organization_params
       params.require(:organization).permit(:name, :description)
     end
-
 end
