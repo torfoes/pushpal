@@ -64,8 +64,7 @@ module Authentication
   end
 
   def find_or_create_user(email, name, picture, sub)
-    Rails.logger.info("Attempting to find or create user with email: #{email}")
-
+    # Rails.logger.info("Attempting to find or create user with email: #{email}")
     user = User.find_or_create_by(email: email) do |user|
       user.name = name
       user.picture = picture
