@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_09_14_202631) do
+ActiveRecord::Schema[7.0].define(version: 2024_09_15_031749) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -50,6 +50,16 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_14_202631) do
     t.uuid "organization_id", null: false
     t.index ["creator_id"], name: "index_events_on_creator_id"
     t.index ["organization_id"], name: "index_events_on_organization_id"
+  end
+
+  create_table "memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "organization_id", null: false
+    t.integer "role", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_memberships_on_organization_id"
+    t.index ["user_id"], name: "index_memberships_on_user_id"
   end
 
   create_table "notifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -102,6 +112,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_14_202631) do
   add_foreign_key "dues", "users"
   add_foreign_key "events", "organizations"
   add_foreign_key "events", "users", column: "creator_id"
+  add_foreign_key "memberships", "organizations"
+  add_foreign_key "memberships", "users"
   add_foreign_key "notifications", "events"
   add_foreign_key "notifications", "users"
   add_foreign_key "push_subscriptions", "users"
