@@ -10,7 +10,8 @@ class MembershipsController < ApplicationController
         id: membership.organization.id,
         name: membership.organization.name,
         description: membership.organization.description,
-        role: membership.role
+        role: membership.role,
+        member_count: membership.organization.memberships.count
       }
     end
 
@@ -19,7 +20,8 @@ class MembershipsController < ApplicationController
         id: membership.organization.id,
         name: membership.organization.name,
         description: membership.organization.description,
-        role: membership.role
+        role: membership.role,
+        member_count: membership.organization.memberships.count
       }
     end
 
