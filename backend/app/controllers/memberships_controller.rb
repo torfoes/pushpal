@@ -3,7 +3,30 @@ class MembershipsController < ApplicationController
 
   # GET /memberships or /memberships.json
   def index
-    @memberships = Membership.all
+    memberships = Membership.where(user: @current_user)
+
+    managed_organizations = memberships.where(role: [:creator, :manage]).map do |membership|
+      {
+        id: membership.organization.id,
+        name: membership.organization.name,
+        description: membership.organization.description,
+        role: membership.role
+      }
+    end
+
+    member_organizations = memberships.where(role: :member).map do |membership|
+      {
+        id: membership.organization.id,
+        name: membership.organization.name,
+        description: membership.organization.description,
+        role: membership.role
+      }
+    end
+
+    render json: {
+      managed_organizations: managed_organizations,
+      member_organizations: member_organizations
+    }, status: :ok
   end
 
   # GET /memberships/1 or /memberships/1.json
