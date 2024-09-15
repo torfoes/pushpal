@@ -1,6 +1,6 @@
 class CreatePushSubscriptions < ActiveRecord::Migration[7.0]
   def change
-    create_table :push_subscriptions do |t|
+    create_table :push_subscriptions, id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
       t.references :user, null: false, foreign_key: true, type: :uuid
       t.string :endpoint, null: false
       t.string :p256dh_key, null: false
