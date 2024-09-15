@@ -1,6 +1,8 @@
 'use server'
 
 import webpush from 'web-push'
+import {cookies} from "next/headers";
+import {redirect} from "next/navigation";
 
 
 webpush.setVapidDetails(
@@ -12,10 +14,18 @@ webpush.setVapidDetails(
 // let subscription: PushSubscription | null = null
 
 export async function subscribeUser(p256dh: string, auth: string, endpoint: string) {
+    const cookieStore = cookies();
+    const sessionToken = cookieStore.get('authjs.session-token')?.value;
+
+    if (!sessionToken) {
+        redirect('./login');
+    }
+
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/push-subscriptions`, {
             method: 'POST',
             headers: {
+                'Authorization': `Bearer ${sessionToken}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
