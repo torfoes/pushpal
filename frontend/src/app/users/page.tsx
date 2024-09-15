@@ -31,7 +31,7 @@ async function getUsers(): Promise<User[]> {
     return res.json();
 }
 
-const Page = async () => {
+export default async function Page() {
     const users = await getUsers()
 
     return (
@@ -44,4 +44,3 @@ const Page = async () => {
     );
 };
 
-export default Page;
