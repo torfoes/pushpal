@@ -82,8 +82,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_15_031749) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "push_subscriptions", force: :cascade do |t|
-    t.uuid "user_id"
+  create_table "push_subscriptions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
     t.string "endpoint", null: false
     t.string "p256dh_key", null: false
     t.string "auth_key", null: false
