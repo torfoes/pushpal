@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
-const formSchema = z.object({
+export const formSchema = z.object({
     name: z.string().min(3, {
         message: "Organization name must be at least 3 characters.",
     }),
@@ -23,7 +23,7 @@ const formSchema = z.object({
 export default function CreateOrganizationDialog({
                                                      createNewOrgAction,
                                                  }: {
-    createNewOrgAction: (formData: z.infer<typeof formSchema>) => void
+    createNewOrgAction: (formData: z.infer<typeof formSchema>) => Promise<void>
 }) {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 

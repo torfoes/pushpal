@@ -1,9 +1,9 @@
 import {cookies} from "next/headers";
 import {redirect} from "next/navigation";
-import CreateOrganizationDialog from "@/components/CreateOrganizationDialog";
+import CreateOrganizationDialog, {formSchema} from "@/components/CreateOrganizationDialog";
 import OrganizationTabs from "@/components/OrganizationTabs";
 import {Organizations} from "@/types";
-
+import * as z from "zod";
 
 async function getCurrentUserOrganizations(): Promise<Organizations> {
     const cookieStore = cookies()
@@ -31,7 +31,7 @@ async function getCurrentUserOrganizations(): Promise<Organizations> {
     return res.json();
 }
 
-async function createNewOrgAction({ name, description }: FormData) {
+async function createNewOrgAction({ name, description }: z.infer<typeof formSchema>) {
     'use server';
 
     const cookieStore = cookies();

@@ -59,23 +59,26 @@ export default function OrganizationTabs({ organizations }: { organizations: Org
             {/* Member Organizations */}
             <TabsContent value="member">
                 {organizations.member_organizations.map((org) => (
-                    <Card
+                    <Link
                         key={org.id}
-                        className="mb-4 cursor-pointer transition-shadow hover:shadow-md"
+                        href={`/dashboard/${org.id}`}
                     >
-                        <CardHeader>
-                            <CardTitle>{org.name}</CardTitle>
-                            <CardDescription>
-                                {org.description}
-
-                                <Users className="inline mr-2" />
-                                {org.member_count || 0} members
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Badge variant="secondary">Member</Badge>
-                        </CardContent>
-                    </Card>
+                        <Card
+                            className="mb-4 cursor-pointer transition-shadow hover:shadow-md"
+                        >
+                            <CardHeader>
+                                <CardTitle>{org.name}</CardTitle>
+                                <CardDescription>
+                                    {org.description}
+                                    <Users className="inline mr-2" />
+                                    {org.member_count || 0} members
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Badge variant="secondary">Member</Badge>
+                            </CardContent>
+                        </Card>
+                    </Link>
                 ))}
             </TabsContent>
         </Tabs>

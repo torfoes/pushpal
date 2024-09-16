@@ -29,7 +29,7 @@ async function getOrganization(organization_id : string): Promise<Organization> 
 async function acceptInviteAction(organization_id: string) {
     'use server';
 
-    console.log(organization_id);
+    // console.log(organization_id);
 
     const cookieStore = cookies();
     const sessionToken = cookieStore.get('authjs.session-token')?.value;
