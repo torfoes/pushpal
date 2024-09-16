@@ -7,8 +7,11 @@
 ```sh
 cd backend
 docker-compose up -d
-docker exec -it notifyme_backend /bin/bash
+docker exec -it pushpal_backend /bin/bash
 cd csce431
+bundle install
+rails db:create
+rails db:migrate
 ```
 
 ### Frontend (Node.js)

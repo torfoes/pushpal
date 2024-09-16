@@ -1,7 +1,7 @@
 services:
   backend:
     image: paulinewade/csce431:latest
-    container_name: notifyme_backend
+    container_name: pushpal_backend
     ports:
       - "3000:3000"
     environment:
