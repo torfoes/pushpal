@@ -1,4 +1,5 @@
 class OrganizationsController < ApplicationController
+  skip_before_action :authenticate_request, only: [:show]
   before_action :set_organization, only: %i[ show edit update destroy ]
 
   # GET /organizations or /organizations.json
@@ -9,23 +10,25 @@ class OrganizationsController < ApplicationController
 
   # GET /organizations/1 or /organizations/1.json
   def show
-    members = @organization.memberships.includes(:user).map do |membership|
-      {
-        id: membership.user.id,
-        name: membership.user.name,
-        email: membership.user.email,
-        role: membership.role
-      }
-    end
+    members = if @current_user
+                @organization.memberships.includes(:user).map do |membership|
+                  {
+                    id: membership.user.id,
+                    name: membership.user.name,
+                    email: membership.user.email,
+                    role: membership.role
+                  }
+                end
+              else
+                []
+              end
 
     response = {
-      organization: {
-        id: @organization.id,
-        name: @organization.name,
-        description: @organization.description,
-        member_count: @organization.memberships.count, # it is possible that this will be slow. we will need to experiment
-      },
-      members: members
+      id: @organization.id,
+      name: @organization.name,
+      description: @organization.description,
+      member_count: @organization.memberships.count,
+      members: members.presence
     }
 
     render json: response, status: :ok

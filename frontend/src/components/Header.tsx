@@ -33,12 +33,12 @@ export default function Header({ session }: HeaderProps) {
                     <AvatarDropdown user={session.user} />
                 ) : (
                     <>
-                        <Link href="/login">
+                        <Link href="./login">
                             <Button>
                                 Log In
                             </Button>
                         </Link>
-                        <Link href="/login">
+                        <Link href="./login">
                             <Button variant="secondary">
                                 Sign Up
                             </Button>
@@ -67,12 +67,18 @@ export default function Header({ session }: HeaderProps) {
                             >
                                 Install
                             </Link>
-                            <Link href="/login">
+                            <Link
+                                className="text-sm font-medium hover:underline underline-offset-4"
+                                href="./dashboard"
+                            >
+                                Dashboard
+                            </Link>
+                            <Link href="./login">
                                 <Button>
                                     Log In
                                 </Button>
                             </Link>
-                            <Link href="/login">
+                            <Link href="./login">
                                 <Button variant="secondary">
                                     Sign Up
                                 </Button>

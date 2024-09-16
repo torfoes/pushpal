@@ -2,9 +2,10 @@ import {cookies} from "next/headers";
 import {redirect} from "next/navigation";
 import CreateOrganizationDialog from "@/components/CreateOrganizationDialog";
 import OrganizationTabs from "@/components/OrganizationTabs";
+import {Organizations} from "@/types";
 
 
-async function getCurrentUserOrganizations(): Promise<Organizations[]> {
+async function getCurrentUserOrganizations(): Promise<Organizations> {
     const cookieStore = cookies()
     const sessionToken = cookieStore.get('authjs.session-token')?.value;
 
@@ -69,7 +70,7 @@ async function createNewOrgAction({ name, description }: FormData) {
 
 export default async function Page() {
     const organizations = await getCurrentUserOrganizations();
-    // console.log(organizations);
+
     return (
         <div className="container mx-auto p-4">
             <div className="flex justify-between items-center mb-6">
@@ -79,7 +80,7 @@ export default async function Page() {
                 </div>
             </div>
                 <div>
-                    <OrganizationTabs data={organizations}/>
+                    <OrganizationTabs organizations={organizations}/>
                 </div>
         </div>
     )
