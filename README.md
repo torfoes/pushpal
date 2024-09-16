@@ -43,5 +43,5 @@ https://ui.shadcn.com/docs/components/form
 This is a good guide for implementing forms with validation. You guys might check out this tutorial
 
 
-Also, if you are confused about routing and anything regarding routing or nextjs,
+Also, if you are confused about routing and anything regarding nextjs,
 https://nextjs.org/docs/
