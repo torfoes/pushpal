@@ -1,9 +1,6 @@
 
-export enum Role {
-    Creator = 1,
-    Manage = 2,
-    Member = 3
-}
+export type Role = "member" | "creator" | "manager";
+
 
 export interface User {
     id: string;
@@ -12,20 +9,47 @@ export interface User {
     picture?: string;
 }
 
-export interface Membership extends User {
+export interface Membership {
+    id: string;
+    user: User;
     role: Role;
-    organization_id: string
+    organization_id: string;
 }
 
 export interface Organization {
     id: string;
     name: string;
     description: string;
-    member_count?: number;
+    role: Role;
+    member_count: number;
     members?: Membership[];
 }
 
-export interface Organizations {
-    managed_organizations: Organization[];
-    member_organizations: Organization[];
+interface PushSubscription {
+    id: string;
+    user_id: string;
+    endpoint: string;
+    p256dh_key: string;
+    auth_key: string;
+    is_bot: boolean;
+    browser_name: string;
+    browser_version: string;
+    device_model: string;
+    device_type: string;
+    device_vendor: string;
+    engine_name: string;
+    engine_version: string;
+    os_name: string;
+    os_version: string;
+    cpu_architecture: string;
+    user_agent: string;
+    last_used_at: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface PushSubscriptionInput {
+    endpoint: string;
+    p256dh_key: string;
+    auth_key: string;
 }

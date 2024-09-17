@@ -8,7 +8,7 @@ import AcceptOrganizationInvite from "@/app/invite/[organization_id]/AcceptOrgan
 
 
 async function getOrganization(organization_id : string): Promise<Organization> {
-    const res = await fetch(`http://localhost:3000/organizations/${organization_id}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ async function acceptInviteAction(organization_id: string) {
         redirect('/login');
     }
 
-    const res = await fetch('http://localhost:3000/memberships', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/memberships`, {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${sessionToken}`,
@@ -67,7 +67,7 @@ async function getMembershipStatus(organization_id : string): Promise<Organizati
         redirect('/login')
     }
 
-    const res = await fetch(`http://localhost:3000/memberships?organization_id=${organization_id}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/memberships?organization_id=${organization_id}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${sessionToken}`,

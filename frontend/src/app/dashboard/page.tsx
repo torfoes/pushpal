@@ -1,11 +1,11 @@
 import {cookies} from "next/headers";
 import {redirect} from "next/navigation";
 import CreateOrganizationDialog, {formSchema} from "@/components/CreateOrganizationDialog";
-import OrganizationTabs from "@/components/OrganizationTabs";
-import {Organizations} from "@/types";
+import {Organization} from "@/types";
 import * as z from "zod";
+import OrganizationList from "@/components/OrganizationList";
 
-async function getCurrentUserOrganizations(): Promise<Organizations> {
+async function getCurrentUserOrganizations(): Promise<Organization[]> {
     const cookieStore = cookies()
     const sessionToken = cookieStore.get('authjs.session-token')?.value;
 
@@ -13,7 +13,7 @@ async function getCurrentUserOrganizations(): Promise<Organizations> {
         redirect('./login')
     }
 
-    const res = await fetch('http://localhost:3000/memberships', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}memberships`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${sessionToken}`,
@@ -28,7 +28,9 @@ async function getCurrentUserOrganizations(): Promise<Organizations> {
         throw new Error(`Failed to fetch organizations: ${res.status}`);
     }
 
-    return res.json();
+    const data = await res.json();
+
+    return data.organizations;
 }
 
 async function createNewOrgAction({ name, description }: z.infer<typeof formSchema>) {
@@ -41,7 +43,7 @@ async function createNewOrgAction({ name, description }: z.infer<typeof formSche
         redirect('./login');
     }
 
-    const res = await fetch('http://localhost:3000/organizations', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/organizations`, {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${sessionToken}`,
@@ -80,7 +82,7 @@ export default async function Page() {
                 </div>
             </div>
                 <div>
-                    <OrganizationTabs organizations={organizations}/>
+                    <OrganizationList organizations={organizations}/>
                 </div>
         </div>
     )
