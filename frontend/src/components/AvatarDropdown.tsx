@@ -12,10 +12,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {User, Settings, Map, Eye, HomeIcon} from "lucide-react"
+import {User, HomeIcon, BellIcon} from "lucide-react"
 import { useRouter } from 'next/navigation'
 import { signOut } from "next-auth/react"
-import {MagnifyingGlassIcon} from "@radix-ui/react-icons";
 
 interface AvatarDropdownProps {
     user: {
@@ -54,26 +53,21 @@ const AvatarDropdown: React.FC<AvatarDropdownProps> = ({ user }) => {
                 <DropdownMenuSeparator className="bg-gray-200" />
                 <DropdownMenuGroup>
                     <DropdownMenuItem
-                        onClick={() => router.push('./dashboard')}
+                        onClick={() => router.push('/dashboard')}
                         className="text-gray-700 hover:bg-gray-100"
                     >
                         <HomeIcon className="mr-2 h-4 w-4" />
                         <span>Dashboard</span>
                     </DropdownMenuItem>
-                    {/*<DropdownMenuItem*/}
-                    {/*    onClick={() => router.push('/account/hides')}*/}
-                    {/*    className="text-gray-700 hover:bg-gray-100"*/}
-                    {/*>*/}
-                    {/*    <Eye className="mr-2 h-4 w-4" />*/}
-                    {/*    <span>My Hides</span>*/}
-                    {/*</DropdownMenuItem>*/}
-                    {/*<DropdownMenuItem*/}
-                    {/*    onClick={() => router.push('/account/settings')}*/}
-                    {/*    className="text-gray-700 hover:bg-gray-100"*/}
-                    {/*>*/}
-                    {/*    <Settings className="mr-2 h-4 w-4" />*/}
-                    {/*    <span>Settings</span>*/}
-                    {/*</DropdownMenuItem>*/}
+                    <DropdownMenuItem
+                        onClick={() => router.push('/subscriptions')}
+                        className="text-gray-700 hover:bg-gray-100"
+                    >
+                        <BellIcon className="mr-2 h-4 w-4" />
+                        <span>Subscriptions</span>
+                    </DropdownMenuItem>
+
+
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator className="bg-gray-200" />
                 <DropdownMenuItem
