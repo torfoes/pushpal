@@ -1,8 +1,8 @@
 import React from 'react';
 import { columns, User } from "@/app/users/columns";
-import {DataTable} from "@/app/users/data-table";
 import { cookies } from 'next/headers'
 import {redirect} from "next/navigation";
+import {DataTable} from "@/components/ui/data-table";
 
 
 async function getUsers(): Promise<User[]> {
@@ -15,7 +15,7 @@ async function getUsers(): Promise<User[]> {
     }
     // console.log(sessionToken);
 
-    const res = await fetch('http://localhost:3000/users', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/users`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${sessionToken}`,
