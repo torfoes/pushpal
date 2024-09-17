@@ -2,12 +2,13 @@ class PushSubscriptionsController < ApplicationController
 
   # POST /push-subscriptions
   def create
-    subscription = PushSubscription.new(push_subscription_params)
+    push_subscription = @current_user.push_subscriptions.new(push_subscription_params)
+    push_subscription.last_used_at = Time.current
 
-    if subscription.save
-      render json: { success: true, subscription: subscription }, status: :created
+    if push_subscription.save
+      render json: { success: true }, status: :created
     else
-      render json: { success: false, errors: subscription.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: push_subscription.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -54,6 +55,22 @@ class PushSubscriptionsController < ApplicationController
   private
 
   def push_subscription_params
-    params.require(:push_subscription).permit(:endpoint, :p256dh_key, :auth_key)
+    params.require(:push_subscription).permit(
+      :endpoint,
+      :p256dh_key,
+      :auth_key,
+      :is_bot,
+      :browser_name,
+      :browser_version,
+      :device_model,
+      :device_type,
+      :device_vendor,
+      :engine_name,
+      :engine_version,
+      :os_name,
+      :os_version,
+      :cpu_architecture,
+      :user_agent
+    )
   end
 end

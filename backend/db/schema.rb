@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_09_15_031749) do
+ActiveRecord::Schema[7.0].define(version: 2024_09_17_162412) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -89,6 +89,19 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_15_031749) do
     t.string "auth_key", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_bot"
+    t.string "browser_name"
+    t.string "browser_version"
+    t.string "device_model"
+    t.string "device_type"
+    t.string "device_vendor"
+    t.string "engine_name"
+    t.string "engine_version"
+    t.string "os_name"
+    t.string "os_version"
+    t.string "cpu_architecture"
+    t.string "user_agent"
+    t.datetime "last_used_at"
     t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint", unique: true
     t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
   end

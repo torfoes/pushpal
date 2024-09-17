@@ -1,11 +1,46 @@
 module Authentication
   extend ActiveSupport::Concern
 
+  def authorize_admin!
+    membership = Membership.find_by(user: @current_user, organization: @organization)
+    unless membership && (membership.role == 'manager' || membership.role == 'creator')
+      render json: { error: 'Unauthorized' }, status: :unauthorized
+    end
+  end
+
+  def authorize_member!
+    @is_member = false
+    if @current_user
+      membership = Membership.find_by(user: @current_user, organization: @organization)
+      @is_member = true if membership
+    end
+  end
+
   included do
     before_action :authenticate_request
   end
 
   private
+
+  def optional_authenticate_request
+    token = extract_token_from_header
+
+    if token.present?
+      begin
+        decoded_jwt = decrypt_jwt(token)
+        email = decoded_jwt['email']
+        name = decoded_jwt['name']
+        picture = decoded_jwt['picture']
+        sub = decoded_jwt['sub']
+
+        if email.present? && name.present? && sub.present?
+          @current_user = find_or_create_user(email, name, picture, sub)
+        end
+      rescue StandardError => e
+        Rails.logger.error("Optional authentication failed: #{e.message}")
+      end
+    end
+  end
 
   def authenticate_request
     # Rails.logger.info("Starting authentication for request...")

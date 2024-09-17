@@ -1,6 +1,10 @@
 class OrganizationsController < ApplicationController
-  skip_before_action :authenticate_request, only: [:show]
-  before_action :set_organization, only: %i[ show edit update destroy ]
+  before_action :optional_authenticate_request, only: [:show]
+  before_action :authenticate_request, except: [:show]
+  before_action :set_organization, only: %i[show edit update destroy send_push_notifications]
+  before_action :authorize_member!, only: [:show]
+  before_action :authorize_admin!, only: [:send_push_notifications]
+
 
   # GET /organizations or /organizations.json
   def index
@@ -10,39 +14,29 @@ class OrganizationsController < ApplicationController
 
   # GET /organizations/1 or /organizations/1.json
   def show
-    members = if @current_user
-                @organization.memberships.includes(:user).map do |membership|
-                  {
-                    id: membership.user.id,
-                    name: membership.user.name,
-                    email: membership.user.email,
-                    role: membership.role
-                  }
-                end
-              else
-                []
-              end
+    if @is_member
+      members = @organization.memberships.includes(:user).map do |membership|
+        {
+          id: membership.user.id,
+          name: membership.user.name,
+          email: membership.user.email,
+          picture: membership.user.picture,
+          role: membership.role,
+        }
+      end
+    else
+      members = []
+    end
 
     response = {
       id: @organization.id,
       name: @organization.name,
       description: @organization.description,
       member_count: @organization.memberships.count,
-      members: members.presence
+      members: members
     }
 
     render json: response, status: :ok
-  end
-
-  # GET /organizations/new
-  def new
-    @organization = Organization.new
-    render json: @organization, status: :ok
-  end
-
-  # GET /organizations/1/edit
-  def edit
-    render json: @organization, status: :ok
   end
 
   # POST /organizations or /organizations.json
@@ -64,7 +58,6 @@ class OrganizationsController < ApplicationController
     end
   end
 
-
   # PATCH/PUT /organizations/1 or /organizations/1.json
   def update
     if @organization.update(organization_params)
@@ -80,15 +73,66 @@ class OrganizationsController < ApplicationController
     render json: { message: 'Organization was successfully destroyed.' }, status: :no_content
   end
 
+  # POST /organizations/:id/send_push_notifications
+  def send_push_notifications
+    message = params[:message]
+
+    unless message.present?
+      render json: { error: 'Message is required' }, status: :bad_request and return
+    end
+
+    # Fetch user IDs of all members of the organization
+    member_user_ids = @organization.memberships.pluck(:user_id)
+
+    # Fetch all push subscriptions for these users
+    push_subscriptions = PushSubscription.where(user_id: member_user_ids)
+
+    if push_subscriptions.empty?
+      render json: { message: 'No subscribers to send notifications to.' }, status: :ok and return
+    end
+
+    # Send notifications (consider using background jobs for scalability)
+    successes = []
+    failures = []
+
+    push_subscriptions.each do |subscription|
+      begin
+        Webpush.payload_send(
+          message: message,
+          endpoint: subscription.endpoint,
+          p256dh: subscription.p256dh_key,
+          auth: subscription.auth_key,
+          vapid: {
+            subject: 'mailto:your-email@example.com', # Update with your contact email
+            public_key: ENV['VAPID_PUBLIC_KEY'],
+            private_key: ENV['VAPID_PRIVATE_KEY']
+          }
+        )
+        successes << subscription.id
+      rescue Webpush::InvalidSubscription => e
+        Rails.logger.error "Invalid subscription: #{e.message}. Deleting subscription #{subscription.id}."
+        subscription.destroy
+        failures << subscription.id
+      rescue => e
+        Rails.logger.error "Failed to send push notification to subscription #{subscription.id}: #{e.message}"
+        failures << subscription.id
+      end
+    end
+
+    render json: {
+      success_count: successes.count,
+      failure_count: failures.count,
+      failures: failures
+    }, status: :ok
+  end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_organization
-      @organization = Organization.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def organization_params
-      params.require(:organization).permit(:name, :description)
-    end
+  def set_organization
+    @organization = Organization.find(params[:id])
+  end
+
+  def organization_params
+    params.require(:organization).permit(:name, :description)
+  end
 end
