@@ -22,7 +22,7 @@ export async function subscribeUser(p256dh: string, auth: string, endpoint: stri
     }
 
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/push-subscriptions`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}push-subscriptions`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${sessionToken}`,
