@@ -68,10 +68,13 @@ class MembershipsController < ApplicationController
   private
 
   def set_membership
-    @membership = Membership.find(params[:id])
+    @membership = @current_user.memberships.find_by(id: params[:id])
+    unless @membership
+      render json: { error: 'Membership not found' }, status: :not_found
+    end
   end
 
-  def membership_params
-    params.require(:membership).permit(:user_id, :organization_id, :role)
+  def membership_update_params
+    params.require(:membership).permit(:role)
   end
 end

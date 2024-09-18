@@ -9,4 +9,5 @@ class Membership < ApplicationRecord
   }
 
   validates :user_id, :organization_id, :role, presence: true
+  validates :user_id, uniqueness: { scope: :organization_id, message: 'already a member of this organization' }
 end
