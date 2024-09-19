@@ -100,7 +100,6 @@ export default function SubscriptionStatus() {
     async function handleAddPushSubscription() {
         console.log("handleAddPushSubscription");
         const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('Service Worker registered:', registration);
 
         const sub = await registration.pushManager.subscribe({
             userVisibleOnly: true,
