@@ -16,7 +16,9 @@ self.addEventListener('push', function (event) {
 })
 
 self.addEventListener('notificationclick', function (event) {
-    console.log('Notification click received.')
-    event.notification.close()
-    event.waitUntil(clients.openWindow('<https://10.>'))
-})
+    console.log('Notification click received.');
+    event.notification.close();
+    event.waitUntil(
+        clients.openWindow('https://pushpal.app/dashboard')
+    );
+});
