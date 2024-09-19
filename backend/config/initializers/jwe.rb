@@ -22,7 +22,7 @@ unless AUTH_SECRET.present?
 end
 
 
-salt = "__Secure-authjs.session-token"
+salt = ENV["NEXT_PUBLIC_AUTHJS_SESSION_COOKIE"]
 info = "Auth.js Generated Encryption Key (#{salt})"
 length = 64
 
