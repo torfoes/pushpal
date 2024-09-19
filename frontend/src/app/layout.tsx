@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import Header from "@/components/Header";
 import {auth} from "@/lib/auth";
 import {Toaster} from "@/components/ui/sonner";
+import ServiceWorker from "@/components/ServiceWorker";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -25,6 +26,7 @@ export default async function RootLayout({
           <Header session={session}/>
           {children}
           <Toaster />
+          <ServiceWorker/>
 
           </body>
         </html>
