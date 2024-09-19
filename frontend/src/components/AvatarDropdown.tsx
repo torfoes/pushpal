@@ -27,6 +27,18 @@ interface AvatarDropdownProps {
 const AvatarDropdown: React.FC<AvatarDropdownProps> = ({ user }) => {
     const router = useRouter()
 
+    const handleLogout = async () => {
+        try {
+            // await unsubscribeUser();
+        } catch (error) {
+            console.error('Error during push unsubscription:', error);
+        }
+
+        signOut({
+            callbackUrl: '/',
+        });
+    };
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
