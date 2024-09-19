@@ -22,7 +22,7 @@ unless AUTH_SECRET.present?
 end
 
 
-salt = "authjs.session-token"
+salt = "__Secure-authjs.session-token"
 info = "Auth.js Generated Encryption Key (#{salt})"
 length = 64
 
