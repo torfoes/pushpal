@@ -1,5 +1,3 @@
-# app/services/push_notification_service.rb
-
 require 'webpush'
 
 class PushNotificationService
@@ -12,14 +10,14 @@ class PushNotificationService
       title: title,
       body: body,
       data: data,
-      # icon: '/icons/icon-192x192.png',
+      # icon: '/icons/icon-192x192.png', # Optional
     }.to_json
 
     options = {
       vapid: {
         subject: 'mailto:karloszuru@gmail.com',
-        public_key: ENV['VAPID_PUBLIC_KEY'] || Rails.application.credentials.webpush[:public_key],
-        private_key: ENV['VAPID_PRIVATE_KEY'] || Rails.application.credentials.webpush[:private_key],
+        public_key: vapid_public_key,
+        private_key: vapid_private_key,
       },
       ttl: 60,
     }
@@ -37,12 +35,7 @@ class PushNotificationService
       if response.code.between?(200, 299)
         return { success: true }
       else
-        if [410, 404].include?(response.code.to_i)
-          @subscription.destroy
-          return { success: false, status: response.code.to_i, error: "Subscription expired or invalid (status #{response.code}) and has been removed." }
-        else
-          return { success: false, status: response.code.to_i, error: "Push failed with status #{response.code}" }
-        end
+        handle_failed_push(response.code)
       end
     rescue Webpush::ExpiredSubscription => e
       @subscription.destroy
@@ -52,6 +45,25 @@ class PushNotificationService
       return { success: false, error: "Invalid subscription and has been removed." }
     rescue => e
       return { success: false, error: "An error occurred: #{e.message}" }
+    end
+  end
+
+  private
+
+  def vapid_public_key
+    ENV['VAPID_PUBLIC_KEY'] || Rails.application.credentials.webpush[:public_key]
+  end
+
+  def vapid_private_key
+    ENV['VAPID_PRIVATE_KEY'] || Rails.application.credentials.webpush[:private_key]
+  end
+
+  def handle_failed_push(status_code)
+    if [410, 404].include?(status_code.to_i)
+      @subscription.destroy
+      return { success: false, status: status_code.to_i, error: "Subscription expired or invalid (status #{status_code}) and has been removed." }
+    else
+      return { success: false, status: status_code.to_i, error: "Push failed with status #{status_code}" }
     end
   end
 end
