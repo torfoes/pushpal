@@ -17,6 +17,9 @@ const ServiceWorker = () => {
             console.warn('Service Workers are not supported in this browser.');
         }
     }, []);
+
+    return 
+    (<div></div>)
 };
 
 export default ServiceWorker;
