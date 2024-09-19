@@ -8,18 +8,19 @@ import {BellIcon} from "lucide-react";
 import {Organization} from "@/types";
 
 import MembersTable from "@/app/dashboard/[organization_id]/MembersTable";
+import SendPushNotificationDialog from "@/app/dashboard/[organization_id]/SendPushNotificationDialog";
 
 
 
 async function getOrganization(organization_id : string): Promise<Organization> {
     const cookieStore = cookies()
-    const sessionToken = cookieStore.get('authjs.session-token')?.value;
+    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
 
     if (!sessionToken) {
         redirect('/login')
     }
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/organizations/${organization_id}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${sessionToken}`,
@@ -45,9 +46,7 @@ export default async function Page({ params }: { params: { organization_id: stri
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold">{organization.name} Dashboard</h1>
 
-                <Button>
-                    <BellIcon className="mr-2 h-4 w-4" /> Send Push Notification
-                </Button>
+                <SendPushNotificationDialog/>
             </div>
 
             <p className="text-lg mb-6">Members: {organization.member_count}</p>
@@ -86,7 +85,6 @@ export default async function Page({ params }: { params: { organization_id: stri
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-
 
                                 </TableBody>
                             </Table>

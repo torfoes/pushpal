@@ -32,7 +32,7 @@ async function acceptInviteAction(organization_id: string) {
     // console.log(organization_id);
 
     const cookieStore = cookies();
-    const sessionToken = cookieStore.get('authjs.session-token')?.value;
+    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
 
     if (!sessionToken) {
         redirect('/login');
@@ -61,7 +61,7 @@ async function acceptInviteAction(organization_id: string) {
 
 async function getMembershipStatus(organization_id : string): Promise<Organization> {
     const cookieStore = cookies()
-    const sessionToken = cookieStore.get('authjs.session-token')?.value;
+    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
 
     if (!sessionToken) {
         redirect('/login')

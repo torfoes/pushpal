@@ -7,7 +7,8 @@ import OrganizationList from "@/components/OrganizationList";
 
 async function getCurrentUserOrganizations(): Promise<Organization[]> {
     const cookieStore = cookies()
-    const sessionToken = cookieStore.get('authjs.session-token')?.value;
+
+    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
 
     if (!sessionToken) {
         redirect('./login')
@@ -37,7 +38,7 @@ async function createNewOrgAction({ name, description }: z.infer<typeof formSche
     'use server';
 
     const cookieStore = cookies();
-    const sessionToken = cookieStore.get('authjs.session-token')?.value;
+    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
 
     if (!sessionToken) {
         redirect('./login');
@@ -81,9 +82,9 @@ export default async function Page() {
                    <CreateOrganizationDialog createNewOrgAction={createNewOrgAction}/>
                 </div>
             </div>
-                <div>
-                    <OrganizationList organizations={organizations}/>
-                </div>
+            <div>
+                <OrganizationList organizations={organizations}/>
+            </div>
         </div>
     )
 }

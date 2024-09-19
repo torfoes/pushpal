@@ -8,7 +8,7 @@ import {DataTable} from "@/components/ui/data-table";
 async function getUsers(): Promise<User[]> {
     const cookieStore = cookies()
 
-    const sessionToken = cookieStore.get('authjs.session-token')?.value;
+    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
 
     if (!sessionToken) {
         redirect('./login')
