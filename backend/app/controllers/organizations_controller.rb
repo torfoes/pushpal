@@ -75,47 +75,35 @@ class OrganizationsController < ApplicationController
 
   # POST /organizations/:id/send_push_notifications
   def send_push_notifications
-    message = params[:message]
+    permitted_params = params.permit(:title, :body, data: {})
 
-    unless message.present?
-      render json: { error: 'Message is required' }, status: :bad_request and return
+    title = permitted_params[:title]
+    body = permitted_params[:body]
+    data = permitted_params[:data] || {}
+
+    unless title.present? && body.present?
+      render json: { success: false, errors: ['Title and Body are required.'] }, status: :bad_request and return
     end
 
-    # Fetch user IDs of all members of the organization
     member_user_ids = @organization.memberships.pluck(:user_id)
 
-    # Fetch all push subscriptions for these users
     push_subscriptions = PushSubscription.where(user_id: member_user_ids)
 
     if push_subscriptions.empty?
       render json: { message: 'No subscribers to send notifications to.' }, status: :ok and return
     end
 
-    # Send notifications (consider using background jobs for scalability)
     successes = []
     failures = []
 
-    push_subscriptions.each do |subscription|
-      begin
-        Webpush.payload_send(
-          message: message,
-          endpoint: subscription.endpoint,
-          p256dh: subscription.p256dh_key,
-          auth: subscription.auth_key,
-          vapid: {
-            subject: 'mailto:your-email@example.com', # Update with your contact email
-            public_key: ENV['VAPID_PUBLIC_KEY'],
-            private_key: ENV['VAPID_PRIVATE_KEY']
-          }
-        )
+    push_subscriptions.find_each do |subscription|
+      notification_service = PushNotificationService.new(subscription)
+      result = notification_service.send_notification(title, body, data)
+
+      if result[:success]
         successes << subscription.id
-      rescue Webpush::InvalidSubscription => e
-        Rails.logger.error "Invalid subscription: #{e.message}. Deleting subscription #{subscription.id}."
-        subscription.destroy
-        failures << subscription.id
-      rescue => e
-        Rails.logger.error "Failed to send push notification to subscription #{subscription.id}: #{e.message}"
-        failures << subscription.id
+      else
+        failures << { subscription_id: subscription.id, error: result[:error] }
       end
     end
 
@@ -125,6 +113,7 @@ class OrganizationsController < ApplicationController
       failures: failures
     }, status: :ok
   end
+
 
   private
 
