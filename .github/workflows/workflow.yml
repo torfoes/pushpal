@@ -1,3 +1,11 @@
+name: Rails Tests
+
+# Trigger the workflow only on push events to the 'test' branch
+on:
+  push:
+    branches:
+      - test
+
 env:
   RUBY_VERSION: 3.1.2
   POSTGRES_USER: postgres
@@ -5,12 +13,11 @@ env:
   DATABASE_USER: postgres
   DATABASE_PASSWORD: password
 
-name: Rails tests
-on: [push, pull_request]
 jobs:
   rspec-test:
     name: RSpec
     runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:12
@@ -19,49 +26,71 @@ jobs:
         env:
           POSTGRES_USER: ${{ env.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: your_test_database
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: ./backend
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: ruby/setup-ruby@v1
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ env.RUBY_VERSION }}
-      - name: Install postgres client
-        run: sudo apt-get install libpq-dev
-      - name: Install dependencies
+          bundler-cache: true
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y libpq-dev
+
+      - name: Install Dependencies
         run: |
           gem install bundler
-          bundler install
-          working-directory: backend
-      - name: Create database
+          bundle install
+
+      - name: Setup Database
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://postgres:password@localhost:5432/your_test_database
         run: |
-          bundler exec rails db:create RAILS_ENV=test
-          bundler exec rails db:migrate RAILS_ENV=test
-          working-directory: backend
-      - uses: borales/actions-yarn@v3.0.0
-        with:
-          cmd: install
-      - name: Run tests
-        run: bundler exec rspec .
-        working-directory: backend
-      - name: Run brakeman
+          bundle exec rails db:create
+          bundle exec rails db:migrate
+
+      - name: Run RSpec Tests
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://postgres:password@localhost:5432/your_test_database
+        run: bundle exec rspec
+
+      - name: Run Brakeman
         run: brakeman -o brakeman.txt
-        working-directory: backend
-      - name: Run rubocop
-        run: bundler exec rubocop --force-exclusion vendor/*/** --out rubocop.txt
-        working-directory: backend
-      - name: Upload coverage results
-        uses: actions/upload-artifact@master
+
+      - name: Run RuboCop
+        run: bundle exec rubocop --force-exclusion vendor/*/** --out rubocop.txt
+
+      - name: Upload Coverage Results
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: coverage-report
           path: coverage
-      - name: Upload rubocop report
-        uses: actions/upload-artifact@master
+
+      - name: Upload RuboCop Report
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: rubocop-report.txt
           path: rubocop.txt
-      - name: Upload brakeman report
-        uses: actions/upload-artifact@master
+
+      - name: Upload Brakeman Report
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: brakeman-report.txt
