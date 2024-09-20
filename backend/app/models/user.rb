@@ -4,5 +4,6 @@ class User < ApplicationRecord
 
   has_many :organizations, through: :memberships
 
-  validates :email, uniqueness: true
+  validates :email, presence: true, uniqueness: { case_sensitive: false }
+
 end
