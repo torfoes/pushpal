@@ -13,7 +13,12 @@ jobs:
         env:
           POSTGRES_USER: ${{ secrets.POSTGRES }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: my_app_test
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        options: >-
+          --health-cmd "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     env:
       RUBY_VERSION: ${{ secrets.RUBY_VERSION }}
@@ -21,66 +26,79 @@ jobs:
       DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
       POSTGRES_USER: ${{ secrets.POSTGRES }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      DATABASE_HOST: 127.0.0.1
+      DATABASE_HOST: localhost
       SECRET_KEY_BASE: ${{ secrets.AUTH_SECRET }}
       VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
       VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
       NEXT_PUBLIC_AUTHJS_SESSION_COOKIE: ${{ secrets.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE }}
       RAILS_ENV: test
 
+    defaults:
+      run:
+        working-directory: ./backend
+
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - uses: ruby/setup-ruby@v1
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ secrets.RUBY_VERSION }}  # Ensure Ruby version is set from secrets
+          ruby-version: ${{ env.RUBY_VERSION }}
 
-      - name: Install postgres client
+      - name: Install PostgreSQL client
         run: sudo apt-get install -y libpq-dev
 
-      - name: Install dependencies
-        run: |
-          gem install bundler
-          bundler install
+      - name: Install Bundler
+        run: gem install bundler
+
+      - name: Install Dependencies
+        run: bundler install
 
       - name: Setup database.yml
         run: |
           cp config/database.yml.example config/database.yml
+          # Optionally, you can replace placeholders in database.yml with env variables
+          sed -i "s/USERNAME/${{ env.DATABASE_USER }}/" config/database.yml
+          sed -i "s/PASSWORD/${{ env.DATABASE_PASSWORD }}/" config/database.yml
+          sed -i "s/HOST/${{ env.DATABASE_HOST }}/" config/database.yml
+          sed -i "s/DB_NAME/${{ secrets.POSTGRES_DB }}/" config/database.yml
 
-      - name: Create and migrate test database
+      - name: Create and Migrate Test Database
         run: |
-          bundler exec rails db:create
-          bundler exec rails db:migrate
+          bundle exec rails db:create
+          bundle exec rails db:migrate
 
-      - uses: borales/actions-yarn@v3.0.0
+      - name: Install Yarn Dependencies
+        uses: borales/actions-yarn@v3.0.0
         with:
           cmd: install
 
-      - name: Run tests
-        run: bundler exec rspec .
+      - name: Run RSpec Tests
+        run: bundle exec rspec .
 
-      - name: Run brakeman
+      - name: Run Brakeman Security Scanner
         run: brakeman -o brakeman.txt
 
-      - name: Run rubocop
-        run: bundler exec rubocop --force-exclusion vendor/*/** --out rubocop.txt
+      - name: Run RuboCop Linter
+        run: bundle exec rubocop --force-exclusion vendor/*/** --out rubocop.txt
 
-      - name: Upload coverage results
-        uses: actions/upload-artifact@master
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: coverage-report
           path: coverage
 
-      - name: Upload rubocop report
-        uses: actions/upload-artifact@master
+      - name: Upload RuboCop Report
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: rubocop-report.txt
           path: rubocop.txt
 
-      - name: Upload brakeman report
-        uses: actions/upload-artifact@master
+      - name: Upload Brakeman Report
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: brakeman-report.txt
