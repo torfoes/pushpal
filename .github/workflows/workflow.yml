@@ -1,89 +1,77 @@
-name: Rails tests
-on: [push, pull_request]
+name: Rails Tests
+
+on:
+  push:
+    branches:
+      - test
+  pull_request:
+    branches:
+      - test
+
+env:
+  RAILS_ENV: test
 
 jobs:
   rspec-test:
     name: RSpec
     runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:12
         ports:
           - 5432:5432
         env:
-          POSTGRES_USER: ${{ secrets.POSTGRES }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
         options: >-
-          --health-cmd "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"
+          --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
-    env:
-      RUBY_VERSION: ${{ secrets.RUBY_VERSION }}
-      DATABASE_USER: ${{ secrets.DATABASE_USER }}
-      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-      POSTGRES_USER: ${{ secrets.POSTGRES }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      DATABASE_HOST: localhost
-      SECRET_KEY_BASE: ${{ secrets.AUTH_SECRET }}
-      VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
-      VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
-      NEXT_PUBLIC_AUTHJS_SESSION_COOKIE: ${{ secrets.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE }}
-      RAILS_ENV: test
 
     defaults:
       run:
         working-directory: ./backend
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ env.RUBY_VERSION }}
+          ruby-version: ${{ secrets.RUBY_VERSION }}
+          bundler-cache: true
 
       - name: Install PostgreSQL client
-        run: sudo apt-get install -y libpq-dev
-
-      - name: Install Bundler
-        run: gem install bundler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpq-dev
 
       - name: Install Dependencies
-        run: bundler install
-
-      - name: Setup database.yml
         run: |
-          cp config/database.yml.example config/database.yml
-          # Optionally, you can replace placeholders in database.yml with env variables
-          sed -i "s/USERNAME/${{ env.DATABASE_USER }}/" config/database.yml
-          sed -i "s/PASSWORD/${{ env.DATABASE_PASSWORD }}/" config/database.yml
-          sed -i "s/HOST/${{ env.DATABASE_HOST }}/" config/database.yml
-          sed -i "s/DB_NAME/${{ secrets.POSTGRES_DB }}/" config/database.yml
+          gem install bundler
+          bundle install
 
-      - name: Create and Migrate Test Database
+      - name: Setup Database
+        env:
+          DATABASE_URL: postgres://${{ secrets.DATABASE_USER }}:${{ secrets.DATABASE_PASSWORD }}@localhost:5432/${{ secrets.DATABASE_NAME }}
         run: |
           bundle exec rails db:create
           bundle exec rails db:migrate
 
-      - name: Install Yarn Dependencies
-        uses: borales/actions-yarn@v3.0.0
-        with:
-          cmd: install
-
       - name: Run RSpec Tests
-        run: bundle exec rspec .
+        run: bundle exec rspec
 
-      - name: Run Brakeman Security Scanner
+      - name: Run Brakeman
         run: brakeman -o brakeman.txt
 
-      - name: Run RuboCop Linter
+      - name: Run RuboCop
         run: bundle exec rubocop --force-exclusion vendor/*/** --out rubocop.txt
 
-      - name: Upload Coverage Report
+      - name: Upload Coverage Results
         uses: actions/upload-artifact@v3
         if: always()
         with:
