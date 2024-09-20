@@ -24,7 +24,11 @@ jobs:
         env:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          NEXT_PUBLIC_AUTHJS_SESSION_COOKIE: ${{ secrets.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
