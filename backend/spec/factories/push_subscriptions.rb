@@ -9,7 +9,7 @@ FactoryBot.define do
     browser_name { ['Chrome', 'Firefox', 'Safari', 'Edge', 'Opera'].sample }
     browser_version { Faker::Number.decimal(l_digits: 1, r_digits: 2) }
     device_model { Faker::Device.model_name }
-    device_type { ['Mobile', 'Tablet', 'Desktop', 'Laptop', 'Smartwatch'].sample } # Replaced Faker::Device.device_type
+    device_type { ['Mobile', 'Tablet', 'Desktop', 'Laptop', 'Smartwatch'].sample }
     device_vendor { Faker::Device.manufacturer }
     engine_name { "Blink" }
     engine_version { Faker::Number.decimal(l_digits: 1, r_digits: 2) }
