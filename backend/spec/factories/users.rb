@@ -6,7 +6,5 @@ FactoryBot.define do
     picture { Faker::Avatar.image }
     uin { Faker::Number.number(digits: 10) }
     sub { Faker::Alphanumeric.alphanumeric(number: 10) }
-
-
   end
 end
