@@ -6,6 +6,9 @@ import {redirect} from "next/navigation";
 import {userAgent} from "next/server";
 import {getSessionTokenOrRedirect} from "@/app/utils";
 
+if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+    throw new Error('VAPID keys are not defined in environment variables.');
+}
 
 webpush.setVapidDetails(
     'mailto: karloszuru@gmail.com',
