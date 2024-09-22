@@ -5,6 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { subscribeUser } from "@/app/subscriptions/actions";
 
+declare global {
+    interface BeforeInstallPromptEvent extends Event {
+        readonly platforms: string[];
+        prompt: () => Promise<void>;
+        userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+    }
+
+    interface WindowEventMap {
+        'beforeinstallprompt': BeforeInstallPromptEvent;
+    }
+}
+
 interface BeforeInstallPromptEvent extends Event {
     readonly platforms: string[];
     prompt: () => Promise<void>;
@@ -63,10 +75,10 @@ export default function SubscriptionStatus() {
             setShowInstallPrompt(true);
         };
 
-        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
 
         return () => {
-            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
         };
     }, []);
 
@@ -186,7 +198,7 @@ export default function SubscriptionStatus() {
                     </div>
                     <div className="flex space-x-2">
                         {showInstallPrompt && (
-                            <Button onClick={handleInstallPWA} variant="secondary">
+                            <Button onClick={handleInstallPWA} variant="default">
                                 Add to Home Screen
                             </Button>
                         )}
@@ -206,7 +218,7 @@ export default function SubscriptionStatus() {
                         </AlertDescription>
                     </div>
                     <div className="flex space-x-2">
-                        <Button onClick={handleAddPushSubscription} variant="primary">
+                        <Button onClick={handleAddPushSubscription} variant="default">
                             Enable Notifications
                         </Button>
                     </div>
@@ -226,7 +238,7 @@ export default function SubscriptionStatus() {
                         </AlertDescription>
                     </div>
 
-                    <Button onClick={handleRemovePushSubscription} variant="primary">
+                    <Button onClick={handleRemovePushSubscription} variant="default">
                         Remove Subscription
                     </Button>
                 </Alert>
