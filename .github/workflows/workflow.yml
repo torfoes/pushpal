@@ -1,0 +1,99 @@
+name: Rails Tests
+
+on:
+  push:
+    branches:
+      - test
+  pull_request:
+    branches:
+      - test
+
+env:
+  RAILS_ENV: test
+
+jobs:
+  rspec-test:
+    name: RSpec Test Suite
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:12
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+      NEXT_PUBLIC_AUTHJS_SESSION_COOKIE: ${{ secrets.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE }}
+      VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+      VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+      DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@127.0.0.1:5432/${{ secrets.DATABASE_NAME }}
+
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ secrets.RUBY_VERSION }}
+          bundler-cache: true
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpq-dev
+
+      - name: Install Dependencies
+        run: |
+          gem install bundler
+          bundle install
+
+      - name: Setup Database
+        run: |
+          bundle exec rails db:create
+          bundle exec rails db:migrate
+
+      - name: Run RSpec Tests
+        run: bundle exec rspec
+
+      - name: Run Brakeman
+        run: brakeman -o brakeman.txt
+        continue-on-error: true
+
+      - name: Run RuboCop
+        run: bundle exec rubocop --force-exclusion vendor/*/** --out rubocop.txt
+
+      - name: Upload Coverage Results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage
+
+      - name: Upload RuboCop Report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: rubocop-report.txt
+          path: rubocop.txt
+
+      - name: Upload Brakeman Report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: brakeman-report.txt
+          path: brakeman.txt
