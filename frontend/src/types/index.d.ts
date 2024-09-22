@@ -9,11 +9,9 @@ export interface User {
     picture?: string;
 }
 
-export interface Membership {
+export interface Membership extends User{
     id: string;
-    user: User;
     role: Role;
-    organization_id: string;
 }
 
 export interface Organization {
