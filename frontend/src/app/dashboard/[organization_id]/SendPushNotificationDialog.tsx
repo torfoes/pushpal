@@ -26,7 +26,6 @@ import {
     FormMessage
 } from "@/components/ui/form";
 
-// Define the Zod schema with a flat structure
 export const sendPushSchema = z.object({
     organization_id: z.string().uuid({
         message: "Invalid organization ID.",
@@ -70,7 +69,6 @@ export default function SendPushNotificationDialog({
             form.reset();
         } catch (error) {
             console.error("Failed to send push notification:", error);
-            // Optionally, display a user-facing error message here
         }
     }
 
