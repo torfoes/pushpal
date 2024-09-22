@@ -31,13 +31,12 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-    # Set environment variables at the job level
     env:
       AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
       NEXT_PUBLIC_AUTHJS_SESSION_COOKIE: ${{ secrets.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE }}
       VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
       VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
-      # Add any other necessary environment variables here
+      DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@127.0.0.1:5432/${{ secrets.DATABASE_NAME }}
 
     defaults:
       run:
@@ -64,8 +63,6 @@ jobs:
           bundle install
 
       - name: Setup Database
-        env:
-          DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.DATABASE_NAME }}
         run: |
           bundle exec rails db:create
           bundle exec rails db:migrate
@@ -99,4 +96,3 @@ jobs:
         with:
           name: brakeman-report.txt
           path: brakeman.txt
-
