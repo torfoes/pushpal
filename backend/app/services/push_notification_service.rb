@@ -15,7 +15,7 @@ class PushNotificationService
 
     options = {
       vapid: {
-        subject: 'mailto:karloszuru@gmail.com',
+        subject: 'mailto: karloszuru@gmail.com',
         public_key: vapid_public_key,
         private_key: vapid_private_key,
       },
@@ -23,6 +23,8 @@ class PushNotificationService
     }
 
     begin
+      Rails.logger.info("Sending push notification to subscription: #{@subscription.id}")
+
       response = Webpush.payload_send(
         message: payload,
         endpoint: @subscription.endpoint,
@@ -60,6 +62,7 @@ class PushNotificationService
 
   def handle_failed_push(status_code)
     if [410, 404].include?(status_code.to_i)
+      Rails.logger.warn("Subscription expired or invalid (status #{status_code}) for subscription: #{@subscription.id}, removing...")
       @subscription.destroy
       return { success: false, status: status_code.to_i, error: "Subscription expired or invalid (status #{status_code}) and has been removed." }
     else
