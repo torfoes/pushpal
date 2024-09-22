@@ -18,7 +18,6 @@ const ServiceWorker = () => {
         }
     }, []);
 
-
     return null;
 };
 

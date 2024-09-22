@@ -1,0 +1,31 @@
+<p style="color: green"><%= notice %></p>
+
+<!-- Render the event details -->
+<%= render @event %>
+
+<!-- Attendees List -->
+<h2>Attendees</h2>
+<table>
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Status</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @attendances.each do |attendance| %>
+    <tr>
+      <td><%= attendance.user.name %></td>
+      <td><%= attendance.status %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<!-- Edit and Back Links -->
+<div>
+  <%= link_to "Edit this event", edit_event_path(@event) %> |
+  <%= link_to "Back to events", events_path %>
+
+  <%= button_to "Destroy this event", @event, method: :delete %>
+</div>
