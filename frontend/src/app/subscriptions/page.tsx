@@ -3,6 +3,7 @@ import {DataTable} from "@/components/ui/data-table";
 import {columns} from "@/app/subscriptions/columns";
 import SubscriptionStatus from "@/app/subscriptions/SubscriptionStatus";
 import {getSessionTokenOrRedirect} from "@/app/utils";
+import {PushSubscription} from "@/types";
 
 async function getCurrentUserPushSubscriptions(): Promise<PushSubscription[]> {
     const sessionToken = await getSessionTokenOrRedirect();
@@ -45,7 +46,9 @@ export default async function Page() {
 
                 <SubscriptionStatus/>
 
-                <DataTable columns={columns} data={push_subscriptions}/>
+                <DataTable<PushSubscription, unknown> columns={columns} data={push_subscriptions} />
+                {/*<DataTable<PushSubscription, unknown> columns={columns} data={push_subscriptions} />*/}
+
             </div>
         </div>
     );
