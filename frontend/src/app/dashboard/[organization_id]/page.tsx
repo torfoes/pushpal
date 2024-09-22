@@ -103,8 +103,62 @@ async function createNewEventAction({ name, date, description }: z.infer<typeof 
     redirect('/dashboard'); 
 }
 
+async function updateEventAction({ name, date, description }: z.infer<typeof formSchema>, eventId: number) {
+    'use server';
 
+    const cookieStore = cookies();
+    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
 
+    if (!sessionToken) {
+        redirect('./login');
+    }
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/events/${eventId}`, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            event: {
+                name: name || null,
+                date: date || null,
+                description: description || null,
+            },
+        }),
+    });
+
+    if (!res.ok) {
+        const errorDetails = await res.json();
+        console.error('Failed to update event', errorDetails);
+        throw new Error(`Failed to update event: ${res.status}`);
+    }
+}
+
+async function deleteEventAction(eventId: number) {
+    'use server';
+
+    const cookieStore = cookies();
+    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
+
+    if (!sessionToken) {
+        redirect('./login');
+    }
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/events/${eventId}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!res.ok) {
+        const errorDetails = await res.json();
+        console.error('Failed to delete event', errorDetails);
+        throw new Error(`Failed to delete event: ${res.status}`);
+    }
+}
 
 
 export default async function Page({ params }: { params: { organization_id: string } }) {
@@ -147,7 +201,7 @@ export default async function Page({ params }: { params: { organization_id: stri
                             <CardTitle>Upcoming Events</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <EventList events={events}/>
+                            <EventList events={events} updateEventAction={updateEventAction} deleteEventAction={deleteEventAction}/>
                         </CardContent>
                     </Card>
                 </TabsContent>

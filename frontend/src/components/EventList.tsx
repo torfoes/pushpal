@@ -6,18 +6,22 @@ import { Search } from 'lucide-react';
 import Link from 'next/link';
 import { Input } from "@/components/ui/input";
 import { Event } from '@/types';
+import EditEventDialog from './EditEventDialog';
+import { format } from 'date-fns';
 
-export default function EventList({ events }: { events: Event[] }) {
+export default function EventList({ events, updateEventAction, deleteEventAction }: { 
+    events: Event[],
+    updateEventAction: (formData: z.infer<typeof editFormSchema>, eventId: number) => Promise<void>,
+    deleteEventAction: (eventId: number) => Promise<void>
+}) {
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Filter events based on search term
     const filteredEvents = events.filter((event) =>
         event.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
         <div>
-            {/* Search Input */}
             <div className="relative mb-4">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <Search className="w-4 h-4 text-gray-500" />
@@ -31,25 +35,30 @@ export default function EventList({ events }: { events: Event[] }) {
                 />
             </div>
 
-            {/* Events List */}
             {filteredEvents.length > 0 ? (
                 <div className="space-y-2">
                     {filteredEvents.map((event) => (
-                        <Link key={event.id} href={`/events/${event.id}`} className="block">
-                            <Card className="cursor-pointer transition-shadow hover:shadow-md">
-                                <CardHeader>
-                                    <div className="flex justify-between items-center">
-                                        <CardTitle>{event.name}</CardTitle>
-                                        <span>{new Date(event.date).toLocaleDateString()}</span> {}
+                        <Card key={event.id} className="bg-gray-800 text-white">
+                            <CardHeader>
+                                <CardTitle className="text-lg">{<EditEventDialog
+                                                                    event={event}
+                                                                    updateEventAction={updateEventAction}
+                                                                    deleteEventAction={deleteEventAction}
+                                                                />}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <CardDescription className="text-sm text-gray-400">Description</CardDescription>
+                                        <p>{event.description}</p>
                                     </div>
-                                    <CardDescription>{event.description}</CardDescription>
-                                </CardHeader>
-
-                                <CardContent>
-                                    {/* Maybe add more */}
-                                </CardContent>
-                            </Card>
-                        </Link>
+                                    <div>
+                                        <CardDescription className="text-sm text-gray-400">Date</CardDescription>
+                                        <p>{format(new Date(event.date), 'MMMM d, yyyy')}</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
                     ))}
                 </div>
             ) : (
@@ -58,3 +67,4 @@ export default function EventList({ events }: { events: Event[] }) {
         </div>
     );
 }
+
