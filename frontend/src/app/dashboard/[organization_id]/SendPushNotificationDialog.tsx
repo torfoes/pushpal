@@ -78,7 +78,7 @@ export default function SendPushNotificationDialog({
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             {/* Trigger button to open the dialog */}
             <DialogTrigger asChild>
-                <Button variant="bold">
+                <Button variant="outline">
                     <BellIcon className="mr-2 h-4 w-4" />
                     Send Push Notification
                 </Button>
