@@ -13,7 +13,7 @@ env:
 
 jobs:
   rspec-test:
-    name: RSpec
+    name: RSpec Test Suite
     runs-on: ubuntu-latest
 
     services:
