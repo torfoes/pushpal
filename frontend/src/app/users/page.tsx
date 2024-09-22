@@ -1,19 +1,10 @@
 import React from 'react';
 import { columns, User } from "@/app/users/columns";
-import { cookies } from 'next/headers'
-import {redirect} from "next/navigation";
 import {DataTable} from "@/components/ui/data-table";
-
+import {getSessionTokenOrRedirect} from "@/app/utils";
 
 async function getUsers(): Promise<User[]> {
-    const cookieStore = cookies()
-
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
-
-    if (!sessionToken) {
-        redirect('./login')
-    }
-    // console.log(sessionToken);
+    const sessionToken = await getSessionTokenOrRedirect();
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/users`, {
         method: 'GET',

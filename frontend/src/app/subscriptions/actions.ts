@@ -1,9 +1,10 @@
 'use server'
 
 import webpush from 'web-push'
-import {cookies, headers} from "next/headers";
+import {headers} from "next/headers";
 import {redirect} from "next/navigation";
 import {userAgent} from "next/server";
+import {getSessionTokenOrRedirect} from "@/app/utils";
 
 
 webpush.setVapidDetails(
@@ -12,15 +13,9 @@ webpush.setVapidDetails(
     process.env.VAPID_PRIVATE_KEY!
 )
 
-// let subscription: PushSubscription | null = null
 
 export async function subscribeUser(p256dh: string, auth: string, endpoint: string) {
-    const cookieStore = cookies();
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
-
-    if (!sessionToken) {
-        redirect('./login');
-    }
+    const sessionToken = await getSessionTokenOrRedirect();
 
     const headersList = headers();
     const userAgentData = userAgent({ headers: headersList });
@@ -77,12 +72,7 @@ export async function subscribeUser(p256dh: string, auth: string, endpoint: stri
 }
 
 export async function sendPushNotification(pushSubscriptionId, title, body, data = {}) {
-    const cookieStore = cookies();
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
-
-    if (!sessionToken) {
-        redirect('/login');
-    }
+    const sessionToken = await getSessionTokenOrRedirect();
 
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}push-subscriptions/${pushSubscriptionId}/send_notification`, {
@@ -118,12 +108,7 @@ export async function sendPushNotification(pushSubscriptionId, title, body, data
 }
 
 export async function unsubscribeUser(pushSubscriptionId) {
-    const cookieStore = cookies();
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
-
-    if (!sessionToken) {
-        redirect('/login');
-    }
+    const sessionToken = await getSessionTokenOrRedirect();
 
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}push-subscriptions/${pushSubscriptionId}`, {

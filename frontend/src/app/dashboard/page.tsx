@@ -1,18 +1,13 @@
-import {cookies} from "next/headers";
 import {redirect} from "next/navigation";
 import CreateOrganizationDialog, {formSchema} from "@/components/CreateOrganizationDialog";
 import {Organization} from "@/types";
 import * as z from "zod";
 import OrganizationList from "@/components/OrganizationList";
+import {getSessionTokenOrRedirect} from "@/app/utils";
 
 async function getCurrentUserOrganizations(): Promise<Organization[]> {
-    const cookieStore = cookies()
+    const sessionToken = await getSessionTokenOrRedirect();
 
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
-
-    if (!sessionToken) {
-        redirect('./login')
-    }
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}memberships`, {
         method: 'GET',
@@ -37,12 +32,7 @@ async function getCurrentUserOrganizations(): Promise<Organization[]> {
 async function createNewOrgAction({ name, description }: z.infer<typeof formSchema>) {
     'use server';
 
-    const cookieStore = cookies();
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
-
-    if (!sessionToken) {
-        redirect('./login');
-    }
+    const sessionToken = getSessionTokenOrRedirect();
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/organizations`, {
         method: 'POST',

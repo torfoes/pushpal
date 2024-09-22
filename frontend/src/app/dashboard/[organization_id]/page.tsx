@@ -1,26 +1,19 @@
-import {cookies} from "next/headers";
 import {redirect} from "next/navigation";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Button} from "@/components/ui/button";
-import {BellIcon} from "lucide-react";
 import {Organization} from "@/types";
 
 import MembersTable from "@/app/dashboard/[organization_id]/MembersTable";
 import SendPushNotificationDialog, {
-    SendOrganizationPushParams, sendPushSchema
+    SendOrganizationPushParams
 } from "@/app/dashboard/[organization_id]/SendPushNotificationDialog";
+import {getSessionTokenOrRedirect} from "@/app/utils";
 
 
 
 async function getOrganization(organization_id : string): Promise<Organization> {
-    const cookieStore = cookies()
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
-
-    if (!sessionToken) {
-        redirect('/login')
-    }
+    const sessionToken = await getSessionTokenOrRedirect();
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}`, {
         method: 'GET',
@@ -40,16 +33,10 @@ async function getOrganization(organization_id : string): Promise<Organization> 
     return res.json();
 }
 
-export async function sendOrganizationPushNotificationAction(params: SendOrganizationPushParams) {
+async function sendOrganizationPushNotificationAction(params: SendOrganizationPushParams) {
     'use server'
     const { organization_id, title, body } = params;
-
-    const cookieStore = cookies();
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
-
-    if (!sessionToken) {
-        redirect('/login');
-    }
+    const sessionToken = await getSessionTokenOrRedirect();
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}/send_push_notifications`, {
         method: 'POST',

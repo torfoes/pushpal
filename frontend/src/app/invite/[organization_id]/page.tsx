@@ -2,9 +2,9 @@ import React from 'react';
 import {auth} from "@/lib/auth";
 import AcceptInviteCreateAccount from "@/app/invite/[organization_id]/AcceptInviteCreateAccount";
 import {Organization} from "@/types";
-import {cookies} from "next/headers";
 import {redirect} from "next/navigation";
 import AcceptOrganizationInvite from "@/app/invite/[organization_id]/AcceptOrganizationInvite";
+import {getSessionTokenOrRedirect} from "@/app/utils";
 
 
 async function getOrganization(organization_id : string): Promise<Organization> {
@@ -29,14 +29,7 @@ async function getOrganization(organization_id : string): Promise<Organization> 
 async function acceptInviteAction(organization_id: string) {
     'use server';
 
-    // console.log(organization_id);
-
-    const cookieStore = cookies();
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
-
-    if (!sessionToken) {
-        redirect('/login');
-    }
+    const sessionToken = await getSessionTokenOrRedirect();
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/memberships`, {
         method: 'POST',
@@ -60,12 +53,7 @@ async function acceptInviteAction(organization_id: string) {
 
 
 async function getMembershipStatus(organization_id : string): Promise<Organization> {
-    const cookieStore = cookies()
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
-
-    if (!sessionToken) {
-        redirect('/login')
-    }
+    const sessionToken = await getSessionTokenOrRedirect();
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/memberships?organization_id=${organization_id}`, {
         method: 'GET',
