@@ -25,6 +25,13 @@ export interface Organization {
     members?: Membership[];
 }
 
+export interface Event {
+    id: string;
+    creator_id: string;
+    date: string;
+    description: string;
+}
+
 interface PushSubscription {
     id: string;
     user_id: string;

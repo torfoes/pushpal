@@ -100,11 +100,8 @@ export default function SubscriptionStatus() {
     async function handleAddPushSubscription() {
         console.log("handleAddPushSubscription");
         const registration = await navigator.serviceWorker.register('/sw.js');
-<<<<<<< HEAD
         console.log('Service Worker registered:', registration);
         console.log(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!)
-=======
->>>>>>> 8a8bfa87d8db0a1dd996778c764e1633641e3240
 
         const sub = await registration.pushManager.subscribe({
             userVisibleOnly: true,

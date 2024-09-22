@@ -1,10 +1,10 @@
 class Event < ApplicationRecord
-  belongs_to :creator, class_name: 'User', foreign_key: 'creator_id'
+  belongs_to :creator, class_name: 'Membership', foreign_key: 'creator_membership_id'
   belongs_to :organization
 
-  has_many :attendances
+  has_many :attendances, dependent: :destroy
   has_many :attendees, through: :attendances, source: :user
 
-  validates :date, presence: true
-  validates :description, presence: true
+  validates :creator_membership_id, presence: true
+  validates :organization_id, presence: true
 end

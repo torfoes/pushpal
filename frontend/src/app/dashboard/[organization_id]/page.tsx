@@ -5,7 +5,9 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Button} from "@/components/ui/button";
 import {BellIcon} from "lucide-react";
-import {Organization} from "@/types";
+import {Organization, Event} from "@/types";
+import CreateEventDialog, {formSchema} from "@/components/CreateEventDialog";
+import EventList from "@/components/EventList";
 
 import MembersTable from "@/app/dashboard/[organization_id]/MembersTable";
 import SendPushNotificationDialog from "@/app/dashboard/[organization_id]/SendPushNotificationDialog";
@@ -38,8 +40,76 @@ async function getOrganization(organization_id : string): Promise<Organization> 
     return res.json();
 }
 
+// Fetch the events for the organization
+async function getOrganizationEvents(organization_id: string): Promise<Event[]> {
+    const cookieStore = cookies();
+    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
+
+    if (!sessionToken) {
+        redirect('/login');
+    }
+    // Fetch events for the current organization
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}/events`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+    });
+
+    if (!res.ok) {
+        const errorDetails = await res.json();
+        console.error('Failed to fetch events', sessionToken);
+        throw new Error(`Failed to fetch events: ${res.status} - ${res.statusText}`);
+    }
+
+    return res.json();
+}
+
+async function createNewEventAction({ name, date, description }: z.infer<typeof formSchema>) {
+    'use server';
+
+    const cookieStore = cookies();
+    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
+
+    if (!sessionToken) {
+        redirect('./login');
+    }
+
+    console.log("EVENT INFO: ", { name, date, description });
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/events`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            event: {
+                name: name || null,  
+                date: date || null,       
+                description: description || null 
+            }
+        }),
+    });
+
+    if (!res.ok) {
+        const errorDetails = await res.json();
+        console.error('Failed to create event', errorDetails);
+        throw new Error(`Failed to create event: ${res.status}`);
+    }
+
+    redirect('/dashboard'); 
+}
+
+
+
+
+
 export default async function Page({ params }: { params: { organization_id: string } }) {
     const organization = await getOrganization(params.organization_id);
+    const events = await getOrganizationEvents(params.organization_id);
 
     return (
         <div className="container mx-auto p-4">
@@ -65,6 +135,7 @@ export default async function Page({ params }: { params: { organization_id: stri
                     <Card>
                         <CardHeader>
                             <CardTitle>Create New Event</CardTitle>
+                            <CreateEventDialog createNewEventAction={createNewEventAction}/>
                         </CardHeader>
                         <CardContent>
 
@@ -76,18 +147,7 @@ export default async function Page({ params }: { params: { organization_id: stri
                             <CardTitle>Upcoming Events</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Title</TableHead>
-                                        <TableHead>Description</TableHead>
-                                        <TableHead>Date</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-
-                                </TableBody>
-                            </Table>
+                            <EventList events={events}/>
                         </CardContent>
                     </Card>
                 </TabsContent>

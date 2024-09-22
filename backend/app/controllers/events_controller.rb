@@ -3,12 +3,20 @@ class EventsController < ApplicationController
 
   # GET /events or /events.json
   def index
-    @events = Event.all
+    if params[:organization_id]
+      # Fetch events for the specific organization
+      @events = Event.where(organization_id: params[:organization_id])
+    else
+      # Fallback to return all events if no organization_id is provided (though this should not happen with nested routes)
+      @events = Event.all
+    end
+    render json: @events
   end
 
   # GET /events/1 or /events/1.json
   def show
     @attendances = @event.attendances.includes(:user)
+    render json: { event: @event, attendances: @attendances }
   end
 
   # GET /events/new
@@ -23,15 +31,19 @@ class EventsController < ApplicationController
   # POST /events or /events.json
   def create
     @event = Event.new(event_params)
+    membership = @current_user.memberships.first # Get the current user's membership
 
-    respond_to do |format|
-      if @event.save
-        format.html { redirect_to event_url(@event), notice: "Event was successfully created." }
-        format.json { render :show, status: :created, location: @event }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @event.errors, status: :unprocessable_entity }
-      end
+    if membership
+      @event.creator_membership_id = membership.id
+      @event.organization_id = membership.organization_id # Associate with the user's organization
+    else
+      render json: { error: 'User has no memberships' }, status: :unprocessable_entity and return
+    end
+
+    if @event.save
+      render json: @event, status: :created
+    else
+      render json: @event.errors, status: :unprocessable_entity
     end
   end
 
@@ -66,6 +78,6 @@ class EventsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def event_params
-      params.require(:event).permit(:creator, :date, :description)
+      params.require(:event).permit(:name, :date, :description, :organization_id)
     end
 end
