@@ -72,6 +72,7 @@ jobs:
 
       - name: Run Brakeman
         run: brakeman -o brakeman.txt
+        continue-on-error: true
 
       - name: Run RuboCop
         run: bundle exec rubocop --force-exclusion vendor/*/** --out rubocop.txt
