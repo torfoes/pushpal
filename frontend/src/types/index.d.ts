@@ -23,7 +23,7 @@ export interface Organization {
     members?: Membership[];
 }
 
-interface PushSubscription {
+export interface PushSubscription {
     id: string;
     user_id: string;
     endpoint: string;
