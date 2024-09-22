@@ -32,7 +32,7 @@ async function getCurrentUserOrganizations(): Promise<Organization[]> {
 async function createNewOrgAction({ name, description }: z.infer<typeof formSchema>) {
     'use server';
 
-    const sessionToken = getSessionTokenOrRedirect();
+    const sessionToken = await getSessionTokenOrRedirect();
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations`, {
         method: 'POST',
