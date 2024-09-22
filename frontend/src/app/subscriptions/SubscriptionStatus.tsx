@@ -3,9 +3,25 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {PushSubscriptionInput} from "@/types";
-import {subscribeUser} from "@/app/subscriptions/actions";
-const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
+import { subscribeUser } from "@/app/subscriptions/actions";
+
+declare global {
+    interface BeforeInstallPromptEvent extends Event {
+        readonly platforms: string[];
+        prompt: () => Promise<void>;
+        userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+    }
+
+    interface WindowEventMap {
+        'beforeinstallprompt': BeforeInstallPromptEvent;
+    }
+}
+
+interface BeforeInstallPromptEvent extends Event {
+    readonly platforms: string[];
+    prompt: () => Promise<void>;
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+}
 
 function arrayBufferToBase64Url(buffer: ArrayBuffer): string {
     const bytes = new Uint8Array(buffer);
@@ -15,10 +31,10 @@ function arrayBufferToBase64Url(buffer: ArrayBuffer): string {
     return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-function urlBase64ToUint8Array(base64String: string) {
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding)
-        .replace(/-/g, '+') // Convert URL-safe base64 to standard base64
+        .replace(/-/g, '+')
         .replace(/_/g, '/');
 
     try {
@@ -36,14 +52,12 @@ function urlBase64ToUint8Array(base64String: string) {
     }
 }
 
-
 export default function SubscriptionStatus() {
     const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
     const [supportsNotifications, setSupportsNotifications] = useState<boolean>(false);
     const [supportsServiceWorker, setSupportsServiceWorker] = useState<boolean>(false);
-    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+    const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
     const [showInstallPrompt, setShowInstallPrompt] = useState<boolean>(false);
-
 
     useEffect(() => {
         if ('serviceWorker' in navigator && 'PushManager' in window) {
@@ -55,16 +69,16 @@ export default function SubscriptionStatus() {
             setSupportsNotifications(false);
         }
 
-        const handleBeforeInstallPrompt = (e: any) => {
+        const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
             e.preventDefault();
             setDeferredPrompt(e);
             setShowInstallPrompt(true);
         };
 
-        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
 
         return () => {
-            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
         };
     }, []);
 
@@ -97,34 +111,37 @@ export default function SubscriptionStatus() {
         }
     };
 
-    async function handleAddPushSubscription() {
+    const handleAddPushSubscription = async () => {
         console.log("handleAddPushSubscription");
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('Service Worker registered:', registration);
-        console.log(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!)
+        try {
+            const registration = await navigator.serviceWorker.register('/sw.js');
 
-        const sub = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(
-                process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
-            ),
-        })
+            const sub = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(
+                    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
+                ),
+            });
 
-        const p256dhBuffer = sub.getKey('p256dh');
-        const authBuffer = sub.getKey('auth');
+            const p256dhBuffer = sub.getKey('p256dh');
+            const authBuffer = sub.getKey('auth');
 
-        if (!p256dhBuffer || !authBuffer) {
-            throw new Error('Missing p256dh or auth keys in the subscription.');
+            if (!p256dhBuffer || !authBuffer) {
+                throw new Error('Missing p256dh or auth keys in the subscription.');
+            }
+
+            const p256dh = arrayBufferToBase64Url(p256dhBuffer);
+            const auth = arrayBufferToBase64Url(authBuffer);
+
+            console.log(p256dh, auth, sub.endpoint);
+            await subscribeUser(p256dh, auth, sub.endpoint);
+            setIsSubscribed(true); // Update subscription status after subscribing
+        } catch (error) {
+            console.error('Error adding push subscription:', error);
         }
+    };
 
-        const p256dh = arrayBufferToBase64Url(p256dhBuffer);
-        const auth = arrayBufferToBase64Url(authBuffer);
-
-        console.log(p256dh, auth, sub.endpoint);
-        await subscribeUser(p256dh, auth, sub.endpoint);
-    }
-
-    async function handleRemovePushSubscription() {
+    const handleRemovePushSubscription = async () => {
         console.log("handleRemovePushSubscription triggered");
         try {
             const registration = await navigator.serviceWorker.ready;
@@ -164,13 +181,36 @@ export default function SubscriptionStatus() {
         } catch (error) {
             console.error('Error unsubscribing:', error);
         }
-    }
-
+    };
 
     return (
         <div className="mt-4">
+            {supportsServiceWorker && !isSubscribed && (
+                <Alert
+                    className="flex items-center justify-between bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative"
+                    role="alert"
+                >
+                    <div>
+                        <AlertTitle>Install Our App</AlertTitle>
+                        <AlertDescription>
+                            Add our app to your home screen to enable push notifications and stay updated.
+                        </AlertDescription>
+                    </div>
+                    <div className="flex space-x-2">
+                        {showInstallPrompt && (
+                            <Button onClick={handleInstallPWA} variant="default">
+                                Add to Home Screen
+                            </Button>
+                        )}
+                    </div>
+                </Alert>
+            )}
+
             {!isSubscribed && supportsNotifications && (
-                <Alert className="flex items-center justify-between bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative" role="alert">
+                <Alert
+                    className="flex items-center justify-between bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative mt-4"
+                    role="alert"
+                >
                     <div>
                         <AlertTitle>Enable Push Notifications</AlertTitle>
                         <AlertDescription>
@@ -178,20 +218,19 @@ export default function SubscriptionStatus() {
                         </AlertDescription>
                     </div>
                     <div className="flex space-x-2">
-                        <Button onClick={handleAddPushSubscription} variant="primary">
+                        <Button onClick={handleAddPushSubscription} variant="default">
                             Enable Notifications
                         </Button>
-
-                        {showInstallPrompt && (
-                            <Button onClick={handleInstallPWA} variant="secondary">
-                                Add to Home Screen
-                            </Button>
-                        )}
                     </div>
                 </Alert>
             )}
+
+            {/* Alert indicating that notifications are enabled */}
             {isSubscribed && (
-                <Alert className="flex items-center bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                <Alert
+                    className="flex items-center bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mt-4"
+                    role="alert"
+                >
                     <div>
                         <AlertTitle>Notifications Enabled</AlertTitle>
                         <AlertDescription>
@@ -199,8 +238,8 @@ export default function SubscriptionStatus() {
                         </AlertDescription>
                     </div>
 
-                    <Button onClick={handleRemovePushSubscription} variant="primary">
-                        Remove Sub
+                    <Button onClick={handleRemovePushSubscription} variant="default">
+                        Remove Subscription
                     </Button>
                 </Alert>
             )}

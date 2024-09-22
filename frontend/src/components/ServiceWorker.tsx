@@ -18,8 +18,8 @@ const ServiceWorker = () => {
         }
     }, []);
 
-    return 
-    (<div></div>)
+
+    return null;
 };
 
 export default ServiceWorker;

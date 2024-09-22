@@ -1,20 +1,12 @@
 import React from 'react';
 import {DataTable} from "@/components/ui/data-table";
 import {columns} from "@/app/subscriptions/columns";
-import {cookies} from "next/headers";
-import {redirect} from "next/navigation";
 import SubscriptionStatus from "@/app/subscriptions/SubscriptionStatus";
-import {subscribeUser} from "@/app/subscriptions/actions";
-
-
+import {getSessionTokenOrRedirect} from "@/app/utils";
+import {PushSubscription} from "@/types";
 
 async function getCurrentUserPushSubscriptions(): Promise<PushSubscription[]> {
-    const cookieStore = cookies();
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
-
-    if (!sessionToken) {
-        redirect('./login');
-    }
+    const sessionToken = await getSessionTokenOrRedirect();
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}push-subscriptions`, {
         method: 'GET',
@@ -39,7 +31,7 @@ async function getCurrentUserPushSubscriptions(): Promise<PushSubscription[]> {
 
 export default async function Page() {
     const push_subscriptions = await getCurrentUserPushSubscriptions();
-    console.log(push_subscriptions)
+    // console.log(push_subscriptions)
 
     return (
         <div>
@@ -54,7 +46,9 @@ export default async function Page() {
 
                 <SubscriptionStatus/>
 
-                <DataTable columns={columns} data={push_subscriptions}/>
+                <DataTable<PushSubscription, unknown> columns={columns} data={push_subscriptions} />
+                {/*<DataTable<PushSubscription, unknown> columns={columns} data={push_subscriptions} />*/}
+
             </div>
         </div>
     );

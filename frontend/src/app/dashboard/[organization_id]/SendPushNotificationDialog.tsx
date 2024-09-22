@@ -27,30 +27,38 @@ import {
 } from "@/components/ui/form";
 
 export const sendPushSchema = z.object({
+    organization_id: z.string().uuid({
+        message: "Invalid organization ID.",
+    }),
     title: z.string().min(3, {
         message: "Title must be at least 3 characters.",
     }),
-    description: z.string().max(500, {
-        message: "Description must not exceed 500 characters.",
-    }).optional(),
+    body: z.string().min(3, {
+        message: "Body must be at least 3 characters.",
+    })
 });
+
+export type SendOrganizationPushParams = z.infer<typeof sendPushSchema>;
 
 export default function SendPushNotificationDialog({
                                                        sendPushAction,
+                                                       organization_id,
                                                    }: {
-    sendPushAction?: (formData: z.infer<typeof sendPushSchema>) => Promise<void>
+    sendPushAction?: (formData: SendOrganizationPushParams) => Promise<void>,
+    organization_id: string,
 }) {
     const [isOpen, setIsOpen] = useState(false);
 
-    const form = useForm<z.infer<typeof sendPushSchema>>({
+    const form = useForm<SendOrganizationPushParams>({
         resolver: zodResolver(sendPushSchema),
         defaultValues: {
+            organization_id: organization_id,
             title: "",
-            description: "",
+            body: ""
         },
     });
 
-    async function onSubmit(values: z.infer<typeof sendPushSchema>) {
+    async function onSubmit(values: SendOrganizationPushParams) {
         try {
             if (sendPushAction) {
                 await sendPushAction(values)
@@ -68,7 +76,7 @@ export default function SendPushNotificationDialog({
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             {/* Trigger button to open the dialog */}
             <DialogTrigger asChild>
-                <Button variant="bold">
+                <Button variant="outline">
                     <BellIcon className="mr-2 h-4 w-4" />
                     Send Push Notification
                 </Button>
@@ -86,6 +94,13 @@ export default function SendPushNotificationDialog({
                 {/* Form */}
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                        {/* Hidden Field for organization_id */}
+                        <input
+                            type="hidden"
+                            value={organization_id}
+                            {...form.register("organization_id")}
+                        />
+
                         {/* Title Field */}
                         <FormField
                             control={form.control}
@@ -104,15 +119,16 @@ export default function SendPushNotificationDialog({
                             )}
                         />
 
+                        {/* Body Field */}
                         <FormField
                             control={form.control}
-                            name="description"
+                            name="body"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Description (Optional)</FormLabel>
+                                    <FormLabel>Body</FormLabel>
                                     <FormControl>
                                         <Textarea
-                                            placeholder="Enter notification description"
+                                            placeholder="Enter notification body"
                                             {...field}
                                             className="resize-none"
                                             rows={3}

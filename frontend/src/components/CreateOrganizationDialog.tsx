@@ -45,7 +45,7 @@ export default function CreateOrganizationDialog({
     return (
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
-                <Button variant="bold">
+                <Button variant="outline">
                     <Plus className="mr-2 h-4 w-4" />
                     New Organization
                 </Button>

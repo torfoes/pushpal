@@ -1,211 +1,258 @@
-import {cookies} from "next/headers";
-import {redirect} from "next/navigation";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Button} from "@/components/ui/button";
-import {BellIcon} from "lucide-react";
-import {Organization, Event} from "@/types";
-import CreateEventDialog, {formSchema} from "@/components/CreateEventDialog";
+import { redirect } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { BellIcon } from "lucide-react";
+import { Organization, Event } from "@/types";
+import CreateEventDialog, { formSchema } from "@/components/CreateEventDialog";
 import EventList from "@/components/EventList";
-
 import MembersTable from "@/app/dashboard/[organization_id]/MembersTable";
-import SendPushNotificationDialog from "@/app/dashboard/[organization_id]/SendPushNotificationDialog";
+import SendPushNotificationDialog, {
+  SendOrganizationPushParams,
+} from "@/app/dashboard/[organization_id]/SendPushNotificationDialog";
+import { getSessionTokenOrRedirect } from "@/app/utils";
+import { z } from "zod"; // Import zod for schema inference
 
+async function getOrganization(
+  organization_id: string
+): Promise<Organization> {
+  const sessionToken = await getSessionTokenOrRedirect();
 
-
-async function getOrganization(organization_id : string): Promise<Organization> {
-    const cookieStore = cookies()
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
-
-    if (!sessionToken) {
-        redirect('/login')
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
     }
+  );
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${sessionToken}`,
-            'Content-Type': 'application/json',
-        },
-        cache: 'no-store',
-    });
+  if (!res.ok) {
+    const errorDetails = await res.json();
+    console.error("Failed to fetch organization", errorDetails);
+    throw new Error(`Failed to fetch organization: ${res.status}`);
+  }
 
-    if (!res.ok) {
-        const errorDetails = await res.json();
-        console.error('Failed to fetch organization', errorDetails);
-        throw new Error(`Failed to fetch organization: ${res.status}`);
-    }
-
-    return res.json();
+  return res.json();
 }
 
-// Fetch the events for the organization
-async function getOrganizationEvents(organization_id: string): Promise<Event[]> {
-    const cookieStore = cookies();
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
+async function getOrganizationEvents(
+  organization_id: string
+): Promise<Event[]> {
+  const sessionToken = await getSessionTokenOrRedirect();
 
-    if (!sessionToken) {
-        redirect('/login');
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}/events`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
     }
-    // Fetch events for the current organization
-    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}/events`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${sessionToken}`,
-            'Content-Type': 'application/json',
-        },
-        cache: 'no-store',
-    });
+  );
 
-    if (!res.ok) {
-        const errorDetails = await res.json();
-        console.error('Failed to fetch events', sessionToken);
-        throw new Error(`Failed to fetch events: ${res.status} - ${res.statusText}`);
-    }
+  if (!res.ok) {
+    const errorDetails = await res.json();
+    console.error("Failed to fetch events", errorDetails);
+    throw new Error(
+      `Failed to fetch events: ${res.status} - ${res.statusText}`
+    );
+  }
 
-    return res.json();
+  return res.json();
 }
 
-async function createNewEventAction({ name, date, description }: z.infer<typeof formSchema>) {
-    'use server';
+async function createNewEventAction(
+  { name, date, description }: z.infer<typeof formSchema>
+) {
+  "use server";
 
-    const cookieStore = cookies();
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
+  const sessionToken = await getSessionTokenOrRedirect();
 
-    if (!sessionToken) {
-        redirect('./login');
-    }
+  console.log("EVENT INFO: ", { name, date, description });
 
-    console.log("EVENT INFO: ", { name, date, description });
-
-    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/events`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${sessionToken}`,
-            'Content-Type': 'application/json',
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/events`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        event: {
+          name: name || null,
+          date: date || null,
+          description: description || null,
         },
-        body: JSON.stringify({
-            event: {
-                name: name || null,  
-                date: date || null,       
-                description: description || null 
-            }
-        }),
-    });
-
-    if (!res.ok) {
-        const errorDetails = await res.json();
-        console.error('Failed to create event', errorDetails);
-        throw new Error(`Failed to create event: ${res.status}`);
+      }),
     }
+  );
 
-    redirect('/dashboard'); 
+  if (!res.ok) {
+    const errorDetails = await res.json();
+    console.error("Failed to create event", errorDetails);
+    throw new Error(`Failed to create event: ${res.status}`);
+  }
+
+  redirect("/dashboard");
 }
 
-async function updateEventAction({ name, date, description }: z.infer<typeof formSchema>, eventId: number) {
-    'use server';
+async function updateEventAction(
+  { name, date, description }: z.infer<typeof formSchema>,
+  eventId: number
+) {
+  "use server";
 
-    const cookieStore = cookies();
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
+  const sessionToken = await getSessionTokenOrRedirect();
 
-    if (!sessionToken) {
-        redirect('./login');
-    }
-
-    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/events/${eventId}`, {
-        method: 'PATCH',
-        headers: {
-            'Authorization': `Bearer ${sessionToken}`,
-            'Content-Type': 'application/json',
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/events/${eventId}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        event: {
+          name: name || null,
+          date: date || null,
+          description: description || null,
         },
-        body: JSON.stringify({
-            event: {
-                name: name || null,
-                date: date || null,
-                description: description || null,
-            },
-        }),
-    });
-
-    if (!res.ok) {
-        const errorDetails = await res.json();
-        console.error('Failed to update event', errorDetails);
-        throw new Error(`Failed to update event: ${res.status}`);
+      }),
     }
+  );
+
+  if (!res.ok) {
+    const errorDetails = await res.json();
+    console.error("Failed to update event", errorDetails);
+    throw new Error(`Failed to update event: ${res.status}`);
+  }
 }
 
 async function deleteEventAction(eventId: number) {
-    'use server';
+  "use server";
 
-    const cookieStore = cookies();
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
+  const sessionToken = await getSessionTokenOrRedirect();
 
-    if (!sessionToken) {
-        redirect('./login');
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/events/${eventId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+        "Content-Type": "application/json",
+      },
     }
+  );
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/events/${eventId}`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${sessionToken}`,
-            'Content-Type': 'application/json',
-        },
-    });
-
-    if (!res.ok) {
-        const errorDetails = await res.json();
-        console.error('Failed to delete event', errorDetails);
-        throw new Error(`Failed to delete event: ${res.status}`);
-    }
+  if (!res.ok) {
+    const errorDetails = await res.json();
+    console.error("Failed to delete event", errorDetails);
+    throw new Error(`Failed to delete event: ${res.status}`);
+  }
 }
 
+async function sendOrganizationPushNotificationAction(
+  params: SendOrganizationPushParams
+) {
+  "use server";
+  const { organization_id, title, body } = params;
+  const sessionToken = await getSessionTokenOrRedirect();
 
-export default async function Page({ params }: { params: { organization_id: string } }) {
-    const organization = await getOrganization(params.organization_id);
-    const events = await getOrganizationEvents(params.organization_id);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}/send_push_notifications`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: title,
+        body: body,
+      }),
+    }
+  );
 
-    return (
-        <div className="container mx-auto p-4">
-            <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold">{organization.name} Dashboard</h1>
+  if (!res.ok) {
+    const errorDetails = await res.json();
+    console.error("Failed to send push notifications", errorDetails);
+    throw new Error(`Failed to send push notifications: ${res.status}`);
+  }
 
-                <SendPushNotificationDialog/>
-            </div>
+  redirect(`/dashboard/${organization_id}`);
+}
 
-            <p className="text-lg mb-6">Members: {organization.member_count}</p>
+export default async function Page({
+  params,
+}: {
+  params: { organization_id: string };
+}) {
+  const organization = await getOrganization(params.organization_id);
+  const events = await getOrganizationEvents(params.organization_id);
 
-            <Tabs defaultValue="dashboard" className="space-y-4">
-                <TabsList>
-                    <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-                    <TabsTrigger value="events">Events</TabsTrigger>
-                </TabsList>
+  return (
+    <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">{organization.name} Dashboard</h1>
 
-                <TabsContent value="dashboard">
-                        <MembersTable organization={organization}/>
-                </TabsContent>
+        <SendPushNotificationDialog
+          sendPushAction={sendOrganizationPushNotificationAction}
+          organization_id={params.organization_id}
+        />
+      </div>
 
-                <TabsContent value="events">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Create New Event</CardTitle>
-                            <CreateEventDialog createNewEventAction={createNewEventAction}/>
-                        </CardHeader>
-                        <CardContent>
+      <p className="text-lg mb-6">Members: {organization.member_count}</p>
 
-                        </CardContent>
-                    </Card>
+      <Tabs defaultValue="dashboard" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="events">Events</TabsTrigger>
+        </TabsList>
 
-                    <Card className="mt-6">
-                        <CardHeader>
-                            <CardTitle>Upcoming Events</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <EventList events={events} updateEventAction={updateEventAction} deleteEventAction={deleteEventAction}/>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
-        </div>
-    )
+        <TabsContent value="dashboard">
+          <MembersTable organization={organization} />
+        </TabsContent>
+
+        <TabsContent value="events">
+          <Card>
+            <CardHeader>
+              <CardTitle>Create New Event</CardTitle>
+              <CreateEventDialog
+                createNewEventAction={createNewEventAction}
+              />
+            </CardHeader>
+            <CardContent></CardContent>
+          </Card>
+
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Upcoming Events</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <EventList
+                events={events}
+                updateEventAction={updateEventAction}
+                deleteEventAction={deleteEventAction}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
 }

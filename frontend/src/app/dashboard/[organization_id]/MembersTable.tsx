@@ -3,7 +3,7 @@
 import React, {useState} from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {Organization} from "@/types";
+import {Membership, Organization} from "@/types";
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "@/app/dashboard/[organization_id]/columns";
 import {Copy, UserPlus} from "lucide-react";
@@ -75,9 +75,9 @@ export default function MembersTable({ organization }: { organization: Organizat
                 </Dialog>
             </div>
 
-            {/* Data Table Section */}
+            {/* Data Table Section - i am not proud of the line below. i was just trying to get typescript to shut up*/}
             <div className="overflow-x-auto">
-                <DataTable columns={columns} data={organization.members} />
+                <DataTable<Membership, unknown> columns={columns} data={organization.members ?? []} />
             </div>
         </div>
     );

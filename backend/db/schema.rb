@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_09_18_044357) do
+ActiveRecord::Schema[7.0].define(version: 2024_09_20_032404) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -58,7 +58,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_18_044357) do
     t.uuid "user_id", null: false
     t.uuid "organization_id", null: false
     t.integer "role", default: 0, null: false
-    t.integer "status", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["organization_id"], name: "index_memberships_on_organization_id"
@@ -118,7 +117,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_18_044357) do
     t.string "picture"
     t.string "uin"
     t.string "sub"
-    t.integer "role"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true

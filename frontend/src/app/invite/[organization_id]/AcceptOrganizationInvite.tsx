@@ -17,7 +17,6 @@ export default function AcceptInviteCreateAccount({organization, acceptInviteAct
     const handleAcceptInvite = async () => {
         setIsLoading(true);
 
-
         try {
             await acceptInviteAction(organization.id);
         } catch (error) {
@@ -32,7 +31,7 @@ export default function AcceptInviteCreateAccount({organization, acceptInviteAct
             <CardHeader>
                 <CardTitle>Accept Invite</CardTitle>
                 <CardDescription>
-                    You've been invited to join an organization
+                    You&apos;ve been invited to join {organization.name}
                 </CardDescription>
             </CardHeader>
             <CardContent>

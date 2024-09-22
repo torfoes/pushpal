@@ -2,9 +2,9 @@ import React from 'react';
 import {auth} from "@/lib/auth";
 import AcceptInviteCreateAccount from "@/app/invite/[organization_id]/AcceptInviteCreateAccount";
 import {Organization} from "@/types";
-import {cookies} from "next/headers";
 import {redirect} from "next/navigation";
 import AcceptOrganizationInvite from "@/app/invite/[organization_id]/AcceptOrganizationInvite";
+import {getSessionTokenOrRedirect} from "@/app/utils";
 
 
 async function getOrganization(organization_id : string): Promise<Organization> {
@@ -29,16 +29,9 @@ async function getOrganization(organization_id : string): Promise<Organization> 
 async function acceptInviteAction(organization_id: string) {
     'use server';
 
-    // console.log(organization_id);
+    const sessionToken = await getSessionTokenOrRedirect();
 
-    const cookieStore = cookies();
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
-
-    if (!sessionToken) {
-        redirect('/login');
-    }
-
-    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/memberships`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}memberships`, {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${sessionToken}`,
@@ -58,16 +51,14 @@ async function acceptInviteAction(organization_id: string) {
     redirect(`/dashboard/${organization_id}`);
 }
 
+interface MembershipStatus {
+    isMember: boolean;
+}
 
-async function getMembershipStatus(organization_id : string): Promise<Organization> {
-    const cookieStore = cookies()
-    const sessionToken = cookieStore.get(process.env.NEXT_PUBLIC_AUTHJS_SESSION_COOKIE)?.value;
+async function getMembershipStatus(organization_id: string): Promise<MembershipStatus> {
+    const sessionToken = await getSessionTokenOrRedirect();
 
-    if (!sessionToken) {
-        redirect('/login')
-    }
-
-    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/memberships?organization_id=${organization_id}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}memberships?organization_id=${organization_id}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${sessionToken}`,
@@ -78,11 +69,11 @@ async function getMembershipStatus(organization_id : string): Promise<Organizati
 
     if (!res.ok) {
         const errorDetails = await res.json();
-        console.error('Failed to fetch organization', errorDetails);
-        throw new Error(`Failed to fetch organization: ${res.status}`);
+        console.error('Failed to fetch membership status', errorDetails);
+        throw new Error(`Failed to fetch membership status: ${res.status}`);
     }
 
-    return res.json();
+    return await res.json();
 }
 
 
