@@ -31,7 +31,7 @@ async function acceptInviteAction(organization_id: string) {
 
     const sessionToken = await getSessionTokenOrRedirect();
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/memberships`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}memberships`, {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${sessionToken}`,

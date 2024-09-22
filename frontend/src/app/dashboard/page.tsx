@@ -34,7 +34,7 @@ async function createNewOrgAction({ name, description }: z.infer<typeof formSche
 
     const sessionToken = getSessionTokenOrRedirect();
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/organizations`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations`, {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${sessionToken}`,
