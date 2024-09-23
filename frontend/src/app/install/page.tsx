@@ -1,24 +1,20 @@
-"use client"; // Marks the component as a client-side component in Next.js
+"use client";
 
 import React, { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowUpFromBracket } from '@fortawesome/free-solid-svg-icons'; // Import the correct share icon
+import { Button } from '@/components/ui/button'; // Shadcn's Button component
+import { Bell, Download } from 'lucide-react';  // Lucide icons
+import QRModal from '@/components/ui/QRModal';  // Importing the Modal Component
 
 const Page = () => {
-    const [isQRModalOpen, setIsQRModalOpen] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);   // State to check if it's mobile or tablet
+    const [isQRModalOpen, setIsQRModalOpen] = useState(false);  // State to open/close the modal
 
     useEffect(() => {
         const handleResize = () => {
-            if (window.innerWidth <= 768) {
-                setIsMobile(true);  // Mobile/Tablet view
-            } else {
-                setIsMobile(false);  // Desktop/Laptop view
-            }
+            setIsMobile(window.innerWidth <= 768);  // Update based on screen size
         };
 
-        // Check on initial load
-        handleResize();
+        handleResize();  // Check on initial load
         window.addEventListener('resize', handleResize);
 
         return () => {
@@ -26,59 +22,51 @@ const Page = () => {
         };
     }, []);
 
-    const openModal = () => {
-        setIsQRModalOpen(true);
+    const handleInstall = () => {
+        if (isMobile) {
+            setIsQRModalOpen(true);  // Open modal for mobile/tablet
+        } else {
+            // Logic for handling PWA installation on desktop (optional)
+            console.log("PWA Install initiated on desktop!");
+        }
     };
 
-    const closeModal = () => {
-        setIsQRModalOpen(false);
+    const handleNotificationSubscription = () => {
+        // Logic to handle notification subscription
+        console.log("Subscribed to notifications!");
     };
 
     return (
-        <div id="install_page-container">
-            <h2>1. Install this page as a PWA on your device.</h2>
-            <button id="install_page-install-button" onClick={openModal}>
-                <span className="icon">⬇️</span> Install
-            </button>
+        <div className="flex flex-col items-center justify-center h-screen bg-background text-foreground text-center p-6 space-y-6">
+            {/* PWA Installation Section */}
+            <div>
+                <h2 className="text-2xl font-bold mb-4 text-shadow-md hover:text-[#2575fc] transition-colors">
+                    1. Install this page as a PWA on your device.
+                </h2>
+                <Button 
+                    onClick={handleInstall} 
+                    className="w-full py-4 px-10 text-xl text-white bg-gradient-to-r from-[#6a11cb] to-[#2575fc] rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-sm"
+                >
+                    <Download className="mr-2 h-6 w-6" /> Install
+                </Button>
+            </div>
 
-            <h2>2. Subscribe to push notifications.</h2>
-            <button id="install_page-notification-button">
-                <span className="icon">🔔</span> Get notifications
-            </button>
+            {/* Push Notifications Section */}
+            <div>
+                <h2 className="text-2xl font-bold mb-4 text-shadow-md hover:text-[#2575fc] transition-colors">
+                    2. Subscribe to push notifications.
+                </h2>
+                <Button 
+                    onClick={handleNotificationSubscription} 
+                    className="w-full py-4 px-10 text-xl text-white bg-gradient-to-r from-[#ff512f] to-[#dd2476] rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-sm"
+                >
+                    <Bell className="mr-2 h-6 w-6" /> Get notifications
+                </Button>
+            </div>
 
-            {/* Modal */}
-            {isQRModalOpen && (
-                <div className="qr-modal-overlay">
-                    <div className="qr-modal">
-                        <button className="qr-modal-close" onClick={closeModal}>
-                            ✖
-                        </button>
-                        <h2>Install the app</h2>
-
-                        {isMobile ? (
-                            // Content for mobile and tablet
-                            <div className="mobile-instructions">
-                                <ol>
-                                    <li>
-                                        Tap on <FontAwesomeIcon icon={faArrowUpFromBracket} /> in the browser menu.
-                                    </li>
-                                    <li>Scroll down and select <strong>Add to Home Screen</strong>.</li>
-                                    <li>Look for the app icon on your home screen.</li>
-                                </ol>
-                            </div>
-                        ) : (
-                            // Content for desktop/laptop (show QR code)
-                            <>
-                                <p>Scan the QR code below to install the app on your iPhone or Android smartphone.</p>
-                                <img
-                                    src="/images/qr-code.png"
-                                    alt="QR Code"
-                                    className="qr-image"
-                                />
-                            </>
-                        )}
-                    </div>
-                </div>
+            {/* Modal for PWA Installation */}
+            {isMobile && (
+                <QRModal isOpen={isQRModalOpen} onClose={() => setIsQRModalOpen(false)} />
             )}
         </div>
     );
