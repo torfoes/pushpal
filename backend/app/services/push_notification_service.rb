@@ -15,7 +15,7 @@ class PushNotificationService
     # make sure vapid subject matches exactly
     options = {
       vapid: {
-        subject: 'mailto: karloszuru@gmail.com',
+        subject: 'mailto:karloszuru@gmail.com',
         public_key: vapid_public_key,
         private_key: vapid_private_key,
       },
