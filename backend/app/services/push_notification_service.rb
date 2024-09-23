@@ -17,8 +17,8 @@ class PushNotificationService
     options = {
       vapid: {
         subject: 'mailto:karloszuru@gmail.com',
-        public_key: vapid_public_key,
-        private_key: vapid_private_key,
+        public_key: vapid_public_key.freeze,
+        private_key: vapid_private_key.freeze,
       },
       ttl: 60,
     }
