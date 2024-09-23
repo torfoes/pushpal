@@ -35,13 +35,14 @@ class PushNotificationService
         vapid: options[:vapid],
         ttl: options[:ttl]
       )
+      status_code = response.code.to_i
 
-      if response.code.between?(200, 299)
+      if status_code.between?(200, 299)
         Rails.logger.info("Push notification sent successfully to subscription ID: #{@subscription.id}")
         return { success: true }
       else
         Rails.logger.error("Push notification failed with status #{response.code} for subscription ID: #{@subscription.id}")
-        handle_failed_push(response.code)
+        handle_failed_push(status_code)
       end
     rescue Webpush::ExpiredSubscription => e
       Rails.logger.warn("Expired subscription (ID: #{@subscription.id}): #{e.message}")
@@ -60,13 +61,14 @@ class PushNotificationService
   private
 
   def handle_failed_push(status_code)
-    if [410, 404].include?(status_code.to_i)
+    case status_code
+    when 410, 404
       Rails.logger.warn("Subscription expired or invalid (status #{status_code}) for subscription ID: #{@subscription.id}, removing...")
       @subscription.destroy
-      return { success: false, status: status_code.to_i, error: "Subscription expired or invalid (status #{status_code}) and has been removed." }
+      { success: false, status: status_code, error: "Subscription expired or invalid (status #{status_code}) and has been removed." }
     else
       Rails.logger.error("Push failed with status #{status_code} for subscription ID: #{@subscription.id}")
-      return { success: false, status: status_code.to_i, error: "Push failed with status #{status_code}" }
+      { success: false, status: status_code, error: "Push failed with status #{status_code}" }
     end
   end
 end
