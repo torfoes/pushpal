@@ -13,21 +13,19 @@ class PushNotificationService
       # icon: '/icons/icon-192x192.png', # Optional
     }.to_json
 
-    # Ensure VAPID subject matches exactly
     options = {
       vapid: {
-        subject: 'mailto:karloszuru@gmail.com',
-        public_key: vapid_public_key.freeze,
-        private_key: vapid_private_key.freeze,
+        subject: VAPID_KEYS[:subject],
+        public_key: VAPID_KEYS[:public_key],
+        private_key: VAPID_KEYS[:private_key],
       },
       ttl: 60,
     }
 
     begin
-      # Log VAPID key details for debugging
       Rails.logger.debug("VAPID Public Key: #{options[:vapid][:public_key].present? ? 'Loaded' : 'Missing'}")
       Rails.logger.debug("VAPID Private Key: #{options[:vapid][:private_key].present? ? 'Loaded' : 'Missing'}")
-      Rails.logger.debug("VAPID Subject: #{options[:vapid][:subject]}")
+      Rails.logger.debug("VAPID Subject: #{options[:vapid][:subject].present? ? 'Loaded' : 'Missing'}")
 
       response = Webpush.payload_send(
         message: payload,
@@ -60,18 +58,6 @@ class PushNotificationService
   end
 
   private
-
-  def vapid_public_key
-    key = ENV['VAPID_PUBLIC_KEY'] || Rails.application.credentials.webpush[:public_key]
-    Rails.logger.debug("Loaded VAPID Public Key from #{ENV['VAPID_PUBLIC_KEY'] ? 'ENV' : 'Rails credentials'}")
-    key
-  end
-
-  def vapid_private_key
-    key = ENV['VAPID_PRIVATE_KEY'] || Rails.application.credentials.webpush[:private_key]
-    Rails.logger.debug("Loaded VAPID Private Key from #{ENV['VAPID_PRIVATE_KEY'] ? 'ENV' : 'Rails credentials'}")
-    key
-  end
 
   def handle_failed_push(status_code)
     if [410, 404].include?(status_code.to_i)
