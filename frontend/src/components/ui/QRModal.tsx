@@ -1,7 +1,9 @@
 "use client";
 
 import React from 'react';
-import { X, Share } from 'lucide-react';  // Importing the Share and X icons
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';  // Shadcn Dialog components
+import { Button } from '@/components/ui/button';  // Shadcn's Button component
+import { Share } from 'lucide-react';  // Lucide icons
 
 interface QRModalProps {
     isOpen: boolean;
@@ -9,39 +11,41 @@ interface QRModalProps {
 }
 
 const QRModal: React.FC<QRModalProps> = ({ isOpen, onClose }) => {
-    if (!isOpen) return null;  // Only render modal if open
-
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg max-w-sm w-full text-center shadow-lg relative">
-                {/* Close Button */}
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-600 hover:text-gray-800">
-                    <X className="h-6 w-6" />
-                </button>
-
-                {/* Modal Heading */}
-                <h2 className="text-xl font-semibold mb-4">Install the app</h2>
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            {/* Modal Content */}
+            <DialogContent className="bg-white p-6 rounded-lg shadow-none max-w-sm mx-auto">
+                {/* Modal Header */}
+                <DialogHeader>
+                    <DialogTitle className="text-xl font-semibold">Install the app</DialogTitle>
+                </DialogHeader>
 
                 {/* Installation Instructions */}
-                <div className="mb-4">
+                <div className="my-4">
                     <ol className="list-decimal text-left pl-6 space-y-2 text-gray-700">
-                        <li className="flex items-center">
-                            Tap on <Share className="h-5 w-5 mx-2" /> in the browser menu.
+                        {/* Item 1 */}
+                        <li>
+                            Tap on <Share className="h-5 w-5 mx-2 inline" /> in the browser menu.
                         </li>
-                        <li>Scroll down and select <strong>Add to Home Screen</strong>.</li>
-                        <li>Look for the app icon on your home screen.</li>
+                        {/* Item 2 */}
+                        <li>
+                            Scroll down and select <strong>Add to Home Screen</strong>.
+                        </li>
+                        {/* Item 3 */}
+                        <li>
+                            Look for the app icon on your home screen.
+                        </li>
                     </ol>
                 </div>
 
-                {/* Styled "Got it" Button */}
-                <button 
-                    onClick={onClose} 
-                    className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                >
-                    Got it
-                </button>
-            </div>
-        </div>
+                {/* Footer with "Got it" Button */}
+                <DialogFooter>
+                    <Button onClick={onClose} className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-2 rounded-md">
+                        Got it
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 };
 
