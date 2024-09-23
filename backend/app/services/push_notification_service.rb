@@ -12,7 +12,7 @@ class PushNotificationService
       data: data,
       # icon: '/icons/icon-192x192.png', # Optional
     }.to_json
-
+    # make sure vapid subject matches exactly
     options = {
       vapid: {
         subject: 'mailto: karloszuru@gmail.com',
