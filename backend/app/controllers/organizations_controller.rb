@@ -17,11 +17,12 @@ class OrganizationsController < ApplicationController
     if @is_member
       members = @organization.memberships.includes(:user).map do |membership|
         {
-          id: membership.user.id,
+          id: membership.id,
           name: membership.user.name,
           email: membership.user.email,
           picture: membership.user.picture,
           role: membership.role,
+          organization_id: @organization.id
         }
       end
     else
