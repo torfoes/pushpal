@@ -65,12 +65,12 @@ export const adminTableColumns: ColumnDef<Membership>[] = [
                         <DropdownMenuLabel>Update Roles</DropdownMenuLabel>
                         <DropdownMenuSeparator/>
                         <DropdownMenuItem
-                            onClick={() => updateMemberRoleAction({membership_id: member.id, organization_id: member.organization_id, newRole: "manager"})}
+                            onClick={() => updateMemberRoleAction(member.id, member.organization_id, "manager")}
                         >
                             Assign as Manager
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                            onClick={() => updateMemberRoleAction({membership_id: member.id, organization_id: member.organization_id, newRole: "member"})}
+                            onClick={() => updateMemberRoleAction(member.id, member.organization_id, "member")}
                         >
                             Assign as Member
                         </DropdownMenuItem>
