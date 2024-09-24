@@ -14,8 +14,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Membership } from "@/types";
+import {deleteMemberAction, updateMemberRoleAction} from "@/app/dashboard/[organization_id]/actions";
 
-export const columns: ColumnDef<Membership>[] = [
+export const adminTableColumns: ColumnDef<Membership>[] = [
     {
         accessorKey: "member",
         header: () => <div className="text-left">Member</div>,
@@ -61,15 +62,23 @@ export const columns: ColumnDef<Membership>[] = [
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                            onClick={() => console.log(member.id)}
-                        >
-                            user_id to console.
-                        </DropdownMenuItem>
+                        <DropdownMenuLabel>Update Roles</DropdownMenuLabel>
                         <DropdownMenuSeparator/>
-                        <DropdownMenuItem>Change Role</DropdownMenuItem>
-                        <DropdownMenuItem>View details</DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => updateMemberRoleAction({membership_id: member.id, organization_id: member.organization_id, newRole: "manager"})}
+                        >
+                            Assign as Manager
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => updateMemberRoleAction({membership_id: member.id, organization_id: member.organization_id, newRole: "member"})}
+                        >
+                            Assign as Member
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => deleteMemberAction(member.id, member.organization_id)}
+                        >
+                            Remove from Organization
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             )
