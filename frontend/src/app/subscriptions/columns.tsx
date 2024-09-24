@@ -42,7 +42,7 @@ export const columns: ColumnDef<PushSubscription>[] = [
                     <div>
                         <p className="font-medium">{subscription.device_vendor} {subscription.device_model}</p>
                         <p className="text-xs text-muted-foreground">OS: {subscription.os_name} {subscription.os_version}</p>
-                        <p className="text-xs text-muted-foreground">Last used: {new Date(subscription.last_used_at).toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground">Date Added: {new Date(subscription.created_at).toLocaleString()}</p>
                     </div>
                 </div>
             )
@@ -63,7 +63,7 @@ export const columns: ColumnDef<PushSubscription>[] = [
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => sendPushNotification(subscription.id, "Hello!!", "Test notification")}>
+                        <DropdownMenuItem onClick={() => sendPushNotification(subscription.id, "PushPal Test Push!!", "This is a test notification.")}>
                             Send Test Push
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => unsubscribeUser(subscription.id)}>
