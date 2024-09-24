@@ -47,8 +47,6 @@ export default async function Page() {
                 <SubscriptionStatus/>
 
                 <DataTable<PushSubscription, unknown> columns={columns} data={push_subscriptions} />
-                {/*<DataTable<PushSubscription, unknown> columns={columns} data={push_subscriptions} />*/}
-
             </div>
         </div>
     );
