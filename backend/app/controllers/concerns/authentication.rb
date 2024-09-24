@@ -2,8 +2,8 @@ module Authentication
   extend ActiveSupport::Concern
 
   def authorize_admin!
-    membership = Membership.find_by(user: @current_user, organization: @organization)
-    unless membership && (membership.role == 'manager' || membership.role == 'creator')
+    @current_membership = Membership.find_by(user: @current_user, organization: @organization)
+    unless @current_membership && ['manager', 'creator'].include?(@current_membership.role)
       render json: { error: 'Unauthorized' }, status: :unauthorized
     end
   end
@@ -53,7 +53,7 @@ module Authentication
 
       begin
         decoded_jwt = decrypt_jwt(token)
-        Rails.logger.info("Decoded JWT: #{decoded_jwt.inspect}")
+        # Rails.logger.info("Decoded JWT: #{decoded_jwt.inspect}")
 
         email = decoded_jwt['email']
         name = decoded_jwt['name']
