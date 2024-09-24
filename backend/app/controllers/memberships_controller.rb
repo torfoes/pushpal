@@ -1,5 +1,7 @@
 class MembershipsController < ApplicationController
   before_action :set_membership, only: %i[show edit update destroy]
+  before_action :set_organization_from_params, only: [:create, :update, :destroy]
+  before_action :authorize_admin!, only: %i[update destroy]
 
   # GET /memberships or /memberships.json
   def index
@@ -7,7 +9,7 @@ class MembershipsController < ApplicationController
       membership = Membership.find_by(user: @current_user, organization_id: params[:organization_id])
 
       if membership
-        render json: { isMember: true }, status: :ok
+        render json: { isMember: true, role: membership.role }, status: :ok
       else
         render json: { isMember: false }, status: :ok
       end
@@ -52,7 +54,7 @@ class MembershipsController < ApplicationController
 
   # PATCH/PUT /memberships/1 or /memberships/1.json
   def update
-    if @membership.update(membership_params)
+    if @membership.update(membership_update_params)
       render json: { message: 'Membership updated successfully', membership: @membership }, status: :ok
     else
       render json: { errors: @membership.errors.full_messages }, status: :unprocessable_entity
@@ -67,14 +69,27 @@ class MembershipsController < ApplicationController
 
   private
 
+
   def set_membership
-    @membership = @current_user.memberships.find_by(id: params[:id])
+    @membership = Membership.find_by(id: params[:id])
     unless @membership
-      render json: { error: 'Membership not found' }, status: :not_found
+      render json: { error: 'Membership not found' }, status: :not_found and return
     end
   end
 
   def membership_update_params
     params.require(:membership).permit(:role)
+  end
+
+
+  def set_organization_from_params
+    if params[:organization_id]
+      @organization = Organization.find_by(id: params[:organization_id])
+      unless @organization
+        render json: { error: 'Organization not found' }, status: :not_found and return
+      end
+    else
+      render json: { error: 'Organization ID missing' }, status: :bad_request
+    end
   end
 end
