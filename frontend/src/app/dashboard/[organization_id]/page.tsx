@@ -59,7 +59,7 @@ async function sendOrganizationPushNotificationAction(params: SendOrganizationPu
     redirect(`/dashboard/${organization_id}`);
 }
 
-export async function getMembership(organization_id: string): Promise<MemberInfo> {
+async function getMembership(organization_id: string): Promise<MemberInfo> {
     const sessionToken = await getSessionTokenOrRedirect();
 
     const res = await fetch(
