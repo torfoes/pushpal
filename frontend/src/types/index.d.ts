@@ -11,6 +11,12 @@ export interface User {
 
 export interface Membership extends User{
     id: string;
+    organization_id: string;
+    role: Role;
+}
+
+export interface MemberInfo {
+    isMember: boolean;
     role: Role;
 }
 
