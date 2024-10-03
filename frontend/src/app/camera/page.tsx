@@ -2,15 +2,16 @@
 import React, { useCallback, useState } from 'react';
 import QrScanner from '../../components/QrScanner'; // Adjust the path based on your file structure
 import { toast } from 'sonner'; // Assuming sonner is installed for toast notifications
-import { Button } from '@/components/ui/button'; // Import the Button component
+import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const Page: React.FC = () => {
   const [hasPermission, setHasPermission] = useState(false); // State to track permission status
@@ -51,15 +52,17 @@ const Page: React.FC = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <Card className="w-[900px] h-[900px]"> {/* Adjust the width and height */}
-        <CardHeader>
-          <CardTitle>QR Code Scanner</CardTitle>
-          <CardDescription>Scan the member's QR code</CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          {/* QR Scanner Component */}
-          {hasPermission && isScanning && (
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline">Scan QR Code</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[600px]" style={{ backgroundColor: 'black' }}>
+          <DialogHeader>
+            <DialogTitle>QR Code Scanner</DialogTitle>
+            <DialogDescription>
+              Scan the member's QR code
+            </DialogDescription>
+          </DialogHeader>
             <QrScanner
               fps={10}
               qrbox={250}
@@ -67,33 +70,9 @@ const Page: React.FC = () => {
               onScanSuccess={handleScanSuccess}
               onScanError={handleScanError}
             />
-          )}
-        </CardContent>
+        </DialogContent>
+      </Dialog>
 
-        <CardFooter className="flex justify-between">
-          {/* Button to request camera permission and start scanning */}
-          {!hasPermission && (
-            <Button onClick={handlePermissionClick}>
-              Request Camera Permissions
-            </Button>
-          )}
-
-          {/* Once permission is granted, show Start Scanning and Stop Scanning buttons */}
-          {hasPermission && (
-            <>
-              {!isScanning ? (
-                <Button onClick={handleStartScanning}>
-                  Start Scanning
-                </Button>
-              ) : (
-                <Button variant="outline" onClick={handleStopScanning}>
-                  Stop Scanning
-                </Button>
-              )}
-            </>
-          )}
-        </CardFooter>
-      </Card>
     </div>
   );
 };
