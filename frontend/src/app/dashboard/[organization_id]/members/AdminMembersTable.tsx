@@ -5,10 +5,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import {Membership, Organization} from "@/types";
 import { DataTable } from "@/components/ui/data-table";
+import { adminTableColumns } from "@/app/dashboard/[organization_id]/members/AdminTableColumns";
 import {Copy, UserPlus} from "lucide-react";
-import {memberTableColumns} from "@/app/dashboard/[organization_id]/MemberTableColumns";
 
-export default function MemberMembersTable({ organization }: { organization: Organization }) {
+export default function AdminMembersTable({ organization }: { organization: Organization }) {
     const [copySuccess, setCopySuccess] = useState('');
 
     const invite_link = `${process.env.NEXT_PUBLIC_BASE_URL}invite/${organization.id}`
@@ -75,8 +75,9 @@ export default function MemberMembersTable({ organization }: { organization: Org
                 </Dialog>
             </div>
 
+            {/* Data Table Section - i am not proud of the line below. i was just trying to get typescript to shut up*/}
             <div className="overflow-x-auto">
-                <DataTable<Membership, unknown> columns={memberTableColumns} data={organization.members ?? []} />
+                <DataTable<Membership, unknown> columns={adminTableColumns} data={organization.members ?? []} />
             </div>
         </div>
     );

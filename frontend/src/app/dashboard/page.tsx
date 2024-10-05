@@ -9,7 +9,7 @@ async function getCurrentUserOrganizations(): Promise<Organization[]> {
     const sessionToken = await getSessionTokenOrRedirect();
 
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}memberships`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/mine`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${sessionToken}`,
@@ -63,6 +63,7 @@ async function createNewOrgAction({ name, description }: z.infer<typeof formSche
 
 export default async function Page() {
     const organizations = await getCurrentUserOrganizations();
+    // console.log(organizations);
 
     return (
         <div className="container mx-auto p-4">
