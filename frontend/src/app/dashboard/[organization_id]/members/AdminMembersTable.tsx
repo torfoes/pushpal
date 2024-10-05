@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import {Membership, Organization} from "@/types";
 import { DataTable } from "@/components/ui/data-table";
-import { adminTableColumns } from "@/app/dashboard/[organization_id]/AdminTableColumns";
+import { adminTableColumns } from "@/app/dashboard/[organization_id]/members/AdminTableColumns";
 import {Copy, UserPlus} from "lucide-react";
 
 export default function AdminMembersTable({ organization }: { organization: Organization }) {
