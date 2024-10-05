@@ -6,7 +6,7 @@
 **Start the Backend:**
 ```sh
 cd backend
-docker-compose up -d
+docker compose up -d
 docker exec -it pushpal_backend /bin/bash
 cd csce431
 bundle install

@@ -37,7 +37,7 @@ export default function OrganizationList({ organizations }: { organizations: Org
             {filteredOrganizations.length > 0 ? (
                 <div className="space-y-2">
                     {filteredOrganizations.map((org) => (
-                        <Link key={org.id} href={`/dashboard/${org.id}`} className="block">
+                        <Link key={org.id} href={`/dashboard/${org.id}/overview`} className="block">
                             <Card className="cursor-pointer transition-shadow hover:shadow-md">
                                 <CardHeader>
                                     <div className="flex justify-between items-center">
@@ -53,9 +53,7 @@ export default function OrganizationList({ organizations }: { organizations: Org
 
                                 <CardContent>
                                     <Badge variant="secondary">
-                                        {org.role === 'creator'
-                                            ? 'Owner'
-                                            : org.role.charAt(0).toUpperCase() + org.role.slice(1)}
+                                        {org.role}
                                     </Badge>
                                 </CardContent>
                             </Card>

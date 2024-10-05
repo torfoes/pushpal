@@ -1,25 +1,33 @@
-Rails.application.routes.draw do
-  resources :memberships
-  resources :dues
-  resources :notifications
-  resources :attendances
-  resources :events
-  resources :organizations
-  resources :push_subscriptions, path: 'push-subscriptions', only: [:create, :destroy, :index, :show] do
-    member do
-      post 'send_notification'
-    end
-  end
+# config/routes.rb
 
-  resources :organizations, only: [] do
+Rails.application.routes.draw do
+  resources :organizations do
+    collection do
+      get 'mine'
+    end
+
+    resources :memberships do
+      collection do
+        get 'current'
+      end
+    end
+
+    resources :events do
+      resources :attendances
+    end
+
+    resources :notifications, only: [:index, :create, :show, :update, :destroy]
+
     member do
       post 'send_push_notifications'
     end
   end
 
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-  resources :users, only: [:create, :index, :show]
+  resources :push_subscriptions, path: 'push-subscriptions', only: [:create, :destroy, :index, :show] do
+      member do
+        post 'send_notification'
+      end
+    end
 
-  # Defines the root path route ("/")
-  # root "articles#index"
+  resources :users, only: [:create, :index, :show]
 end

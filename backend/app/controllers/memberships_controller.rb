@@ -1,49 +1,83 @@
+# app/controllers/memberships_controller.rb
 class MembershipsController < ApplicationController
-  before_action :set_membership, only: %i[show edit update destroy]
-  before_action :set_organization_from_params, only: [:create, :update, :destroy]
-  before_action :authorize_admin!, only: %i[update destroy]
+  include OrganizationContext
 
-  # GET /memberships or /memberships.json
-  def index
-    if params[:organization_id]
-      membership = Membership.find_by(user: @current_user, organization_id: params[:organization_id])
+  # override organization_id_param to fetch from :organization_id
+  private def organization_id_param
+    params[:organization_id]
+  end
 
-      if membership
-        render json: { isMember: true, role: membership.role }, status: :ok
-      else
-        render json: { isMember: false }, status: :ok
-      end
-      return
-    end
+  # set organization context for all actions
+  before_action :set_organization
+  before_action :set_current_member_role
+  before_action :set_current_membership
 
-    memberships = Membership.includes(:organization).where(user: @current_user)
+  # Adjust authorization callbacks
+  before_action :authorize_admin!, only: [:update, :destroy]
+  # Exclude :current from authorize_member!
+  before_action :authorize_member!, only: [:index, :show]
 
-    organizations = memberships.map do |membership|
-      {
-        id: membership.organization.id,
-        name: membership.organization.name,
-        description: membership.organization.description,
+  before_action :set_membership, only: [:show, :update, :destroy]
+
+
+  # GET /organizations/:organization_id/memberships/current
+  def current
+    membership = @organization.memberships.find_by(user: @current_user)
+
+    if membership
+      render json: {
+        id: membership.id,
         role: membership.role,
-        member_count: membership.organization.memberships.count
-      }
+        organization_id: membership.organization_id
+      }, status: :ok
+    else
+      render json: { error: 'Membership not found' }, status: :not_found
     end
+  end
+  # GET /organizations/:organization_id/memberships
+  def index
+    memberships = @organization.memberships.includes(:user)
 
-    render json: { organizations: organizations }, status: :ok
+    render json: {
+      memberships: memberships.map do |membership|
+        {
+          id: membership.id,
+          user: {
+            id: membership.user.id,
+            name: membership.user.name,
+            email: membership.user.email,
+            picture: membership.user.picture
+          },
+          role: membership.role,
+          organization_id: membership.organization_id
+        }
+      end
+    }, status: :ok
   end
 
-  # GET /memberships/1 or /memberships/1.json
+  # GET /organizations/:organization_id/memberships/:id
   def show
-    render json: @membership, status: :ok
+    render json: {
+      id: @membership.id,
+      user: {
+        id: @membership.user.id,
+        name: @membership.user.name,
+        email: @membership.user.email,
+        picture: @membership.user.picture
+      },
+      role: @membership.role,
+      organization_id: @membership.organization_id
+    }, status: :ok
   end
 
-  # POST /memberships or /memberships.json
+  # POST /organizations/:organization_id/memberships
   def create
-    organization = Organization.find_by(id: params[:organization_id])
-    if organization.nil?
-      render json: { error: 'Organization not found' }, status: :not_found and return
+    existing_membership = @organization.memberships.find_by(user: @current_user)
+    if existing_membership
+      render json: { error: 'You are already a member of this organization.' }, status: :unprocessable_entity and return
     end
 
-    @membership = Membership.new(user: @current_user, organization: organization, role: :member)
+    @membership = @organization.memberships.new(user: @current_user, role: 'member')
 
     if @membership.save
       render json: { message: 'Membership created successfully', membership: @membership }, status: :created
@@ -52,7 +86,8 @@ class MembershipsController < ApplicationController
     end
   end
 
-  # PATCH/PUT /memberships/1 or /memberships/1.json
+
+  # PATCH/PUT /organizations/:organization_id/memberships/:id
   def update
     if @membership.update(membership_update_params)
       render json: { message: 'Membership updated successfully', membership: @membership }, status: :ok
@@ -61,7 +96,7 @@ class MembershipsController < ApplicationController
     end
   end
 
-  # DELETE /memberships/1 or /memberships/1.json
+  # DELETE /organizations/:organization_id/memberships/:id
   def destroy
     @membership.destroy
     render json: { message: 'Membership successfully destroyed' }, status: :no_content
@@ -69,27 +104,19 @@ class MembershipsController < ApplicationController
 
   private
 
-
+  # Scope the membership within the current organization
   def set_membership
-    @membership = Membership.find_by(id: params[:id])
+    @membership = @organization.memberships.find_by(id: params[:id])
     unless @membership
-      render json: { error: 'Membership not found' }, status: :not_found and return
+      render json: { error: 'Membership not found' }, status: :not_found
     end
+  end
+
+  def membership_params
+    params.require(:membership).permit(:user_id, :role)
   end
 
   def membership_update_params
     params.require(:membership).permit(:role)
-  end
-
-
-  def set_organization_from_params
-    if params[:organization_id]
-      @organization = Organization.find_by(id: params[:organization_id])
-      unless @organization
-        render json: { error: 'Organization not found' }, status: :not_found and return
-      end
-    else
-      render json: { error: 'Organization ID missing' }, status: :bad_request
-    end
   end
 end

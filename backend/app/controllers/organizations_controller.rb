@@ -1,18 +1,31 @@
+# app/controllers/organizations_controller.rb
+
 class OrganizationsController < ApplicationController
+  include OrganizationContext
+
+  # skip the inherited authenticate_request before_action
+  skip_before_action :authenticate_request
+
+  # use optional authentication for :show action
   before_action :optional_authenticate_request, only: [:show]
+
+  # require authentication for all other actions
   before_action :authenticate_request, except: [:show]
-  before_action :set_organization, only: %i[show edit update destroy send_push_notifications]
-  before_action :authorize_member!, only: [:show]
-  before_action :authorize_admin!, only: [:send_push_notifications]
 
+  # set organization context only for actions that need it
+  before_action :set_organization, only: [:show, :update, :destroy, :send_push_notifications]
+  before_action :set_current_member_role, only: [:show, :update, :destroy, :send_push_notifications]
+  before_action :set_current_membership, only: [:show, :update, :destroy, :send_push_notifications]
 
-  # GET /organizations or /organizations.json
+  before_action :authorize_admin!, only: [:update, :destroy, :send_push_notifications]
+
+  # GET /organizations
   def index
     @organizations = Organization.all
     render json: @organizations, status: :ok
   end
 
-  # GET /organizations/1 or /organizations/1.json
+  # GET /organizations/:id
   def show
     if @is_member
       members = @organization.memberships.includes(:user).map do |membership|
@@ -40,7 +53,7 @@ class OrganizationsController < ApplicationController
     render json: response, status: :ok
   end
 
-  # POST /organizations or /organizations.json
+  # POST /organizations
   def create
     @organization = Organization.new(organization_params)
 
@@ -59,7 +72,7 @@ class OrganizationsController < ApplicationController
     end
   end
 
-  # PATCH/PUT /organizations/1 or /organizations/1.json
+  # PATCH/PUT /organizations/:id
   def update
     if @organization.update(organization_params)
       render json: @organization, status: :ok
@@ -68,7 +81,7 @@ class OrganizationsController < ApplicationController
     end
   end
 
-  # DELETE /organizations/1 or /organizations/1.json
+  # DELETE /organizations/:id
   def destroy
     @organization.destroy
     render json: { message: 'Organization was successfully destroyed.' }, status: :no_content
@@ -87,7 +100,6 @@ class OrganizationsController < ApplicationController
     end
 
     member_user_ids = @organization.memberships.pluck(:user_id)
-
     push_subscriptions = PushSubscription.where(user_id: member_user_ids)
 
     if push_subscriptions.empty?
@@ -115,12 +127,30 @@ class OrganizationsController < ApplicationController
     }, status: :ok
   end
 
+  # GET /organizations/mine
+  def mine
+    organizations = @current_user.organizations
+
+    organizations_data = organizations.map do |organization|
+      membership = organization.memberships.find_by(user: @current_user)
+
+      {
+        id: organization.id.to_s,
+        name: organization.name,
+        description: organization.description,
+        role: membership&.role || 'member',
+        member_count: organization.memberships.count
+      }
+    end
+
+    render json: {
+      organizations: organizations_data
+    }, status: :ok
+  rescue StandardError => e
+    render json: { error: 'Failed to fetch organizations', message: e.message }, status: :internal_server_error
+  end
 
   private
-
-  def set_organization
-    @organization = Organization.find(params[:id])
-  end
 
   def organization_params
     params.require(:organization).permit(:name, :description)
