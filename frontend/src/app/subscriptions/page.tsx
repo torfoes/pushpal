@@ -31,7 +31,6 @@ async function getCurrentUserPushSubscriptions(): Promise<PushSubscription[]> {
 
 export default async function Page() {
     const push_subscriptions = await getCurrentUserPushSubscriptions();
-    // console.log(push_subscriptions)
 
     return (
         <div>
