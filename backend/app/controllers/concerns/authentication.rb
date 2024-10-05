@@ -1,21 +1,6 @@
 module Authentication
   extend ActiveSupport::Concern
 
-  def authorize_admin!
-    @current_membership = Membership.find_by(user: @current_user, organization: @organization)
-    unless @current_membership && ['manager', 'creator'].include?(@current_membership.role)
-      render json: { error: 'Unauthorized' }, status: :unauthorized
-    end
-  end
-
-  def authorize_member!
-    @is_member = false
-    if @current_user
-      membership = Membership.find_by(user: @current_user, organization: @organization)
-      @is_member = true if membership
-    end
-  end
-
   included do
     before_action :authenticate_request
   end
@@ -111,8 +96,6 @@ module Authentication
     else
       Rails.logger.error("Failed to create or find user: #{user.errors.full_messages}")
     end
-
     user
   end
-
 end
