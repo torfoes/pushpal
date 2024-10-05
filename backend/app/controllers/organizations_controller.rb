@@ -17,7 +17,7 @@ class OrganizationsController < ApplicationController
   before_action :set_current_member_role, only: [:show, :update, :destroy, :send_push_notifications]
   before_action :set_current_membership, only: [:show, :update, :destroy, :send_push_notifications]
 
-  before_action :authorize_admin!, only: [:create, :update, :destroy, :send_push_notifications]
+  before_action :authorize_admin!, only: [:update, :destroy, :send_push_notifications]
 
   # GET /organizations
   def index
