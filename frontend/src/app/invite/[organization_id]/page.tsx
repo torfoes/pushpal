@@ -26,7 +26,7 @@ async function getOrganization(organization_id : string): Promise<Organization> 
 }
 
 
-export async function acceptInviteAction(organization_id: string) {
+async function acceptInviteAction(organization_id: string) {
     'use server';
 
     const sessionToken = await getSessionTokenOrRedirect();
