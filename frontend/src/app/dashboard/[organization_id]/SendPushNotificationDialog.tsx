@@ -77,8 +77,8 @@ export default function SendPushNotificationDialog({
             {/* Trigger button to open the dialog */}
             <DialogTrigger asChild>
                 <Button variant="outline">
-                    <BellIcon className="mr-2 h-4 w-4" />
-                    Send Push Notification
+                    <BellIcon className="h-4 w-4" />
+                    <span className="ml-2 hidden sm:inline">Send Push Notification</span>
                 </Button>
             </DialogTrigger>
 
