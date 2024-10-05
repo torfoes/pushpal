@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import {Membership, Organization} from "@/types";
 import { DataTable } from "@/components/ui/data-table";
 import {Copy, UserPlus} from "lucide-react";
-import {memberTableColumns} from "@/app/dashboard/[organization_id]/MemberTableColumns";
+import {memberTableColumns} from "@/app/dashboard/[organization_id]/members/MemberTableColumns";
 
 export default function MemberMembersTable({ organization }: { organization: Organization }) {
     const [copySuccess, setCopySuccess] = useState('');
