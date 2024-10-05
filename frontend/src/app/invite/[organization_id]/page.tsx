@@ -26,21 +26,21 @@ async function getOrganization(organization_id : string): Promise<Organization> 
 }
 
 
-async function acceptInviteAction(organization_id: string) {
+export async function acceptInviteAction(organization_id: string) {
     'use server';
 
     const sessionToken = await getSessionTokenOrRedirect();
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}memberships`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${sessionToken}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            organization_id: organization_id,
-        }),
-    });
+    const res = await fetch(
+        `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}/memberships`,
+        {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${sessionToken}`,
+                'Content-Type': 'application/json',
+            },
+        }
+    );
 
     if (!res.ok) {
         const errorDetails = await res.json();
@@ -58,22 +58,27 @@ interface MembershipStatus {
 async function getMembershipStatus(organization_id: string): Promise<MembershipStatus> {
     const sessionToken = await getSessionTokenOrRedirect();
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}memberships?organization_id=${organization_id}`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${sessionToken}`,
-            'Content-Type': 'application/json',
-        },
-        cache: 'no-store',
-    });
+    const res = await fetch(
+        `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}/memberships/current`,
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${sessionToken}`,
+                'Content-Type': 'application/json',
+            },
+            cache: 'no-store',
+        }
+    );
 
-    if (!res.ok) {
+    if (res.status === 404) {
+        return { isMember: false };
+    } else if (!res.ok) {
         const errorDetails = await res.json();
         console.error('Failed to fetch membership status', errorDetails);
         throw new Error(`Failed to fetch membership status: ${res.status}`);
     }
 
-    return await res.json();
+    return { isMember: true };
 }
 
 
