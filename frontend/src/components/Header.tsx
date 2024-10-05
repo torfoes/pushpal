@@ -22,7 +22,7 @@ export default function Header({ session }: HeaderProps) {
     return (
         <header className="px-4 lg:px-6 h-14 flex items-center justify-between bg-black">
             {/* Logo */}
-            <Link className="flex items-center justify-center" href="./">
+            <Link className="flex items-center justify-center" href="/">
                 <Bell className="h-6 w-6 text-white" />
                 <span className="ml-2 text-2xl font-bold text-white">PushPal</span>
             </Link>
