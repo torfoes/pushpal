@@ -1,26 +1,27 @@
 'use server'
 
-import {getSessionTokenOrRedirect} from "@/app/utils";
-import {Role} from "@/types";
-import {redirect} from "next/navigation";
-
+import { getSessionTokenOrRedirect } from "@/app/utils";
+import { Role } from "@/types";
+import { redirect } from "next/navigation";
 
 export async function updateMemberRoleAction(membership_id: string, organization_id: string, newRole: Role) {
     const sessionToken = await getSessionTokenOrRedirect();
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}memberships/${membership_id}`, {
-        method: 'PATCH',
-        headers: {
-            'Authorization': `Bearer ${sessionToken}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            membership: {
-                role: newRole,
+    const res = await fetch(
+        `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}/memberships/${membership_id}`,
+        {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${sessionToken}`,
+                'Content-Type': 'application/json',
             },
-            organization_id: organization_id
-        }),
-    });
+            body: JSON.stringify({
+                membership: {
+                    role: newRole,
+                },
+            }),
+        }
+    );
 
     if (!res.ok) {
         const errorDetails = await res.json();
@@ -28,19 +29,21 @@ export async function updateMemberRoleAction(membership_id: string, organization
         throw new Error(`Failed to update member role: ${res.status}`);
     }
 
-    redirect(`/dashboard/${organization_id}`);
+    redirect(`/dashboard/${organization_id}/members`);
 }
-
 
 export async function deleteMemberAction(membership_id: string, organization_id: string) {
     const sessionToken = await getSessionTokenOrRedirect();
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}memberships/${membership_id}?organization_id=${organization_id}`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${sessionToken}`,
-        },
-    });
+    const res = await fetch(
+        `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}/memberships/${membership_id}`,
+        {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${sessionToken}`,
+            },
+        }
+    );
 
     if (!res.ok) {
         const errorDetails = await res.json();
@@ -48,6 +51,5 @@ export async function deleteMemberAction(membership_id: string, organization_id:
         throw new Error(`Failed to remove member: ${res.status}`);
     }
 
-    redirect(`/dashboard/${organization_id}`);
+    redirect(`/dashboard/${organization_id}/members`);
 }
-
