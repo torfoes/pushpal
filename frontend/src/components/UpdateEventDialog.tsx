@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus } from "lucide-react";
+import { updateEvent, getOrganizationEvents  } from '../app/dashboard/[organization_id]/events/actions';
+
 
 export const formSchema = z.object({
     name: z.string().min(3, { message: "Event name must be at least 3 characters." }),
@@ -27,6 +29,7 @@ export default function UpdateEventDialog({
     event_id: string;
 }) {
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [events, setEvents] = useState<Event[]>([]); // State to store events
 
     // Initialize form
     const form = useForm<z.infer<typeof formSchema>>({
@@ -39,55 +42,49 @@ export default function UpdateEventDialog({
         },
     });
 
-    // Fetch event data when dialog opens
+    // Fetch the list of events when the dialog opens
     useEffect(() => {
-        async function fetchEventDetails() {
-            console.log("organization_id")
-            console.log(organization_id)
-            console.log("event_id")
-            console.log(event_id)
-            const res = await fetch(`/api/organizations/${organization_id}/events/${event_id}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                form.setValue("name", data.name);
-                form.setValue("description", data.description ?? '');
-                form.setValue("date", data.date);
-                form.setValue("attendance_required", data.attendance_required ?? false);
-            } else {
-                console.error('Failed to fetch event details');
+        async function fetchEvents() {
+            try {
+                const fetchedEvents = await getOrganizationEvents(organization_id);
+                setEvents(fetchedEvents);
+                
+                // Find the specific event and populate form values
+                const eventToEdit = fetchedEvents.find(event => event.id === event_id);
+                if (eventToEdit) {
+                    form.setValue("name", eventToEdit.name);
+                    form.setValue("description", eventToEdit.description ?? '');
+                    form.setValue("date", eventToEdit.date);
+                    form.setValue("attendance_required", eventToEdit.attendance_required ?? false);
+                }
+            } catch (error) {
+                console.error('Failed to fetch events', error);
             }
         }
 
         if (isUpdateModalOpen) {
-            fetchEventDetails();
+            fetchEvents();
         }
     }, [isUpdateModalOpen, organization_id, event_id, form]);
 
     // Handle form submission
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const res = await fetch(`/api/organizations/${organization_id}/events/${event_id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(values),
-        });
+        try {
+            await updateEvent(
+                organization_id,
+                event_id,
+                values.name,
+                values.date,
+                values.description,
+                values.attendance_required
+            );
 
-        if (!res.ok) {
-            const errorDetails = await res.json();
-            console.error('Failed to update event', errorDetails);
-            throw new Error(`Failed to update event: ${res.status}`);
+            setIsUpdateModalOpen(false);
+            form.reset();
+            window.location.reload(); // Optionally reload the page to reflect changes
+        } catch (error) {
+            console.error("Failed to update event", error);
         }
-
-        setIsUpdateModalOpen(false);
-        form.reset();
-        window.location.reload();
     }
 
     return (

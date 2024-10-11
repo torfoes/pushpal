@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus } from "lucide-react";
+import { createEvent } from '../app/dashboard/[organization_id]/events/actions';
 
 export const formSchema = z.object({
     name: z.string().min(3, { message: "Event name must be at least 3 characters." }),
@@ -38,24 +39,23 @@ export default function CreateEventDialog({
 
     // Function to handle form submission
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const res = await fetch(`/api/organizations/${organization_id}/events`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(values),
-        });
+        try {
+            // Call the createEvent function from actions.ts
+            await createEvent(
+                organization_id,
+                values.name,
+                values.date,
+                values.description,
+                values.attendance_required
+            );
 
-        if (!res.ok) {
-            const errorDetails = await res.json();
-            console.error('Failed to create event', errorDetails);
-            throw new Error(`Failed to create event: ${res.status}`);
+            // Close modal and reset form after success
+            setIsCreateModalOpen(false);
+            form.reset();
+            window.location.reload();  // Optionally reload after success
+        } catch (error) {
+            console.error("Failed to create event", error);
         }
-
-        // Close modal and reset form after success
-        setIsCreateModalOpen(false);
-        form.reset();
-        window.location.reload();  // Optionally reload after success
     }
 
     return (
