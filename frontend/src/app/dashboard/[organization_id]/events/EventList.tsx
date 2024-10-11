@@ -8,6 +8,7 @@ import { Calendar, Search } from 'lucide-react';
 import { Event } from '@/types';
 import { Input } from "@/components/ui/input";
 import UpdateEventDialog from './UpdateEventDialog';
+import DeleteEventDialog from './DeleteEventDialog';
 
 export default function EventList({ events = [] }: { events?: Event[] }) {
     const [searchTerm, setSearchTerm] = useState('');
@@ -62,11 +63,19 @@ export default function EventList({ events = [] }: { events?: Event[] }) {
                                         </Badge>
                                     )}
                                 </CardContent>
-                                {/* Pass the organization_id and event_id to UpdateEventDialog */}
-                                <UpdateEventDialog 
-                                    organization_id={organization_id} 
-                                    event_id={event.id} 
-                                />
+                                <div className="p-4 flex space-x-2">
+                                    {/* Update Event Button */}
+                                    <UpdateEventDialog 
+                                        organization_id={organization_id} 
+                                        event_id={event.id} 
+                                    />
+                                    {/* Delete Event Button */}
+                                    <DeleteEventDialog
+                                        organization_id={organization_id}
+                                        event_id={event.id}
+                                        event_name={event.name}
+                                    />
+                                </div>
                             </Card>
                         </div>
                     ))}

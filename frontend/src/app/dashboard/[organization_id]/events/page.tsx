@@ -1,7 +1,7 @@
 import { getSessionTokenOrRedirect } from "@/app/utils";
-import CreateEventDialog from "@/components/CreateEventDialog";
+import CreateEventDialog from "@/app/dashboard/[organization_id]/events/CreateEventDialog";
 import { Event } from "@/types";
-import EventList from "@/components/EventList";
+import EventList from "@/app/dashboard/[organization_id]/events/EventList";
 import { getOrganizationEvents } from './actions'
 
 

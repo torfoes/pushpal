@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,8 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus } from "lucide-react";
-import { updateEvent, getOrganizationEvents  } from '../app/dashboard/[organization_id]/events/actions';
-
+import { createEvent } from './actions';
 
 export const formSchema = z.object({
     name: z.string().min(3, { message: "Event name must be at least 3 characters." }),
@@ -21,17 +20,13 @@ export const formSchema = z.object({
     attendance_required: z.boolean().optional(),
 });
 
-export default function UpdateEventDialog({
-    organization_id,
-    event_id
+export default function CreateEventDialog({
+    organization_id
 }: {
     organization_id: string;
-    event_id: string;
 }) {
-    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-    const [events, setEvents] = useState<Event[]>([]); // State to store events
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-    // Initialize form
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -42,63 +37,41 @@ export default function UpdateEventDialog({
         },
     });
 
-    // Fetch the list of events when the dialog opens
-    useEffect(() => {
-        async function fetchEvents() {
-            try {
-                const fetchedEvents = await getOrganizationEvents(organization_id);
-                setEvents(fetchedEvents);
-                
-                // Find the specific event and populate form values
-                const eventToEdit = fetchedEvents.find(event => event.id === event_id);
-                if (eventToEdit) {
-                    form.setValue("name", eventToEdit.name);
-                    form.setValue("description", eventToEdit.description ?? '');
-                    form.setValue("date", eventToEdit.date);
-                    form.setValue("attendance_required", eventToEdit.attendance_required ?? false);
-                }
-            } catch (error) {
-                console.error('Failed to fetch events', error);
-            }
-        }
-
-        if (isUpdateModalOpen) {
-            fetchEvents();
-        }
-    }, [isUpdateModalOpen, organization_id, event_id, form]);
-
-    // Handle form submission
+    // Function to handle form submission
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
-            await updateEvent(
+            // Call the createEvent function from actions.ts
+            await createEvent(
                 organization_id,
-                event_id,
                 values.name,
                 values.date,
                 values.description,
                 values.attendance_required
             );
 
-            setIsUpdateModalOpen(false);
+            // Close modal and reset form after success
+            setIsCreateModalOpen(false);
             form.reset();
-            window.location.reload(); // Optionally reload the page to reflect changes
+            window.location.reload();  // Optionally reload after success
         } catch (error) {
-            console.error("Failed to update event", error);
+            console.error("Failed to create event", error);
         }
     }
 
     return (
-        <Dialog open={isUpdateModalOpen} onOpenChange={setIsUpdateModalOpen}>
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline">
                     <Plus className="mr-2 h-4 w-4" />
-                    Update Event
+                    New Event
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] bg-black">
                 <DialogHeader>
-                    <DialogTitle>Update Event</DialogTitle>
-                    <DialogDescription>Edit the details for this event.</DialogDescription>
+                    <DialogTitle>Create New Event</DialogTitle>
+                    <DialogDescription>
+                        Enter the details for your new event.
+                    </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -155,7 +128,7 @@ export default function UpdateEventDialog({
                             )}
                         />
                         <DialogFooter>
-                            <Button type="submit">Update Event</Button>
+                            <Button type="submit">Create Event</Button>
                         </DialogFooter>
                     </form>
                 </Form>

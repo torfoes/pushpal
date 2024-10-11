@@ -71,6 +71,28 @@ export async function createEvent(organization_id: string, name: string, date: s
     redirect(`/dashboard/${organization_id}/events`);
 }
 
+export async function deleteEvent(organization_id: string, event_id: string) {
+    const sessionToken = await getSessionTokenOrRedirect();
+
+    // Make a request to the external API to delete the event
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/organizations/${organization_id}/events/${event_id}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!res.ok) {
+        const errorDetails = await res.json();
+        console.error('Failed to delete event', errorDetails);
+        throw new Error(`Failed to delete event: ${res.status}`);
+    }
+
+    // Redirect to the events list for the organization after successful deletion
+    redirect(`/dashboard/${organization_id}/events`);
+}
+
 export async function updateEvent(organization_id: string, event_id: string, name: string, date: string, description?: string, attendance_required?: boolean) {
     const sessionToken = await getSessionTokenOrRedirect();
 
