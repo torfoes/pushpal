@@ -2,17 +2,16 @@
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Search } from 'lucide-react';
 import { Event } from '@/types';
 import { Input } from "@/components/ui/input";
-import UpdateEventDialog from './UpdateEventDialog';
-import DeleteEventDialog from './DeleteEventDialog';
 
 export default function EventList({ events = [] }: { events?: Event[] }) {
     const [searchTerm, setSearchTerm] = useState('');
-    const { organization_id } = useParams(); // Grab organization_id from URL
+    const { organization_id } = useParams();
 
     // Filter events based on the search term
     const filteredEvents = events.filter((event) =>
@@ -23,9 +22,9 @@ export default function EventList({ events = [] }: { events?: Event[] }) {
         <div>
             {/* Search Input */}
             <div className="relative mb-4">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <Search className="w-4 h-4 text-gray-500" />
-              </span>
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <Search className="w-4 h-4 text-gray-500" />
+                </span>
                 <Input
                     type="text"
                     placeholder="Search events..."
@@ -39,7 +38,11 @@ export default function EventList({ events = [] }: { events?: Event[] }) {
             {filteredEvents.length > 0 ? (
                 <div className="space-y-2">
                     {filteredEvents.map((event) => (
-                        <div key={event.id} className="block">
+                        <Link
+                            key={event.id}
+                            href={`/dashboard/${organization_id}/events/${event.id}`}
+                            className="block"
+                        >
                             <Card className="cursor-pointer transition-shadow hover:shadow-md">
                                 <CardHeader>
                                     <div className="flex justify-between items-center">
@@ -54,30 +57,13 @@ export default function EventList({ events = [] }: { events?: Event[] }) {
 
                                 <CardContent>
                                     {event.attendance_required ? (
-                                        <Badge variant="secondary">
-                                            Attendance Required
-                                        </Badge>
+                                        <Badge variant="secondary">Attendance Required</Badge>
                                     ) : (
-                                        <Badge variant="outline">
-                                            Attendance Optional
-                                        </Badge>
+                                        <Badge variant="outline">Attendance Optional</Badge>
                                     )}
                                 </CardContent>
-                                <div className="p-4 flex space-x-2">
-                                    {/* Update Event Button */}
-                                    <UpdateEventDialog 
-                                        organization_id={organization_id} 
-                                        event_id={event.id} 
-                                    />
-                                    {/* Delete Event Button */}
-                                    <DeleteEventDialog
-                                        organization_id={organization_id}
-                                        event_id={event.id}
-                                        event_name={event.name}
-                                    />
-                                </div>
                             </Card>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             ) : (
