@@ -118,11 +118,14 @@ export default function CreateEventDialog({
                             control={form.control}
                             name="attendance_required"
                             render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Attendance Required</FormLabel>
+                                <FormItem className="flex items-center space-x-2">
                                     <FormControl>
-                                        <Checkbox {...field} checked={field.value} onCheckedChange={field.onChange} />
+                                        <Checkbox
+                                            checked={field.value}
+                                            onCheckedChange={(checked) => field.onChange(checked)}
+                                        />
                                     </FormControl>
+                                    <FormLabel>Attendance Required</FormLabel>
                                     <FormMessage />
                                 </FormItem>
                             )}

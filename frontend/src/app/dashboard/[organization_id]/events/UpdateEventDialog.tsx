@@ -1,6 +1,8 @@
+// src/app/dashboard/[organization_id]/events/UpdateEventDialog.tsx
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,9 +13,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus } from "lucide-react";
-import { updateEvent, getOrganizationEvents  } from './actions';
+import { updateEvent } from './actions';
 
 
+// Define the form schema using Zod
 export const formSchema = z.object({
     name: z.string().min(3, { message: "Event name must be at least 3 characters." }),
     description: z.string().max(500, { message: "Description must not exceed 500 characters." }).optional(),
@@ -21,51 +24,25 @@ export const formSchema = z.object({
     attendance_required: z.boolean().optional(),
 });
 
-export default function UpdateEventDialog({
-                                              organization_id,
-                                              event_id
-                                          }: {
+// Define the shape of default values prop
+interface UpdateEventDialogProps {
     organization_id: string;
     event_id: string;
-}) {
-    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-    const [events, setEvents] = useState<Event[]>([]); // State to store events
+    defaultValues: z.infer<typeof formSchema>;
+}
 
-    // Initialize form
+export default function UpdateEventDialog({
+                                              organization_id,
+                                              event_id,
+                                              defaultValues,
+                                          }: UpdateEventDialogProps) {
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
+    // Initialize the form with default values passed as props
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: {
-            name: "",
-            description: "",
-            date: "",
-            attendance_required: false,
-        },
+        defaultValues,
     });
-
-    // Fetch the list of events when the dialog opens
-    useEffect(() => {
-        async function fetchEvents() {
-            try {
-                const fetchedEvents = await getOrganizationEvents(organization_id);
-                setEvents(fetchedEvents);
-
-                // Find the specific event and populate form values
-                const eventToEdit = fetchedEvents.find(event => event.id === event_id);
-                if (eventToEdit) {
-                    form.setValue("name", eventToEdit.name);
-                    form.setValue("description", eventToEdit.description ?? '');
-                    form.setValue("date", eventToEdit.date);
-                    form.setValue("attendance_required", eventToEdit.attendance_required ?? false);
-                }
-            } catch (error) {
-                console.error('Failed to fetch events', error);
-            }
-        }
-
-        if (isUpdateModalOpen) {
-            fetchEvents();
-        }
-    }, [isUpdateModalOpen, organization_id, event_id, form]);
 
     // Handle form submission
     async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -84,6 +61,7 @@ export default function UpdateEventDialog({
             window.location.reload(); // Optionally reload the page to reflect changes
         } catch (error) {
             console.error("Failed to update event", error);
+            // Optionally, you can add user-facing error handling here
         }
     }
 
@@ -122,7 +100,12 @@ export default function UpdateEventDialog({
                                 <FormItem>
                                     <FormLabel>Description (Optional)</FormLabel>
                                     <FormControl>
-                                        <Textarea placeholder="Enter event description" {...field} className="resize-none" rows={3} />
+                                        <Textarea
+                                            placeholder="Enter event description"
+                                            {...field}
+                                            className="resize-none"
+                                            rows={3}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -145,11 +128,14 @@ export default function UpdateEventDialog({
                             control={form.control}
                             name="attendance_required"
                             render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Attendance Required</FormLabel>
+                                <FormItem className="flex items-center space-x-2">
                                     <FormControl>
-                                        <Checkbox {...field} checked={field.value} onCheckedChange={field.onChange} />
+                                        <Checkbox
+                                            checked={field.value}
+                                            onCheckedChange={(checked: boolean) => field.onChange(checked)}
+                                        />
                                     </FormControl>
+                                    <FormLabel>Attendance Required</FormLabel>
                                     <FormMessage />
                                 </FormItem>
                             )}
