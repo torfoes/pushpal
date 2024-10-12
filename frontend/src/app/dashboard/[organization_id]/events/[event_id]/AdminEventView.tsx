@@ -1,44 +1,26 @@
-import { getSessionTokenOrRedirect } from '@/app/utils';
-import {EventDetails} from '@/types';
+'use client'
+
 import AttendanceTable from "@/app/dashboard/[organization_id]/events/[event_id]/AttendanceTable";
-import {fetchMembership} from "@/lib/dataFetchers";
-import {Button} from "@/components/ui/button";
-import {Edit, Trash} from "lucide-react";
+import { getEventDetails } from "./actions"
+import { useEffect, useState } from "react";
+import UpdateEventDialog from "../UpdateEventDialog";
+import DeleteEventDialog from "../DeleteEventDialog";
 
+export default function AdminEventView({ organization_id, event_id }: { organization_id: string, event_id: string }) {
+    const [eventDetails, setEventDetails] = useState<any>(null);
 
-async function getEventDetails(
-    organization_id: string,
-    event_id: string
-): Promise<EventDetails> {
-    const sessionToken = await getSessionTokenOrRedirect();
-
-    const res = await fetch(
-        `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/organizations/${organization_id}/events/${event_id}`,
-        {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${sessionToken}`,
-                'Content-Type': 'application/json',
-            },
-            cache: 'no-cache',
+    useEffect(() => {
+        async function fetchEventDetails() {
+            const data = await getEventDetails(organization_id, event_id);
+            setEventDetails(data);
         }
-    );
 
-    if (!res.ok) {
-        const errorDetails = await res.json();
-        console.error('Failed to fetch event details', errorDetails);
-        throw new Error(`Failed to fetch event details: ${res.status}`);
+        fetchEventDetails();
+    }, [organization_id, event_id]);
+
+    if (!eventDetails) {
+        return <div>Loading...</div>;
     }
-
-    const data = await res.json();
-    return data as EventDetails;
-}
-
-
-export default async function AdminEventView({ organization_id, event_id }: { organization_id: string, event_id: string }) {
-    const eventDetails = await getEventDetails(organization_id, event_id);
-    const membership = await fetchMembership(organization_id);
-    const admin_rights = membership.role === 'creator' || membership.role === 'manager';
 
     return (
         <div >
@@ -51,18 +33,23 @@ export default async function AdminEventView({ organization_id, event_id }: { or
                         Date: <strong>{new Date(eventDetails.date).toLocaleDateString()}</strong>
                     </p>
                 </div>
-                {admin_rights && (
-                    <div className="flex space-x-2">
-                        <Button variant="outline">
-                            <Edit className="h-4 w-4 mr-1" />
-                            Edit Event
-                        </Button>
-                        <Button variant="destructive">
-                            <Trash className="h-4 w-4 mr-1" />
-                            Delete Event
-                        </Button>
-                    </div>
-                )}
+                <div className="flex space-x-2">
+                    <UpdateEventDialog
+                        organization_id={organization_id}
+                        event_id={event_id}
+                        defaultValues={{
+                            name: eventDetails.name,
+                            description: eventDetails.description,
+                            date: eventDetails.date,
+                            attendance_required: eventDetails.attendance_required,
+                        }}
+                    />
+                    <DeleteEventDialog
+                        organization_id={organization_id}
+                        event_id={event_id}
+                        event_name={eventDetails.name}
+                    />
+                </div>
             </div>
 
             {/* Attendance Table */}
