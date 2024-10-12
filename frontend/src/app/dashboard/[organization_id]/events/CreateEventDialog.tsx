@@ -21,8 +21,8 @@ export const formSchema = z.object({
 });
 
 export default function CreateEventDialog({
-    organization_id
-}: {
+                                              organization_id
+                                          }: {
     organization_id: string;
 }) {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);

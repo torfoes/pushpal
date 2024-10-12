@@ -22,9 +22,9 @@ export const formSchema = z.object({
 });
 
 export default function UpdateEventDialog({
-    organization_id,
-    event_id
-}: {
+                                              organization_id,
+                                              event_id
+                                          }: {
     organization_id: string;
     event_id: string;
 }) {
@@ -48,7 +48,7 @@ export default function UpdateEventDialog({
             try {
                 const fetchedEvents = await getOrganizationEvents(organization_id);
                 setEvents(fetchedEvents);
-                
+
                 // Find the specific event and populate form values
                 const eventToEdit = fetchedEvents.find(event => event.id === event_id);
                 if (eventToEdit) {
