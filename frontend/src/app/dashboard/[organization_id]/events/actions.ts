@@ -22,7 +22,7 @@ export async function getOrganizationEvents(organization_id: string): Promise<Ev
         throw new Error(`Failed to fetch events: ${res.status}`);
     }
 
-    return res.json();  // Directly return the array of events
+    return res.json();
 }
 
 export async function createEvent(organization_id: string, name: string, date: string, description?: string, attendance_required?: boolean) {
@@ -118,6 +118,5 @@ export async function updateEvent(organization_id: string, event_id: string, nam
         return NextResponse.json({ error: 'Failed to update event', details: errorDetails }, { status: res.status });
     }
 
-    // Redirect to the events list for the organization after successful update
     redirect(`/dashboard/${organization_id}/events`);
 }
