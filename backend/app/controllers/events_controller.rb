@@ -1,71 +1,123 @@
 class EventsController < ApplicationController
-  before_action :set_event, only: %i[ show edit update destroy ]
+  # Use optional authentication for viewing events
+  before_action :optional_authenticate_request, only: [:index, :show]
 
-  # GET /events or /events.json
+  # Require authentication for creating, updating, and deleting events
+  before_action :authenticate_request, except: [:index, :show]
+
+  # Set event context only for actions that need it
+  before_action :set_event, only: [:show, :update, :destroy]
+  before_action :set_current_member_role, only: [:show, :update, :destroy]
+  before_action :authorize_event_management, only: [:create, :update, :destroy]
+
+  # GET /organizations/:organization_id/events
   def index
-    @events = Event.all
+    @organization = Organization.find(params[:organization_id])
+    @events = @organization.events
+
+    render json: @events, status: :ok
   end
 
-  # GET /events/1 or /events/1.json
+  # GET /organizations/:organization_id/events/:id
   def show
-    @attendances = @event.attendances.includes(:user)
+    attendances = @event.attendances.includes(membership: :user).map do |attendance|
+      {
+        id: attendance.id,
+        event_id: attendance.event_id,
+        organization_id: @event.organization_id,
+        checkin_status: attendance.checkin_status,
+        checkin_time: attendance.time,
+        rsvp_status: attendance.rsvp_status,
+        rsvp_time: attendance.rsvp_time,
+
+        # user fields
+        user_name: attendance.membership.user.name,
+        user_email: attendance.membership.user.email,
+        user_id: attendance.membership.user.id,
+        user_picture: attendance.membership.user.picture,
+        user_role: attendance.membership.role,
+      }
+    end
+
+    response = {
+      id: @event.id,
+      name: @event.name,
+      description: @event.description,
+      date: @event.date,
+      attendance_required: @event.attendance_required,
+      attendances: attendances
+    }
+
+    render json: response, status: :ok
   end
 
-  # GET /events/new
-  def new
-    @event = Event.new
-  end
 
-  # GET /events/1/edit
-  def edit
-  end
 
-  # POST /events or /events.json
+  # POST /organizations/:organization_id/events
   def create
-    @event = Event.new(event_params)
+    @organization = Organization.find(params[:organization_id])
+    @event = @organization.events.build(event_params)
 
-    respond_to do |format|
-      if @event.save
-        format.html { redirect_to event_url(@event), notice: "Event was successfully created." }
-        format.json { render :show, status: :created, location: @event }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @event.errors, status: :unprocessable_entity }
-      end
+    if @event.save
+      create_attendances if @event.attendance_required
+      render json: @event, status: :created, location: [@organization, @event]
+    else
+      render json: @event.errors, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /events/1 or /events/1.json
+  # PATCH/PUT /organizations/:organization_id/events/:id
   def update
-    respond_to do |format|
-      if @event.update(event_params)
-        format.html { redirect_to event_url(@event), notice: "Event was successfully updated." }
-        format.json { render :show, status: :ok, location: @event }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @event.errors, status: :unprocessable_entity }
-      end
+    if @event.update(event_params)
+      create_attendances if @event.attendance_required && @event.attendances.empty?
+      render json: @event, status: :ok
+    else
+      render json: @event.errors, status: :unprocessable_entity
     end
   end
 
-  # DELETE /events/1 or /events/1.json
+  # DELETE /organizations/:organization_id/events/:id
   def destroy
     @event.destroy
-
-    respond_to do |format|
-      format.html { redirect_to events_url, notice: "Event was successfully destroyed." }
-      format.json { head :no_content }
-    end
+    render json: { message: 'Event was successfully destroyed.' }, status: :no_content
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_event
-      @event = Event.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def event_params
-      params.require(:event).permit(:creator, :date, :description)
+  def set_current_member_role
+    # Find the membership for the current user in the specified organization
+    @current_member_role = @current_user.memberships.find_by(organization_id: params[:organization_id])&.role
+  
+    # If no membership is found, set the role to nil
+    unless @current_member_role
+      render json: { error: 'Membership not found' }, status: :forbidden
     end
+  end
+
+  # Set the event for actions that need it
+  def set_event
+    @event = Event.find(params[:id])
+  end
+
+  # Permit only trusted parameters
+  def event_params
+    params.require(:event).permit(:name, :description, :date, :attendance_required, :creator_membership_id)
+  end
+
+  # Create attendances for all members if attendance is required
+  def create_attendances
+    @event.organization.memberships.each do |membership|
+      Attendance.create!(membership: membership, event: @event)
+    end
+  end
+
+  # Ensure that only authorized users (creator or manager) can manage events
+  def authorize_event_management
+    organization = @event ? @event.organization : Organization.find(params[:organization_id])
+    membership = @current_user.memberships.find_by(organization: organization)
+
+    unless membership&.role.in?(["creator", "manager"])
+      render json: { error: 'Not authorized' }, status: :forbidden
+    end
+  end
 end
