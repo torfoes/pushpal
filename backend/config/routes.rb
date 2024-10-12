@@ -13,7 +13,12 @@ Rails.application.routes.draw do
     end
 
     resources :events do
-      resources :attendances
+        resources :attendances do
+          member do
+            post 'toggle_rsvp'
+            post 'toggle_checkin'
+          end
+        end
     end
 
     resources :notifications, only: [:index, :create, :show, :update, :destroy]
