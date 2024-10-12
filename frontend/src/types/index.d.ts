@@ -57,3 +57,11 @@ export interface PushSubscriptionInput {
     p256dh_key: string;
     auth_key: string;
 }
+
+export interface Event {
+    id: string;
+    name: string;
+    description?: string;
+    date: string;
+    attendance_required: boolean;
+}

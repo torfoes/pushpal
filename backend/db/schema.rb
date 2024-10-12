@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_09_20_032404) do
+ActiveRecord::Schema[7.0].define(version: 2024_10_07_000920) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -50,6 +50,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_20_032404) do
     t.uuid "organization_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "attendance_required", default: false
     t.index ["creator_membership_id"], name: "index_events_on_creator_membership_id"
     t.index ["organization_id"], name: "index_events_on_organization_id"
   end
