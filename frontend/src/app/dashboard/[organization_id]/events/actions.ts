@@ -3,6 +3,7 @@
 import { getSessionTokenOrRedirect } from "@/app/utils";
 import { redirect } from "next/navigation";
 import { NextResponse } from 'next/server';
+import { Event } from '@/types';
 
 export async function getOrganizationEvents(organization_id: string): Promise<Event[]> {
     const sessionToken = await getSessionTokenOrRedirect();
