@@ -64,6 +64,8 @@ export default async function DashboardLayout({
 
             <NavigationBar organization_id={params.organization_id}/>
 
+            <div className="border-t border-gray-500 my-4"></div>
+
             <div>{children}</div>
         </div>
     );
