@@ -18,28 +18,37 @@ class EventsController < ApplicationController
     render json: @events, status: :ok
   end
 
-  # GET /organizations/:organization_id/events/:id
-  def show
-    attendances = @event.attendances.includes(:membership).map do |attendance|
-      {
-        id: attendance.id,
-        user_name: attendance.membership.user.name,
-        user_email: attendance.membership.user.email,
-        attended: attendance.attended
+    # GET /organizations/:organization_id/events/:id
+    def show
+      attendances = @event.attendances.includes(membership: :user).map do |attendance|
+        {
+          id: attendance.id,
+          checkin_status: attendance.checkin_status,
+          checkin_time: attendance.time,
+          rsvp_status: attendance.rsvp_status,
+          rsvp_time: attendance.rsvp_time,
+
+          # user fields
+          user_name: attendance.membership.user.name,
+          user_email: attendance.membership.user.email,
+          user_id: attendance.membership.user.id,
+          user_picture: attendance.membership.user.picture,
+          user_role: attendance.membership.role,
+        }
+      end
+
+      response = {
+        id: @event.id,
+        name: @event.name,
+        description: @event.description,
+        date: @event.date,
+        attendance_required: @event.attendance_required,
+        attendances: attendances
       }
+
+      render json: response, status: :ok
     end
 
-    response = {
-      id: @event.id,
-      name: @event.name,
-      description: @event.description,
-      date: @event.date,
-      attendance_required: @event.attendance_required,
-      attendances: attendances
-    }
-
-    render json: response, status: :ok
-  end
 
   # POST /organizations/:organization_id/events
   def create
