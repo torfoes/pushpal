@@ -3,7 +3,7 @@
 import { getEventDetails, toggleRsvpAction, getAttendance } from "./actions";
 import { useEffect, useState } from "react";
 
-export default function AdminEventView({ organization_id, event_id }: { organization_id: string, event_id: string }) {
+export default function MemberEventView({ organization_id, event_id }: { organization_id: string, event_id: string }) {
     const [eventDetails, setEventDetails] = useState<any>(null);
     const [attendance, setAttendance] = useState<any>(null);
     const [loading, setLoading] = useState(true);

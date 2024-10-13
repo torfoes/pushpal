@@ -12,7 +12,7 @@ export default async function MembersPage({ params }: { params: { organization_i
     return (
         <div>
             {admin_rights ? (
-                <MemberEventView organization_id={ params.organization_id } event_id={ params.event_id }/>
+                <AdminEventView organization_id={ params.organization_id } event_id={ params.event_id }/>
             ) : (
                 <MemberEventView organization_id={ params.organization_id } event_id={ params.event_id }/>
             )}
