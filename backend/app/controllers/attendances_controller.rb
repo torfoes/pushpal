@@ -77,6 +77,16 @@ class AttendancesController < ApplicationController
     end
   end
 
+  def current
+    @attendance = @event.attendances.find_by(membership: @current_user.memberships.find_by(organization: @organization))
+
+    if @attendance
+      render json: attendance_json(@attendance), status: :ok
+    else
+      render json: { error: 'Attendance not found' }, status: :not_found
+    end
+  end
+
   private
 
   # Helper method to serialize attendance

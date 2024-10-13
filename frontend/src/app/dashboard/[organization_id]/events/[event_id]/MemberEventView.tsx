@@ -1,23 +1,53 @@
-'use client'
+'use client';
 
-import { getEventDetails } from "./actions"
+import { getEventDetails, toggleRsvpAction, getAttendance } from "./actions";
 import { useEffect, useState } from "react";
-import { toggleRsvpAction } from "@/app/dashboard/[organization_id]/events/[event_id]/actions";
 
 export default function AdminEventView({ organization_id, event_id }: { organization_id: string, event_id: string }) {
     const [eventDetails, setEventDetails] = useState<any>(null);
+    const [attendance, setAttendance] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
+    // Fetch event details and, if attendance is required, also fetch user's attendance
     useEffect(() => {
-        async function fetchEventDetails() {
-            const data = await getEventDetails(organization_id, event_id);
-            setEventDetails(data);
+        async function fetchDetails() {
+            try {
+                const eventData = await getEventDetails(organization_id, event_id);
+                setEventDetails(eventData);
+
+                if (eventData.attendance_required) {
+                    const attendanceData = await getAttendance(organization_id, event_id);
+                    setAttendance(attendanceData);
+                }
+            } catch (error) {
+                console.error('Error fetching event or attendance:', error);
+            } finally {
+                setLoading(false);
+            }
         }
 
-        fetchEventDetails();
+        fetchDetails();
     }, [organization_id, event_id]);
 
-    if (!eventDetails) {
+    const handleRsvpToggle = async () => {
+        try {
+            if (attendance && attendance.id) {
+                await toggleRsvpAction(attendance.id, organization_id, event_id);
+
+                const updatedAttendance = await getAttendance(organization_id, event_id);
+                setAttendance(updatedAttendance);
+            }
+        } catch (error) {
+            console.error('Error toggling RSVP:', error);
+        }
+    };
+
+    if (loading) {
         return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    }
+
+    if (!eventDetails) {
+        return <div className="flex justify-center items-center h-screen">Error loading event details</div>;
     }
 
     return (
@@ -31,14 +61,22 @@ export default function AdminEventView({ organization_id, event_id }: { organiza
                         <strong>Date:</strong> {new Date(eventDetails.date).toLocaleDateString()}
                     </p>
                 </div>
+
                 {/* RSVP Section */}
-                <div className="text-center">
-                    <button
-                        className="bg-black text-white px-6 py-2 rounded-lg hover:bg-blue-500 transition"
-                    >
-                        RSVP Now
-                    </button>
-                </div>
+                {eventDetails.attendance_required && attendance && (
+                    <div className="text-center">
+                        <button
+                            onClick={handleRsvpToggle}
+                            className={`px-6 py-2 rounded-lg transition ${
+                                attendance.rsvp_status
+                                    ? 'bg-red-500 text-white hover:bg-red-700'
+                                    : 'bg-green-500 text-white hover:bg-green-700'
+                            }`}
+                        >
+                            {attendance.rsvp_status ? 'Click to Un-RSVP' : 'Click to RSVP'}
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
