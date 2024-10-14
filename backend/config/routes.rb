@@ -18,9 +18,6 @@ Rails.application.routes.draw do
             post 'toggle_rsvp'
             post 'toggle_checkin'
           end
-          collection do
-            get 'current'  # Add this route to fetch the current user's attendance
-          end
         end
     end
 
