@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toggleRsvpAction, toggleCheckinAction } from "@/app/dashboard/[organization_id]/events/[event_id]/actions";
 
-export const attendanceTableColumns = (refreshAttendances: () => void): ColumnDef<Attendance>[] => [
+export const attendanceTableColumns: ColumnDef<Attendance>[] = [
     {
         accessorKey: "member",
         header: () => <div className="text-left">Member</div>,
@@ -116,18 +116,16 @@ export const attendanceTableColumns = (refreshAttendances: () => void): ColumnDe
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                            onClick={async () => {
-                                await toggleRsvpAction(attendance.id, attendance.organization_id, attendance.event_id);
-                                refreshAttendances(); // Refresh the table after action
-                            }}
+                            onClick={() =>
+                                toggleRsvpAction(attendance.id, attendance.organization_id, attendance.event_id)
+                            }
                         >
                             {attendance.rsvp_status ? "Undo RSVP" : "Mark as RSVP'd"}
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                            onClick={async () => {
-                                await toggleCheckinAction(attendance.id, attendance.organization_id, attendance.event_id);
-                                refreshAttendances(); // Refresh the table after action
-                            }}
+                            onClick={() =>
+                                toggleCheckinAction(attendance.id, attendance.organization_id, attendance.event_id)
+                            }
                         >
                             {attendance.checkin_status ? "Undo Check-in" : "Mark as Checked-in"}
                         </DropdownMenuItem>
