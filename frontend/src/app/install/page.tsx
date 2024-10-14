@@ -1,9 +1,44 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';  // Shadcn's Button component
+import QRModal from '../../components/InstallModal';  // Import the modal
+import SubscriptionStatus from "@/app/subscriptions/SubscriptionStatus";
 
 const Page = () => {
+    const [isQRModalOpen, setIsQRModalOpen] = useState(false);  // Manage modal open/close state
+
+    const handleInstall = () => {
+        setIsQRModalOpen(true);  // Open the modal when Install is clicked
+    };
+
     return (
-        <div>
-            A tutorial page with animated gifs showing the install process for different platforms
+        <div className="container mx-auto p-4 max-w-5xl">
+            {/* PWA Installation Section */}
+            <SubscriptionStatus />
+            <br />
+            {/* Install Button */}
+            <div className="mt-8 flex justify-center">
+                <Button 
+                    onClick={handleInstall} 
+                    className="py-4 px-8 text-white bg-black hover:text-black hover:bg-white font-semibold rounded-md transition-colors duration-300"
+                >
+                    How To Install
+                </Button>
+            </div>
+            <br />
+            {/* Demo GIF Section */}
+            <div className="flex flex-col items-center justify-center w-full max-w-xs space-y-12 mx-auto">
+                <div className="w-full max-w-xs">
+                    <img 
+                        src="/demo.gif" 
+                        alt="Push Pal Demo" 
+                        className="rounded-lg shadow-lg w-full h-auto" 
+                    />
+                </div>
+            </div>
+            {/* QR Modal */}
+            <QRModal isOpen={isQRModalOpen} onClose={() => setIsQRModalOpen(false)} />
         </div>
     );
 };
