@@ -3,21 +3,21 @@
 import AttendanceTable from "@/app/dashboard/[organization_id]/events/[event_id]/AttendanceTable";
 import { getEventDetails } from "./actions"
 import { EventDetails } from '@/types';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback  } from "react";
 import UpdateEventDialog from "../UpdateEventDialog";
 import DeleteEventDialog from "../DeleteEventDialog";
 
 export default function AdminEventView({ organization_id, event_id }: { organization_id: string, event_id: string }) {
-    const [eventDetails, setEventDetails] = useState<any>(null);
+    const [eventDetails, setEventDetails] = useState<EventDetails | null>(null);
 
-    const fetchEventDetails = async () => {
+    const fetchEventDetails = useCallback(async () => {
         const data = await getEventDetails(organization_id, event_id);
         setEventDetails(data);
-    };
+    }, [organization_id, event_id]);
 
     useEffect(() => {
         fetchEventDetails();
-    }, [organization_id, event_id]);
+    }, [fetchEventDetails]);
 
     if (!eventDetails) {
         return <div>Loading...</div>;

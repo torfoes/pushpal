@@ -2,10 +2,11 @@
 
 import { getEventDetails, toggleRsvpAction, getAttendance } from "./actions";
 import { useEffect, useState } from "react";
+import { EventDetails, Attendance } from "@/types";
 
 export default function MemberEventView({ organization_id, event_id }: { organization_id: string, event_id: string }) {
-    const [eventDetails, setEventDetails] = useState<any>(null);
-    const [attendance, setAttendance] = useState<any>(null);
+    const [eventDetails, setEventDetails] = useState<EventDetails | null>(null);
+    const [attendance, setAttendance] = useState<Attendance | null>(null);
     const [loading, setLoading] = useState(true);
 
     // Fetch event details and, if attendance is required, also fetch user's attendance

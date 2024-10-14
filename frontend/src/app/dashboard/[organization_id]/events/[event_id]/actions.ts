@@ -3,7 +3,7 @@
 
 import { getSessionTokenOrRedirect } from '@/app/utils';
 import { revalidatePath } from "next/cache";
-import { EventDetails } from '@/types';
+import { EventDetails, Attendance } from '@/types';
 
 export async function getEventDetails(
     organization_id: string,
