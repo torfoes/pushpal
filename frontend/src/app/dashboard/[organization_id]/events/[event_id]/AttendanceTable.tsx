@@ -7,7 +7,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { Attendance } from "@/types";
 import { attendanceTableColumns } from "./AttendanceTableColumns";
 
-export default function AttendanceTable({ attendances }: { attendances: Attendance[] }) {
+export default function AttendanceTable({ attendances, refreshAttendances  }: { attendances: Attendance[], refreshAttendances: () => void }) {
     return (
         <div className="w-full">
             {/* Header Section */}
@@ -17,7 +17,7 @@ export default function AttendanceTable({ attendances }: { attendances: Attendan
 
             <div className="overflow-x-auto">
                 <DataTable<Attendance, unknown>
-                    columns={attendanceTableColumns}
+                    columns={attendanceTableColumns(refreshAttendances)}
                     data={attendances}
                 />
             </div>
