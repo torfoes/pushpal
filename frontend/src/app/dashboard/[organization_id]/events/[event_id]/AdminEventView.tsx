@@ -2,6 +2,7 @@
 
 import AttendanceTable from "@/app/dashboard/[organization_id]/events/[event_id]/AttendanceTable";
 import { getEventDetails } from "./actions"
+import { EventDetails } from '@/types';
 import { useEffect, useState } from "react";
 import UpdateEventDialog from "../UpdateEventDialog";
 import DeleteEventDialog from "../DeleteEventDialog";
@@ -9,12 +10,12 @@ import DeleteEventDialog from "../DeleteEventDialog";
 export default function AdminEventView({ organization_id, event_id }: { organization_id: string, event_id: string }) {
     const [eventDetails, setEventDetails] = useState<any>(null);
 
-    useEffect(() => {
-        async function fetchEventDetails() {
-            const data = await getEventDetails(organization_id, event_id);
-            setEventDetails(data);
-        }
+    const fetchEventDetails = async () => {
+        const data = await getEventDetails(organization_id, event_id);
+        setEventDetails(data);
+    };
 
+    useEffect(() => {
         fetchEventDetails();
     }, [organization_id, event_id]);
 
@@ -53,7 +54,7 @@ export default function AdminEventView({ organization_id, event_id }: { organiza
             </div>
 
             {/* Attendance Table */}
-            <AttendanceTable attendances={eventDetails.attendances} />
+            <AttendanceTable attendances={eventDetails.attendances} refreshAttendances={fetchEventDetails} />
         </div>
     );
 }
