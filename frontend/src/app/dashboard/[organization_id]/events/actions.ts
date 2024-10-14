@@ -121,3 +121,22 @@ export async function updateEvent(organization_id: string, event_id: string, nam
 
     redirect(`/dashboard/${organization_id}/events`);
 }
+
+export async function getCurrentMembership(organization_id: string) {
+    const sessionToken = await getSessionTokenOrRedirect();
+    
+    const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/organizations/${organization_id}/memberships/current`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to fetch current membership');
+    }
+
+    return res.json();
+}
