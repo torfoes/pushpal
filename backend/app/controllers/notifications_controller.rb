@@ -1,73 +1,81 @@
-# frozen_string_literal: true
+# app/controllers/notifications_controller.rb
 
 class NotificationsController < ApplicationController
-  before_action :set_notification, only: %i[show edit update destroy]
+  include OrganizationContext
 
-  # GET /notifications or /notifications.json
+  # set organization context for all actions
+  before_action :set_organization
+  before_action :set_current_member_role
+  before_action :set_current_membership
+
+  before_action :authorize_admin!, only: %i[update destroy]
+  before_action :authorize_member!, only: %i[index show]
+
+
+  # GET /organizations/:organization_id/notifications
   def index
-    @notifications = Notification.all
+    @notifications = @organization.notifications.order(sent_at: :desc)
+
+    render json: @notifications, status: :ok
   end
 
-  # GET /notifications/1 or /notifications/1.json
-  def show; end
+  # GET /organizations/:organization_id/notifications/recent
+  def recent
+    @recent_notifications = @organization.notifications
+                                         .where.not(sent_at: nil)
+                                         .order(sent_at: :desc)
+                                         .limit(10)  # Adjust the limit as needed
 
-  # GET /notifications/new
-  def new
-    @notification = Notification.new
+    render json: @recent_notifications, status: :ok
   end
 
-  # GET /notifications/1/edit
-  def edit; end
+  # GET /organizations/:organization_id/notifications/:id
+  def show
+    render json: @notification, status: :ok
+  end
 
-  # POST /notifications or /notifications.json
+  # POST /organizations/:organization_id/notifications
   def create
-    @notification = Notification.new(notification_params)
+    @notification = @organization.notifications.build(notification_params)
+    @notification.creator_membership = current_user.memberships.find_by(organization: @organization)
 
-    respond_to do |format|
-      if @notification.save
-        PushNotificationJob.perform_later(@notification.id)
-
-        format.html { redirect_to notification_url(@notification), notice: 'Notification was successfully created.' }
-        format.json { render :show, status: :created, location: @notification }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @notification.errors, status: :unprocessable_entity }
-      end
+    if @notification.save
+      render json: @notification, status: :created, location: [@organization, @notification]
+    else
+      render json: @notification.errors, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /notifications/1 or /notifications/1.json
+  # PATCH/PUT /organizations/:organization_id/notifications/:id
   def update
-    respond_to do |format|
-      if @notification.update(notification_params)
-        format.html { redirect_to notification_url(@notification), notice: 'Notification was successfully updated.' }
-        format.json { render :show, status: :ok, location: @notification }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @notification.errors, status: :unprocessable_entity }
-      end
+    if @notification.update(notification_params)
+      render json: @notification, status: :ok
+    else
+      render json: @notification.errors, status: :unprocessable_entity
     end
   end
 
-  # DELETE /notifications/1 or /notifications/1.json
+  # DELETE /organizations/:organization_id/notifications/:id
   def destroy
     @notification.destroy
-
-    respond_to do |format|
-      format.html { redirect_to notifications_url, notice: 'Notification was successfully destroyed.' }
-      format.json { head :no_content }
-    end
+    render json: { message: 'Notification was successfully destroyed.' }, status: :no_content
   end
 
   private
 
-  # Use callbacks to share common setup or constraints between actions.
-  def set_notification
-    @notification = Notification.find(params[:id])
+  def set_organization
+    @organization = Organization.find(params[:organization_id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'Organization not found' }, status: :not_found
   end
 
-  # Only allow a list of trusted parameters through.
+  def set_notification
+    @notification = @organization.notifications.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'Notification not found' }, status: :not_found
+  end
+
   def notification_params
-    params.require(:notification).permit(:user_id, :event_id, :message, :send_type, :message_type, :sent_at)
+    params.require(:notification).permit(:send_type, :title, :message, :sent_at, :status)
   end
 end
