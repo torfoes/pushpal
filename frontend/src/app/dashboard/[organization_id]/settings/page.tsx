@@ -1,9 +1,13 @@
 import React from 'react';
 
 const Page = () => {
+
+
     return (
         <div>
-            settings
+            <h2 className="text-2xl font-semibold">Settings</h2>
+
+            {/*<EventSettingsForm initialData/>*/}
         </div>
     );
 };

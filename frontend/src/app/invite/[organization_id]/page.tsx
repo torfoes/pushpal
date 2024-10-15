@@ -96,7 +96,7 @@ export default async function Page({ params }: { params: { organization_id: stri
     }
 
     const membershipStatus = await getMembershipStatus(params.organization_id);
-    console.log(membershipStatus);
+    // console.log(membershipStatus);
 
     if (!membershipStatus.isMember) {
         return (

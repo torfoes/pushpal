@@ -1,6 +1,8 @@
 import React from 'react';
 import {MemberInfo} from "@/types";
 import {getSessionTokenOrRedirect} from "@/app/utils";
+import RecentNotificationList from "@/app/dashboard/[organization_id]/overview/RecentNotificationList";
+import UpcomingEventsList from "@/app/dashboard/[organization_id]/overview/UpcomingEventsList";
 
 async function fetchUpcomingEvents(organization_id: string): Promise<MemberInfo> {
     const sessionToken = await getSessionTokenOrRedirect();
@@ -68,7 +70,24 @@ export default async function OverviewPage({ params }: { params: { organization_
 
     return (
         <div>
-            overview
+            {/*<h2 className="text-2xl font-semibold">Overview</h2>*/}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h2 className="text-1xl">
+                        Upcoming Events
+                    </h2>
+                    <UpcomingEventsList events={upcomingEvents}/>
+
+                </div>
+
+                <div>
+                    <h2 className="text-1xl">
+                        Recent Notifications
+                    </h2>
+
+                    <RecentNotificationList notification={recentNotifications}/>
+                </div>
+            </div>
         </div>
     );
 };
