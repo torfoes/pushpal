@@ -16,7 +16,7 @@ module JwtHelper
     )
   end
 
-  # Initialize the JWK for encryption/decryption
+  # init the JWK for encryption/decryption
   def jwk_oct512
     @jwk_oct512 ||= begin
                       hash_algo = 'sha256'
@@ -30,7 +30,7 @@ module JwtHelper
                     end
   end
 
-  # Generate an encrypted JWT for a given user
+  # gen an encrypted JWT for a given user
   def generate_encrypted_jwt(user)
     payload = {
       email: user.email,
