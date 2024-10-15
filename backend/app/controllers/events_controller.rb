@@ -53,6 +53,17 @@ class EventsController < ApplicationController
     render json: response, status: :ok
   end
 
+  # GET /organizations/:organization_id/events/upcoming
+  def upcoming
+    @organization = Organization.find(params[:organization_id])
+    @upcoming_events = @organization.events
+                                    .where('date >= ?', Date.today)
+                                    .order(date: :asc)
+                                    .limit(10)
+
+    render json: @upcoming_events, status: :ok
+  end
+
   # POST /organizations/:organization_id/events
   def create
     @organization = Organization.find(params[:organization_id])
