@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Membership < ApplicationRecord
   belongs_to :user
   belongs_to :organization
@@ -15,7 +17,6 @@ class Membership < ApplicationRecord
            dependent: :destroy
 
   enum role: { member: 0, creator: 1, manager: 2 }
-
 
   validates :user_id, :organization_id, :role, presence: true
   validates :role, inclusion: { in: roles.keys }

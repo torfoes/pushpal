@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Due < ApplicationRecord
   belongs_to :membership
   belongs_to :organization

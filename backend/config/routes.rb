@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # config/routes.rb
 
 Rails.application.routes.draw do
@@ -13,26 +15,26 @@ Rails.application.routes.draw do
     end
 
     resources :events do
-        resources :attendances do
-          member do
-            post 'toggle_rsvp'
-            post 'toggle_checkin'
-          end
+      resources :attendances do
+        member do
+          post 'toggle_rsvp'
+          post 'toggle_checkin'
         end
+      end
     end
 
-    resources :notifications, only: [:index, :create, :show, :update, :destroy]
+    resources :notifications, only: %i[index create show update destroy]
 
     member do
       post 'send_push_notifications'
     end
   end
 
-  resources :push_subscriptions, path: 'push-subscriptions', only: [:create, :destroy, :index, :show] do
-      member do
-        post 'send_notification'
-      end
+  resources :push_subscriptions, path: 'push-subscriptions', only: %i[create destroy index show] do
+    member do
+      post 'send_notification'
     end
+  end
 
-  resources :users, only: [:create, :index, :show]
+  resources :users, only: %i[create index show]
 end

@@ -1,17 +1,19 @@
+# frozen_string_literal: true
+
 require 'openssl'
 
 # Function to derive encryption key using HKDF
 def derive_encryption_key(hash_algo, key_material, salt, info, length)
   OpenSSL::KDF.hkdf(key_material,
-                    salt: salt,
-                    info: info,
-                    length: length,
+                    salt:,
+                    info:,
+                    length:,
                     hash: hash_algo)
 end
 
 # this key is not in use - this is simply to demonstrate the process.
-key_material = "xBvLQXMtI7W1BILHGszkhbNpYgOtcaosq64s7Sn6308="
-salt = "authjs.session-token"
+key_material = 'xBvLQXMtI7W1BILHGszkhbNpYgOtcaosq64s7Sn6308='
+salt = 'authjs.session-token'
 info = "Auth.js Generated Encryption Key (#{salt})"
 length = 64
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :due do
     membership
@@ -6,6 +8,6 @@ FactoryBot.define do
     payment_id { Faker::Alphanumeric.alphanumeric(number: 12) }
     status { 0 } # Adjust based on your enum or status definitions
     organization
-    semester { "Fall 2024" } # Adjust as needed
+    semester { 'Fall 2024' } # Adjust as needed
   end
 end

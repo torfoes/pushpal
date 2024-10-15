@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # app/controllers/concerns/organization_context.rb
 
 module OrganizationContext
@@ -36,14 +38,14 @@ module OrganizationContext
   end
 
   def authorize_member!
-    unless @is_member
-      render json: { error: 'Unauthorized: You are not a member of this organization.' }, status: :unauthorized
-    end
+    return if @is_member
+
+    render json: { error: 'Unauthorized: You are not a member of this organization.' }, status: :unauthorized
   end
 
   def authorize_admin!
-    unless @current_membership&.role.in?(%w[manager creator])
-      render json: { error: 'Unauthorized: Admin access required.' }, status: :unauthorized
-    end
+    return if @current_membership&.role.in?(%w[manager creator])
+
+    render json: { error: 'Unauthorized: Admin access required.' }, status: :unauthorized
   end
 end

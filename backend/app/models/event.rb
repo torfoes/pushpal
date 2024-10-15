@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Event < ApplicationRecord
   belongs_to :creator_membership, class_name: 'Membership'
   belongs_to :organization

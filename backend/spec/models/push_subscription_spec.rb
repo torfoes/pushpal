@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe PushSubscription, type: :model do
@@ -12,5 +14,4 @@ RSpec.describe PushSubscription, type: :model do
   it 'has a valid factory' do
     expect(create(:push_subscription)).to be_valid
   end
-
 end

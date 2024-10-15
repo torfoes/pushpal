@@ -1,11 +1,8 @@
+# frozen_string_literal: true
+
 # app/controllers/memberships_controller.rb
 class MembershipsController < ApplicationController
   include OrganizationContext
-
-  # override organization_id_param to fetch from :organization_id
-  private def organization_id_param
-    params[:organization_id]
-  end
 
   # set organization context for all actions
   before_action :set_organization
@@ -13,12 +10,11 @@ class MembershipsController < ApplicationController
   before_action :set_current_membership
 
   # Adjust authorization callbacks
-  before_action :authorize_admin!, only: [:update, :destroy]
+  before_action :authorize_admin!, only: %i[update destroy]
   # Exclude :current from authorize_member!
-  before_action :authorize_member!, only: [:index, :show]
+  before_action :authorize_member!, only: %i[index show]
 
-  before_action :set_membership, only: [:show, :update, :destroy]
-
+  before_action :set_membership, only: %i[show update destroy]
 
   # GET /organizations/:organization_id/memberships/current
   def current
@@ -34,6 +30,7 @@ class MembershipsController < ApplicationController
       render json: { error: 'Membership not found' }, status: :not_found
     end
   end
+
   # GET /organizations/:organization_id/memberships
   def index
     memberships = @organization.memberships.includes(:user)
@@ -86,7 +83,6 @@ class MembershipsController < ApplicationController
     end
   end
 
-
   # PATCH/PUT /organizations/:organization_id/memberships/:id
   def update
     if @membership.update(membership_update_params)
@@ -104,12 +100,17 @@ class MembershipsController < ApplicationController
 
   private
 
+  # override organization_id_param to fetch from :organization_id
+  def organization_id_param
+    params[:organization_id]
+  end
+
   # Scope the membership within the current organization
   def set_membership
     @membership = @organization.memberships.find_by(id: params[:id])
-    unless @membership
-      render json: { error: 'Membership not found' }, status: :not_found
-    end
+    return if @membership
+
+    render json: { error: 'Membership not found' }, status: :not_found
   end
 
   def membership_params

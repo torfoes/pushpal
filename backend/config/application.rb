@@ -1,9 +1,9 @@
-require_relative "boot"
-require "rails/all"
+# frozen_string_literal: true
 
+require_relative 'boot'
+require 'rails/all'
 
 Bundler.require(*Rails.groups)
-
 
 module Notifyme
   class Application < Rails::Application
@@ -11,10 +11,8 @@ module Notifyme
     config.active_record.primary_key = :uuid
     config.api_only = true
 
-
     config.generators do |g|
       g.orm :active_record, primary_key_type: :uuid
     end
-
   end
 end

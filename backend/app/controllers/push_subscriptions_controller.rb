@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 class PushSubscriptionsController < ApplicationController
-  before_action :set_push_subscription, only: [:destroy, :show, :view, :send_notification]
+  before_action :set_push_subscription, only: %i[destroy show view send_notification]
 
   # POST /push-subscriptions
   def create
@@ -39,7 +41,7 @@ class PushSubscriptionsController < ApplicationController
   # GET /push-subscriptions
   def index
     subscriptions = @current_user.push_subscriptions
-    render json: { success: true, subscriptions: subscriptions }, status: :ok
+    render json: { success: true, subscriptions: }, status: :ok
   end
 
   # GET /push-subscriptions/:id
@@ -65,8 +67,8 @@ class PushSubscriptionsController < ApplicationController
       return render json: { success: false, errors: ['Subscription not found.'] }, status: :not_found
     end
 
-    title = params[:notification][:title] || "Default Title"
-    body = params[:notification][:body] || "Default Body"
+    title = params[:notification][:title] || 'Default Title'
+    body = params[:notification][:body] || 'Default Body'
     data = params[:notification][:data] || {}
 
     notification_service = PushNotificationService.new(@push_subscription)

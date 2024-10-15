@@ -1,11 +1,9 @@
+# frozen_string_literal: true
+
 # app/controllers/attendances_controller.rb
 
 class AttendancesController < ApplicationController
   include OrganizationContext
-
-  private def organization_id_param
-    params[:organization_id]
-  end
 
   before_action :authenticate_request
   before_action :set_organization
@@ -13,8 +11,8 @@ class AttendancesController < ApplicationController
   before_action :set_current_member_role
   before_action :authorize_member!
 
-  before_action :set_attendance, only: [:show, :update, :destroy, :toggle_rsvp, :toggle_checkin]
-  before_action :authorize_attendance_modification, only: [:update, :destroy, :toggle_rsvp, :toggle_checkin]
+  before_action :set_attendance, only: %i[show update destroy toggle_rsvp toggle_checkin]
+  before_action :authorize_attendance_modification, only: %i[update destroy toggle_rsvp toggle_checkin]
 
   # GET /organizations/:organization_id/events/:event_id/attendances
   def index
@@ -79,6 +77,10 @@ class AttendancesController < ApplicationController
 
   private
 
+  def organization_id_param
+    params[:organization_id]
+  end
+
   # Helper method to serialize attendance
   def attendance_json(attendance)
     {
@@ -101,17 +103,17 @@ class AttendancesController < ApplicationController
   # Set the event based on event_id
   def set_event
     @event = @organization.events.find_by(id: params[:event_id])
-    unless @event
-      render json: { error: 'Event not found' }, status: :not_found
-    end
+    return if @event
+
+    render json: { error: 'Event not found' }, status: :not_found
   end
 
   # Set the attendance based on id
   def set_attendance
     @attendance = @event.attendances.find_by(id: params[:id])
-    unless @attendance
-      render json: { error: 'Attendance not found' }, status: :not_found
-    end
+    return if @attendance
+
+    render json: { error: 'Attendance not found' }, status: :not_found
   end
 
   # Only allow a list of trusted parameters through.
@@ -123,10 +125,10 @@ class AttendancesController < ApplicationController
   def authorize_attendance_modification
     if @attendance.membership.user_id == @current_user.id
       # User is modifying their own attendance
-      return
+      nil
     elsif @current_member_role.in?(%w[creator manager])
       # User is an admin in the organization
-      return
+      nil
     else
       render json: { error: 'Unauthorized' }, status: :unauthorized
     end
