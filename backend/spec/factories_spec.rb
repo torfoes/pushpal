@@ -25,10 +25,6 @@ RSpec.describe 'Factories' do
     expect(create(:attendance)).to be_valid
   end
 
-  it 'has a valid due factory' do
-    expect(create(:due)).to be_valid
-  end
-
   it 'has a valid notification factory' do
     expect(create(:notification)).to be_valid
   end

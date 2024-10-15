@@ -6,7 +6,6 @@ RSpec.describe Organization, type: :model do
   it { should have_many(:memberships).dependent(:destroy) }
   it { should have_many(:users).through(:memberships) }
   it { should have_many(:events).dependent(:destroy) }
-  it { should have_many(:dues).dependent(:destroy) }
 
   it { should validate_presence_of(:name) }
 
