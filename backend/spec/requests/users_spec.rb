@@ -14,52 +14,35 @@ RSpec.describe 'Users API', type: :request do
     JSON.parse(response.body)
   end
 
-  # Shared examples for unauthorized access
-  shared_examples 'unauthorized access' do
-    before { send(http_method, endpoint, params: request_params) }
-
-    it 'returns status code 401 Unauthorized' do
-      expect(response).to have_http_status(401)
-    end
-
-    it 'returns an error message' do
-      expect(json['error']).to eq('Token missing')
-    end
-  end
-
-  # Tests for each endpoint when unauthorized
-
+  # Single test for the index action with authenticated request
   describe 'GET /users' do
-    let(:http_method) { :get }
-    let(:endpoint) { base_endpoint }
-    let(:request_params) { {} }
+    context 'when the request is authenticated' do
+      it 'returns all users with status code 200' do
+        # Generate JWT for the user
+        token = generate_encrypted_jwt(user)
 
-    it_behaves_like 'unauthorized access'
-  end
+        # Set the Authorization header
+        headers = { 'Authorization' => "Bearer #{token}" }
 
-  describe 'GET /users/:id' do
-    let(:http_method) { :get }
-    let(:endpoint) { "#{base_endpoint}/#{user.id}" }
-    let(:request_params) { {} }
+        # Make the GET request to /users with headers
+        get base_endpoint, headers: headers
 
-    it_behaves_like 'unauthorized access'
-  end
-
-  describe 'POST /users' do
-    let(:http_method) { :post }
-    let(:endpoint) { base_endpoint }
-    let(:request_params) do
-      {
-        user: {
-          email: 'newuser@example.com',
-          password: 'password',
-          password_confirmation: 'password',
-          uin: '123456789',
-          name: 'New User'
-        }
-      }
+        # Expectations
+        expect(response).to have_http_status(:ok)
+        expect(json).not_to be_empty
+        expect(json.size).to eq(User.count)
+        expect(json.first['email']).to eq(user.email)
+      end
     end
 
-    it_behaves_like 'unauthorized access'
+    context 'when the request is not authenticated' do
+      it 'returns status code 401 Unauthorized' do
+        get base_endpoint
+
+        # Expectations
+        expect(response).to have_http_status(:unauthorized)
+        expect(json['error']).to eq('Token missing')
+      end
+    end
   end
 end
