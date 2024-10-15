@@ -6,7 +6,7 @@ class Organization < ApplicationRecord
   has_many :events, dependent: :destroy
   has_many :dues, dependent: :destroy
 
-  has_many :sent_notifications, through: :memberships, source: :sent_notifications
+  has_many :notifications, dependent: :destroy
 
   validates :name, presence: true
 end
