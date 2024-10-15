@@ -4,7 +4,7 @@ import {getSessionTokenOrRedirect} from "@/app/utils";
 import RecentNotificationList from "@/app/dashboard/[organization_id]/overview/RecentNotificationList";
 import UpcomingEventsList from "@/app/dashboard/[organization_id]/overview/UpcomingEventsList";
 
-async function fetchUpcomingEvents(organization_id: string): Promise<MemberInfo> {
+async function fetchUpcomingEvents(organization_id: string): Promise<Event[]> {
     const sessionToken = await getSessionTokenOrRedirect();
 
     const res = await fetch(
@@ -32,7 +32,7 @@ async function fetchUpcomingEvents(organization_id: string): Promise<MemberInfo>
     return res.json();
 }
 
-async function fetchRecentNotifications(organization_id: string): Promise<MemberInfo> {
+async function fetchRecentNotifications(organization_id: string): Promise<Notification[]> {
     const sessionToken = await getSessionTokenOrRedirect();
 
     const res = await fetch(
@@ -76,7 +76,7 @@ export default async function OverviewPage({ params }: { params: { organization_
                     <h2 className="text-1xl">
                         Upcoming Events
                     </h2>
-                    <UpcomingEventsList events={upcomingEvents}/>
+                    {/*<UpcomingEventsList events={upcomingEvents}/>*/}
 
                 </div>
 
