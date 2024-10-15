@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 # db/migrate/20240918000300_create_memberships.rb
 class CreateMemberships < ActiveRecord::Migration[7.0]
   def change
-    create_table :memberships, id: :uuid, default: "gen_random_uuid()", force: :cascade do |t|
+    create_table :memberships, id: :uuid, default: 'gen_random_uuid()', force: :cascade do |t|
       t.uuid :user_id, null: false
       t.uuid :organization_id, null: false
       t.integer :role, default: 0, null: false

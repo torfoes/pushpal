@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
     if Rails.env.development?
@@ -8,7 +10,7 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
 
     resource '*',
              headers: :any,
-             methods: [:get, :post, :put, :patch, :delete, :options, :head],
+             methods: %i[get post put patch delete options head],
              expose: ['Authorization'],
              max_age: 600
   end

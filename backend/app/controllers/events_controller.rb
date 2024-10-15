@@ -1,14 +1,16 @@
+# frozen_string_literal: true
+
 class EventsController < ApplicationController
   # Use optional authentication for viewing events
-  before_action :optional_authenticate_request, only: [:index, :show]
+  before_action :optional_authenticate_request, only: %i[index show]
 
   # Require authentication for creating, updating, and deleting events
-  before_action :authenticate_request, except: [:index, :show]
+  before_action :authenticate_request, except: %i[index show]
 
   # Set event context only for actions that need it
-  before_action :set_event, only: [:show, :update, :destroy]
-  before_action :set_current_member_role, only: [:show, :update, :destroy]
-  before_action :authorize_event_management, only: [:create, :update, :destroy]
+  before_action :set_event, only: %i[show update destroy]
+  before_action :set_current_member_role, only: %i[show update destroy]
+  before_action :authorize_event_management, only: %i[create update destroy]
 
   # GET /organizations/:organization_id/events
   def index
@@ -35,7 +37,7 @@ class EventsController < ApplicationController
         user_email: attendance.membership.user.email,
         user_id: attendance.membership.user.id,
         user_picture: attendance.membership.user.picture,
-        user_role: attendance.membership.role,
+        user_role: attendance.membership.role
       }
     end
 
@@ -45,13 +47,11 @@ class EventsController < ApplicationController
       description: @event.description,
       date: @event.date,
       attendance_required: @event.attendance_required,
-      attendances: attendances
+      attendances:
     }
 
     render json: response, status: :ok
   end
-
-
 
   # POST /organizations/:organization_id/events
   def create
@@ -87,11 +87,11 @@ class EventsController < ApplicationController
   def set_current_member_role
     # Find the membership for the current user in the specified organization
     @current_member_role = @current_user.memberships.find_by(organization_id: params[:organization_id])&.role
-  
+
     # If no membership is found, set the role to nil
-    unless @current_member_role
-      render json: { error: 'Membership not found' }, status: :forbidden
-    end
+    return if @current_member_role
+
+    render json: { error: 'Membership not found' }, status: :forbidden
   end
 
   # Set the event for actions that need it
@@ -107,17 +107,17 @@ class EventsController < ApplicationController
   # Create attendances for all members if attendance is required
   def create_attendances
     @event.organization.memberships.each do |membership|
-      Attendance.create!(membership: membership, event: @event)
+      Attendance.create!(membership:, event: @event)
     end
   end
 
   # Ensure that only authorized users (creator or manager) can manage events
   def authorize_event_management
     organization = @event ? @event.organization : Organization.find(params[:organization_id])
-    membership = @current_user.memberships.find_by(organization: organization)
+    membership = @current_user.memberships.find_by(organization:)
 
-    unless membership&.role.in?(["creator", "manager"])
-      render json: { error: 'Not authorized' }, status: :forbidden
-    end
+    return if membership&.role.in?(%w[creator manager])
+
+    render json: { error: 'Not authorized' }, status: :forbidden
   end
 end

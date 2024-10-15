@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # config/initializers/vapid_keys.rb
 
 VAPID_KEYS = {

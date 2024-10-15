@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'webpush'
 
 class PushNotificationService
@@ -7,9 +9,9 @@ class PushNotificationService
 
   def send_notification(title, body, data = {})
     payload = {
-      title: title,
-      body: body,
-      data: data,
+      title:,
+      body:,
+      data:
       # icon: '/icons/icon-192x192.png', # Optional
     }.to_json
 
@@ -17,9 +19,9 @@ class PushNotificationService
       vapid: {
         subject: VAPID_KEYS[:subject],
         public_key: VAPID_KEYS[:public_key],
-        private_key: VAPID_KEYS[:private_key],
+        private_key: VAPID_KEYS[:private_key]
       },
-      ttl: 60,
+      ttl: 60
     }
 
     begin
@@ -39,7 +41,7 @@ class PushNotificationService
 
       if status_code.between?(200, 299)
         Rails.logger.info("Push notification sent successfully to subscription ID: #{@subscription.id}")
-        return { success: true }
+        { success: true }
       else
         Rails.logger.error("Push notification failed with status #{response.code} for subscription ID: #{@subscription.id}")
         handle_failed_push(status_code)
@@ -47,14 +49,14 @@ class PushNotificationService
     rescue Webpush::ExpiredSubscription => e
       Rails.logger.warn("Expired subscription (ID: #{@subscription.id}): #{e.message}")
       @subscription.destroy
-      return { success: false, error: "Expired subscription and has been removed." }
+      { success: false, error: 'Expired subscription and has been removed.' }
     rescue Webpush::InvalidSubscription => e
       Rails.logger.warn("Invalid subscription (ID: #{@subscription.id}): #{e.message}")
       @subscription.destroy
-      return { success: false, error: "Invalid subscription and has been removed." }
-    rescue => e
+      { success: false, error: 'Invalid subscription and has been removed.' }
+    rescue StandardError => e
       Rails.logger.error("An error occurred while sending push notification to subscription ID: #{@subscription.id} - #{e.message}")
-      return { success: false, error: "An error occurred: #{e.message}" }
+      { success: false, error: "An error occurred: #{e.message}" }
     end
   end
 
@@ -65,7 +67,8 @@ class PushNotificationService
     when 410, 404
       Rails.logger.warn("Subscription expired or invalid (status #{status_code}) for subscription ID: #{@subscription.id}, removing...")
       @subscription.destroy
-      { success: false, status: status_code, error: "Subscription expired or invalid (status #{status_code}) and has been removed." }
+      { success: false, status: status_code,
+        error: "Subscription expired or invalid (status #{status_code}) and has been removed." }
     else
       Rails.logger.error("Push failed with status #{status_code} for subscription ID: #{@subscription.id}")
       { success: false, status: status_code, error: "Push failed with status #{status_code}" }

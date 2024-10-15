@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Authentication
   extend ActiveSupport::Concern
 
@@ -10,20 +12,18 @@ module Authentication
   def optional_authenticate_request
     token = extract_token_from_header
 
-    if token.present?
-      begin
-        decoded_jwt = decrypt_jwt(token)
-        email = decoded_jwt['email']
-        name = decoded_jwt['name']
-        picture = decoded_jwt['picture']
-        sub = decoded_jwt['sub']
+    return unless token.present?
 
-        if email.present? && name.present? && sub.present?
-          @current_user = find_or_create_user(email, name, picture, sub)
-        end
-      rescue StandardError => e
-        Rails.logger.error("Optional authentication failed: #{e.message}")
-      end
+    begin
+      decoded_jwt = decrypt_jwt(token)
+      email = decoded_jwt['email']
+      name = decoded_jwt['name']
+      picture = decoded_jwt['picture']
+      sub = decoded_jwt['sub']
+
+      @current_user = find_or_create_user(email, name, picture, sub) if email.present? && name.present? && sub.present?
+    rescue StandardError => e
+      Rails.logger.error("Optional authentication failed: #{e.message}")
     end
   end
 
@@ -53,9 +53,7 @@ module Authentication
         @current_user = find_or_create_user(email, name, picture, sub)
 
         # case where user could not be found or created
-        unless @current_user
-          render json: { error: 'Unable to authenticate user' }, status: :unauthorized
-        end
+        render json: { error: 'Unable to authenticate user' }, status: :unauthorized unless @current_user
 
       # rescue JOSE::JWT::DecodeError => e
       #   render json: { error: 'Invalid token', message: e.message }, status: :unauthorized
@@ -71,21 +69,19 @@ module Authentication
 
   def extract_token_from_header
     auth_header = request.headers['Authorization']
-    if auth_header&.start_with?('Bearer ')
-      auth_header.split(' ').last
-    else
-      nil
-    end
+    return unless auth_header&.start_with?('Bearer ')
+
+    auth_header.split(' ').last
   end
 
   def decrypt_jwt(token)
-    decrypted_payload, headers = JOSE::JWE.block_decrypt(JWK_OCT512, token)
+    decrypted_payload, = JOSE::JWE.block_decrypt(JWK_OCT512, token)
     JSON.parse(decrypted_payload)
   end
 
   def find_or_create_user(email, name, picture, sub)
     # Rails.logger.info("Attempting to find or create user with email: #{email}")
-    user = User.find_or_create_by(email: email) do |user|
+    user = User.find_or_create_by(email:) do |user|
       user.name = name
       user.picture = picture
       user.sub = sub

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Notification < ApplicationRecord
   belongs_to :recipient_membership, class_name: 'Membership', foreign_key: 'recipient_membership_id'
   belongs_to :creator_membership, class_name: 'Membership', foreign_key: 'creator_membership_id'

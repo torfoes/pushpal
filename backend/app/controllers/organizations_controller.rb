@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # app/controllers/organizations_controller.rb
 
 class OrganizationsController < ApplicationController
@@ -13,11 +15,11 @@ class OrganizationsController < ApplicationController
   before_action :authenticate_request, except: [:show]
 
   # set organization context only for actions that need it
-  before_action :set_organization, only: [:show, :update, :destroy, :send_push_notifications]
-  before_action :set_current_member_role, only: [:show, :update, :destroy, :send_push_notifications]
-  before_action :set_current_membership, only: [:show, :update, :destroy, :send_push_notifications]
+  before_action :set_organization, only: %i[show update destroy send_push_notifications]
+  before_action :set_current_member_role, only: %i[show update destroy send_push_notifications]
+  before_action :set_current_membership, only: %i[show update destroy send_push_notifications]
 
-  before_action :authorize_admin!, only: [:update, :destroy, :send_push_notifications]
+  before_action :authorize_admin!, only: %i[update destroy send_push_notifications]
 
   # GET /organizations
   def index
@@ -27,27 +29,27 @@ class OrganizationsController < ApplicationController
 
   # GET /organizations/:id
   def show
-    if @is_member
-      members = @organization.memberships.includes(:user).map do |membership|
-        {
-          id: membership.id,
-          name: membership.user.name,
-          email: membership.user.email,
-          picture: membership.user.picture,
-          role: membership.role,
-          organization_id: @organization.id
-        }
-      end
-    else
-      members = []
-    end
+    members = if @is_member
+                @organization.memberships.includes(:user).map do |membership|
+                  {
+                    id: membership.id,
+                    name: membership.user.name,
+                    email: membership.user.email,
+                    picture: membership.user.picture,
+                    role: membership.role,
+                    organization_id: @organization.id
+                  }
+                end
+              else
+                []
+              end
 
     response = {
       id: @organization.id,
       name: @organization.name,
       description: @organization.description,
       member_count: @organization.memberships.count,
-      members: members
+      members:
     }
 
     render json: response, status: :ok
@@ -123,7 +125,7 @@ class OrganizationsController < ApplicationController
     render json: {
       success_count: successes.count,
       failure_count: failures.count,
-      failures: failures
+      failures:
     }, status: :ok
   end
 
