@@ -54,7 +54,7 @@ const Page: React.FC = () => {
           <DialogHeader>
             <DialogTitle>QR Code Scanner</DialogTitle>
             <DialogDescription>
-              Scan the member's QR code
+              Scan the member&apos;s QR code
             </DialogDescription>
           </DialogHeader>
           <QrScanner

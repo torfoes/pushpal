@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';  // Shadcn's Button component
-import QRModal from '../../components/InstallModal';  // Import the modal
+import { Button } from '@/components/ui/button';
+import QRModal from '../../components/InstallModal';
 import SubscriptionStatus from "@/app/subscriptions/SubscriptionStatus";
+import Image from 'next/image'
 
 const Page = () => {
-    const [isQRModalOpen, setIsQRModalOpen] = useState(false);  // Manage modal open/close state
+    const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
     const handleInstall = () => {
         setIsQRModalOpen(true);  // Open the modal when Install is clicked
@@ -30,7 +31,7 @@ const Page = () => {
             {/* Demo GIF Section */}
             <div className="flex flex-col items-center justify-center w-full max-w-xs space-y-12 mx-auto">
                 <div className="w-full max-w-xs">
-                    <img 
+                    <Image
                         src="/demo.gif" 
                         alt="Push Pal Demo" 
                         className="rounded-lg shadow-lg w-full h-auto" 

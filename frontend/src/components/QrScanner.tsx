@@ -10,12 +10,15 @@ interface QrScannerProps {
   aspectRatio?: number;
   disableFlip?: boolean;
   verbose?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onScanSuccess: (decodedText: string, decodedResult: any) => void;
   onScanError?: (errorMessage: string) => void;
 }
 
 // Only extract config-related properties
 const createConfig = ({ fps, qrbox, aspectRatio, disableFlip }: Partial<QrScannerProps>) => {
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const config: any = {};
   if (fps) config.fps = fps;
   if (qrbox) config.qrbox = qrbox;
@@ -66,32 +69,36 @@ const QrScanner: React.FC<QrScannerProps> = ({
     const initScanner = () => {
       const config = createConfig({ fps, qrbox, aspectRatio, disableFlip });
       const scannerVerbose = verbose === true;
-  
+
       if (!onScanSuccess) {
         throw new Error('onScanSuccess callback is required.');
       }
-  
+
       html5QrCodeScannerRef.current = new Html5QrcodeScanner(qrcodeRegionId, config, scannerVerbose);
-      html5QrCodeScannerRef.current.render(onScanSuccess, onScanError);
-  
+      if (html5QrCodeScannerRef.current instanceof Html5QrcodeScanner) {
+        html5QrCodeScannerRef.current.render(onScanSuccess, onScanError);
+      }
+
       setTimeout(() => {
-        removeScanFileOption(); // Removes the "Request Camera Permissions" UI
+        removeScanFileOption();
         removeQrCodeImage();
         observeDomChanges();
       }, 0);
     };
-  
+
     initScanner();
-  
+
     return () => {
       if (html5QrCodeScannerRef.current) {
-        html5QrCodeScannerRef.current.clear().catch((error) => {
-          console.error('Failed to clear QR code scanner', error);
-        });
+        if (html5QrCodeScannerRef.current instanceof Html5QrcodeScanner) {
+          html5QrCodeScannerRef.current.clear().catch((error) => {
+            console.error('Failed to clear QR code scanner', error);
+          });
+        }
       }
     };
   }, [fps, qrbox, aspectRatio, disableFlip, verbose, onScanSuccess, onScanError]);
-  
+
   return <div id={qrcodeRegionId} />;
 };
 
