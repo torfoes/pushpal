@@ -15,6 +15,10 @@ Rails.application.routes.draw do
     end
 
     resources :events do
+      collection do
+        get 'upcoming'
+      end
+
       resources :attendances do
         member do
           post 'toggle_rsvp'
@@ -23,7 +27,11 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :notifications, only: %i[index create show update destroy]
+    resources :notifications, only: %i[index create show update destroy] do
+      collection do
+        get 'recent'
+      end
+    end
 
     member do
       post 'send_push_notifications'
