@@ -3,10 +3,8 @@
 require 'rails_helper'
 
 RSpec.describe Notification, type: :model do
-  it { should belong_to(:recipient_membership).class_name('Membership') }
   it { should belong_to(:creator_membership).class_name('Membership') }
 
-  it { should validate_presence_of(:recipient_membership) }
   it { should validate_presence_of(:creator_membership) }
   it { should validate_presence_of(:send_type) }
   it { should validate_presence_of(:title) }

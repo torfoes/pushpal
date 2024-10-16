@@ -2,8 +2,9 @@
 
 FactoryBot.define do
   factory :notification do
-    association :recipient_membership, factory: :membership
     association :creator_membership, factory: :membership
+    association :organization
+
     title { Faker::Lorem.sentence(word_count: 5) }
     message { Faker::Lorem.paragraph }
     sent_at { Faker::Time.backward(days: 7, period: :morning) }
