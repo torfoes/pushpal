@@ -56,9 +56,9 @@ export default function CreateEventDialog({ organization_id }: { organization_id
         defaultValues: {
             name: "",
             description: "",
-            date: new Date(),  // Defaults to current date
-            time: "12:00",     // Default time
-            duration: 60,      // Default duration in minutes
+            date: new Date(),
+            time: "12:00",
+            duration: 60,
             attendance_required: false,
         },
     });
