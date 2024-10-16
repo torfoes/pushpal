@@ -1,22 +1,25 @@
 # frozen_string_literal: true
 
-class EventsController < ApplicationController
-  # Use optional authentication for viewing events
-  before_action :optional_authenticate_request, only: %i[index show]
+# app/controllers/events_controller.rb
 
-  # Require authentication for creating, updating, and deleting events
-  before_action :authenticate_request, except: %i[index show]
+class EventsController < ApplicationController
+  include OrganizationContext
+
+  # Set organization and membership context for all actions
+  before_action :set_organization
+  before_action :set_current_member_role
+  before_action :set_current_membership
+
+  # Authorization callbacks
+  before_action :authorize_admin!, only: %i[create update destroy]
+  before_action :authorize_member!, only: %i[index show upcoming]
 
   # Set event context only for actions that need it
   before_action :set_event, only: %i[show update destroy]
-  before_action :set_current_member_role, only: %i[show update destroy]
-  before_action :authorize_event_management, only: %i[create update destroy]
 
   # GET /organizations/:organization_id/events
   def index
-    @organization = Organization.find(params[:organization_id])
     @events = @organization.events
-
     render json: @events, status: :ok
   end
 
@@ -32,7 +35,7 @@ class EventsController < ApplicationController
         rsvp_status: attendance.rsvp_status,
         rsvp_time: attendance.rsvp_time,
 
-        # user fields
+        # User fields
         user_name: attendance.membership.user.name,
         user_email: attendance.membership.user.email,
         user_id: attendance.membership.user.id,
@@ -45,9 +48,12 @@ class EventsController < ApplicationController
       id: @event.id,
       name: @event.name,
       description: @event.description,
-      date: @event.date,
+      start_time: @event.start_time,
+      duration: @event.duration,
+      organization_id: @event.organization_id,
+      creator_membership_id: @event.creator_membership_id,
       attendance_required: @event.attendance_required,
-      attendances:
+      attendances: attendances
     }
 
     render json: response, status: :ok
@@ -55,10 +61,9 @@ class EventsController < ApplicationController
 
   # GET /organizations/:organization_id/events/upcoming
   def upcoming
-    @organization = Organization.find(params[:organization_id])
     @upcoming_events = @organization.events
-                                    .where('date >= ?', Date.today)
-                                    .order(date: :asc)
+                                    .where('start_time >= ?', Date.today)
+                                    .order(start_time: :asc)
                                     .limit(10)
 
     render json: @upcoming_events, status: :ok
@@ -66,14 +71,14 @@ class EventsController < ApplicationController
 
   # POST /organizations/:organization_id/events
   def create
-    @organization = Organization.find(params[:organization_id])
     @event = @organization.events.build(event_params)
+    @event.creator_membership = @current_membership
 
     if @event.save
       create_attendances if @event.attendance_required
       render json: @event, status: :created, location: [@organization, @event]
     else
-      render json: @event.errors, status: :unprocessable_entity
+      render json: { errors: @event.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -83,7 +88,7 @@ class EventsController < ApplicationController
       create_attendances if @event.attendance_required && @event.attendances.empty?
       render json: @event, status: :ok
     else
-      render json: @event.errors, status: :unprocessable_entity
+      render json: { errors: @event.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -95,40 +100,26 @@ class EventsController < ApplicationController
 
   private
 
-  def set_current_member_role
-    # Find the membership for the current user in the specified organization
-    @current_member_role = @current_user.memberships.find_by(organization_id: params[:organization_id])&.role
-
-    # If no membership is found, set the role to nil
-    return if @current_member_role
-
-    render json: { error: 'Membership not found' }, status: :forbidden
+  # Override organization_id_param to fetch from :organization_id
+  def organization_id_param
+    params[:organization_id]
   end
 
-  # Set the event for actions that need it
+  # Set the event within the context of the current organization
   def set_event
-    @event = Event.find(params[:id])
+    @event = @organization.events.find_by(id: params[:id])
+    render json: { error: 'Event not found' }, status: :not_found unless @event
   end
 
   # Permit only trusted parameters
   def event_params
-    params.require(:event).permit(:name, :description, :date, :attendance_required, :creator_membership_id)
+    params.require(:event).permit(:name, :description, :start_time, :duration, :attendance_required)
   end
 
   # Create attendances for all members if attendance is required
   def create_attendances
-    @event.organization.memberships.each do |membership|
-      Attendance.create!(membership:, event: @event)
+    @organization.memberships.each do |membership|
+      Attendance.create!(membership: membership, event: @event)
     end
-  end
-
-  # Ensure that only authorized users (creator or manager) can manage events
-  def authorize_event_management
-    organization = @event ? @event.organization : Organization.find(params[:organization_id])
-    membership = @current_user.memberships.find_by(organization:)
-
-    return if membership&.role.in?(%w[creator manager])
-
-    render json: { error: 'Not authorized' }, status: :forbidden
   end
 end

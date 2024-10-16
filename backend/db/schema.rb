@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_10_15_194526) do
+ActiveRecord::Schema[7.0].define(version: 2024_10_15_223731) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -45,12 +45,13 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_15_194526) do
   create_table "events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "creator_membership_id", null: false
     t.string "name"
-    t.date "date"
     t.text "description"
     t.uuid "organization_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "attendance_required", default: false
+    t.datetime "start_time"
+    t.integer "duration"
     t.index ["creator_membership_id"], name: "index_events_on_creator_membership_id"
     t.index ["organization_id"], name: "index_events_on_organization_id"
   end
