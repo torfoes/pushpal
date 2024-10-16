@@ -1,72 +1,64 @@
-import { getSessionTokenOrRedirect } from '@/app/utils';
-import {EventDetails} from '@/types';
+import React from 'react';
+import MemberEventView from './MemberEventView';
+import { fetchOrganization, fetchMembership } from '@/lib/dataFetchers';
+import { getEventDetails } from "@/app/dashboard/[organization_id]/events/[event_id]/actions";
+import UpdateEventDialog from "@/app/dashboard/[organization_id]/events/UpdateEventDialog";
+import DeleteEventDialog from "@/app/dashboard/[organization_id]/events/DeleteEventDialog";
 import AttendanceTable from "@/app/dashboard/[organization_id]/events/[event_id]/AttendanceTable";
-import {fetchMembership} from "@/lib/dataFetchers";
-import {Button} from "@/components/ui/button";
-import {Edit, Trash} from "lucide-react";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon, Clock as ClockIcon } from "lucide-react";
 
-
-async function getEventDetails(
-    organization_id: string,
-    event_id: string
-): Promise<EventDetails> {
-    const sessionToken = await getSessionTokenOrRedirect();
-
-    const res = await fetch(
-        `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}/organizations/${organization_id}/events/${event_id}`,
-        {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${sessionToken}`,
-                'Content-Type': 'application/json',
-            },
-            cache: 'no-cache',
-        }
-    );
-
-    if (!res.ok) {
-        const errorDetails = await res.json();
-        console.error('Failed to fetch event details', errorDetails);
-        throw new Error(`Failed to fetch event details: ${res.status}`);
-    }
-
-    const data = await res.json();
-    return data as EventDetails;
-}
-
-
-export default async function Page({ params }: { params: { organization_id: string, event_id: string } }) {
-    const eventDetails = await getEventDetails(params.organization_id, params.event_id);
-    const membership = await fetchMembership(params.organization_id);
+export default async function EventPage({ params }) {
+    const { organization_id, event_id } = params;
+    const membership = await fetchMembership(organization_id);
+    console.log("membership", membership);
     const admin_rights = membership.role === 'creator' || membership.role === 'manager';
 
+    const event = await getEventDetails(organization_id, event_id);
+    console.log(admin_rights);
+
     return (
-        <div >
+        <div>
             {/* Event Header */}
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                 <div>
-                    <h2 className="text-2xl font-bold">{eventDetails.name}</h2>
-                    <p className="text-gray-600">{eventDetails.description}</p>
-                    <p>
-                        Date: <strong>{new Date(eventDetails.date).toLocaleDateString()}</strong>
-                    </p>
+                    <h2 className="text-3xl font-bold mb-2">{event.name}</h2>
+                    <p className="mb-4">{event.description}</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 text-sm text-muted-foreground">
+                        <div className="flex items-center space-x-2 mb-2 sm:mb-0">
+                            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                            <span>
+                                {format(new Date(event.start_time), "EEEE, MMMM d, yyyy 'at' h:mm a")}
+                            </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <ClockIcon className="h-4 w-4 text-muted-foreground" />
+                            <span>{event.duration} minutes</span>
+                        </div>
+                    </div>
                 </div>
                 {admin_rights && (
-                    <div className="flex space-x-2">
-                        <Button variant="outline">
-                            <Edit className="h-4 w-4 mr-1" />
-                            Edit Event
-                        </Button>
-                        <Button variant="destructive">
-                            <Trash className="h-4 w-4 mr-1" />
-                            Delete Event
-                        </Button>
+                    <div className="flex space-x-2 mt-4 md:mt-0">
+                        <UpdateEventDialog
+                            organization_id={organization_id}
+                            event={event}
+                        />
+                        <DeleteEventDialog
+                            organization_id={event.organization_id}
+                            event_id={event.id}
+                            event_name={event.name}
+                        />
                     </div>
                 )}
             </div>
 
-            {/* Attendance Table */}
-            <AttendanceTable attendances={eventDetails.attendances} />
+            {admin_rights ? (
+                <div>
+                    <AttendanceTable attendances={event.attendances} />
+                </div>
+            ) : (
+                <MemberEventView event={event} />
+            )}
         </div>
     );
 }

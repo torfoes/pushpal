@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Search } from 'lucide-react';
+import {Calendar, CalendarIcon, ClockIcon, Search} from 'lucide-react';
 import { Event } from '@/types';
 import { Input } from "@/components/ui/input";
+import {format} from "date-fns";
 
 export default function EventList({ events = [] }: { events?: Event[] }) {
     const [searchTerm, setSearchTerm] = useState('');
@@ -47,9 +48,17 @@ export default function EventList({ events = [] }: { events?: Event[] }) {
                                 <CardHeader>
                                     <div className="flex justify-between items-center">
                                         <CardTitle>{event.name}</CardTitle>
-                                        <div className="flex items-center">
-                                            <Calendar className="h-4 w-4 mr-1" aria-hidden="true" />
-                                            <span>{new Date(event.date).toLocaleDateString()}</span>
+                                        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 text-sm text-muted-foreground">
+                                            <div className="flex items-center space-x-2 mb-2 sm:mb-0">
+                                                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                                                <span>
+                                                    {format(new Date(event.start_time), "EEEE, MMMM d, yyyy 'at' h:mm a")}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <ClockIcon className="h-4 w-4 text-muted-foreground" />
+                                                <span>{event.duration} minutes</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <CardDescription>{event.description}</CardDescription>

@@ -7,10 +7,9 @@ import { DataTable } from "@/components/ui/data-table";
 import { Attendance } from "@/types";
 import { attendanceTableColumns } from "./AttendanceTableColumns";
 
-export default function AttendanceTable({ attendances }: { attendances: Attendance[] }) {
+export default function AttendanceTable({ attendances  }: { attendances: Attendance[]}) {
     return (
         <div className="w-full">
-            {/* Header Section */}
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-semibold">Attendances</h2>
             </div>

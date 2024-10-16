@@ -64,7 +64,8 @@ export interface Event {
     description?: string;
     creator_membership_id: string;
     organization_id: string;
-    date: string;
+    start_time: string;
+    duration: number;
     attendance_required: boolean;
 }
 
