@@ -3,6 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe 'Memberships API', type: :request do
+  # Include helper methods
+  include JwtHelper
+  include RequestSpecHelper
+
   # Initialize test data
   let!(:organization) { create(:organization) }
   let!(:user) { create(:user) }
@@ -11,21 +15,16 @@ RSpec.describe 'Memberships API', type: :request do
   # Define the base endpoint
   let(:base_endpoint) { "/organizations/#{organization.id}/memberships" }
 
-  # Helper method to parse JSON responses
-  def json
-    JSON.parse(response.body)
-  end
-
   # Shared examples for unauthorized access
   shared_examples 'unauthorized access' do
-    before { send(http_method, endpoint, params: request_params) }
+    before { send(http_method, endpoint, params: request_params, headers: unauthorized_headers) }
 
     it 'returns status code 401 Unauthorized' do
-      expect(response).to have_http_status(401)
+      expect(response).to have_http_status(:unauthorized)
     end
 
     it 'returns an error message' do
-      expect(json['error']).to eq('Token missing')
+      expect(json['error']).to eq('Not Authorized')
     end
   end
 

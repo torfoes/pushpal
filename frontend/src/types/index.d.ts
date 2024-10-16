@@ -62,7 +62,10 @@ export interface Event {
     id: string;
     name: string;
     description?: string;
-    date: string;
+    creator_membership_id: string;
+    organization_id: string;
+    start_time: string;
+    duration: number;
     attendance_required: boolean;
 }
 
@@ -84,4 +87,27 @@ export interface Attendance {
 
 export interface EventDetails extends Event {
     attendances: Attendance[];
+}
+
+export enum SendType {
+    Email = 'email',
+    Sms = 'sms',
+    Push = 'push',
+}
+
+export enum NotificationStatus {
+    Pending = 'pending',
+    Sent = 'sent',
+    Failed = 'failed',
+}
+
+export interface Notification {
+    id: string;
+    organization_id: string;
+    creator_membership_id: string;
+    send_type: SendType;
+    title: string;
+    message: string;
+    sent_at: string;
+    status: NotificationStatus;
 }

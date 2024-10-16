@@ -1,10 +1,10 @@
-# frozen_string_literal: true
+# app/models/notification.rb
 
 class Notification < ApplicationRecord
-  belongs_to :recipient_membership, class_name: 'Membership', foreign_key: 'recipient_membership_id'
+  belongs_to :organization
   belongs_to :creator_membership, class_name: 'Membership', foreign_key: 'creator_membership_id'
 
-  validates :recipient_membership, presence: true
+  validates :organization, presence: true
   validates :creator_membership, presence: true
   validates :send_type, presence: true
   validates :status, presence: true

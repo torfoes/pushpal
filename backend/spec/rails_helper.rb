@@ -67,7 +67,7 @@ RSpec.configure do |config|
   # Include FactoryBot methods
   config.include FactoryBot::Syntax::Methods
   config.include RequestSpecHelper, type: :request
-  config.include AuthHelper, type: :request
+  config.include JwtHelper
 
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")

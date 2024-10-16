@@ -1,13 +1,15 @@
-# frozen_string_literal: true
+# app/controllers/users_controller.rb
 
 class UsersController < ApplicationController
+  skip_before_action :authenticate_request, only: [:create]
+
   def index
     @users = User.all
     render json: @users
   end
 
   def show
-    @user = User.find(params[:id])
+    @user = User.find_by(id: params[:id])
     if @user
       render json: @user
     else
@@ -28,6 +30,6 @@ class UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:email, :password, :password_confirmation, :uin, :name)
+    params.require(:user).permit(:email, :uin, :name, :picture, :sub)
   end
 end

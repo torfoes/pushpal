@@ -33,8 +33,8 @@ export const sendPushSchema = z.object({
     title: z.string().min(3, {
         message: "Title must be at least 3 characters.",
     }),
-    body: z.string().min(3, {
-        message: "Body must be at least 3 characters.",
+    message: z.string().min(3, {
+        message: "Message must be at least 3 characters.",
     })
 });
 
@@ -54,14 +54,14 @@ export default function SendPushNotificationDialog({
         defaultValues: {
             organization_id: organization_id,
             title: "",
-            body: ""
+            message: ""
         },
     });
 
     async function onSubmit(values: SendOrganizationPushParams) {
         try {
             if (sendPushAction) {
-                await sendPushAction(values)
+                await sendPushAction(values);
             } else {
                 console.log("Push Notification Data:", values);
             }
@@ -119,16 +119,16 @@ export default function SendPushNotificationDialog({
                             )}
                         />
 
-                        {/* Body Field */}
+                        {/* Message Field */}
                         <FormField
                             control={form.control}
-                            name="body"
+                            name="message"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Body</FormLabel>
+                                    <FormLabel>Message</FormLabel>
                                     <FormControl>
                                         <Textarea
-                                            placeholder="Enter notification body"
+                                            placeholder="Enter notification message"
                                             {...field}
                                             className="resize-none"
                                             rows={3}

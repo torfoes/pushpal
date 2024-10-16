@@ -1,30 +1,54 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Plus } from "lucide-react";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage
+} from "@/components/ui/form";
+import { Plus, Calendar as CalendarIcon } from "lucide-react";
 import { createEvent } from './actions';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import {Label} from "@/components/ui/label";
 
 export const formSchema = z.object({
     name: z.string().min(3, { message: "Event name must be at least 3 characters." }),
-    description: z.string().max(500, { message: "Description must not exceed 500 characters." }).optional(),
-    date: z.string().nonempty({ message: "Date is required." }),
+    description: z
+        .string()
+        .max(500, { message: "Description must not exceed 500 characters." })
+        .optional(),
+    date: z.date({ required_error: "Date is required." }),
+    time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: "Invalid time format. Use HH:mm" }),
+    duration: z.preprocess(
+        (value) => parseInt(value as string, 10),
+        z.number().positive({ message: "Duration must be a positive number." })
+    ),
     attendance_required: z.boolean().optional(),
 });
 
-export default function CreateEventDialog({
-                                              organization_id
-                                          }: {
-    organization_id: string;
-}) {
+export default function CreateEventDialog({ organization_id }: { organization_id: string; }) {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -32,27 +56,44 @@ export default function CreateEventDialog({
         defaultValues: {
             name: "",
             description: "",
-            date: "",
+            date: new Date(),  // Defaults to current date
+            time: "12:00",     // Default time
+            duration: 60,      // Default duration in minutes
             attendance_required: false,
         },
     });
 
-    // Function to handle form submission
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
+            // Parse the time string (HH:mm)
+            const [hours, minutes] = values.time.split(':').map(Number);
+
+            // Combine date and time into a single Date object
+            const date = values.date;
+            const start_time = new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate(),
+                hours,
+                minutes
+            );
+
+            // Convert start_time to ISO string
+            const start_time_iso = start_time.toISOString();
+
             // Call the createEvent function from actions.ts
             await createEvent(
                 organization_id,
                 values.name,
-                values.date,
+                start_time_iso,
+                values.duration,
                 values.description,
                 values.attendance_required
             );
 
-            // Close modal and reset form after success
             setIsCreateModalOpen(false);
             form.reset();
-            window.location.reload();  // Optionally reload after success
+            window.location.reload();
         } catch (error) {
             console.error("Failed to create event", error);
         }
@@ -74,7 +115,8 @@ export default function CreateEventDialog({
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        {/* Event Name */}
                         <FormField
                             control={form.control}
                             name="name"
@@ -88,6 +130,7 @@ export default function CreateEventDialog({
                                 </FormItem>
                             )}
                         />
+                        {/* Description */}
                         <FormField
                             control={form.control}
                             name="description"
@@ -95,12 +138,18 @@ export default function CreateEventDialog({
                                 <FormItem>
                                     <FormLabel>Description (Optional)</FormLabel>
                                     <FormControl>
-                                        <Textarea placeholder="Enter event description" {...field} className="resize-none" rows={3} />
+                                        <Textarea
+                                            placeholder="Enter event description"
+                                            {...field}
+                                            className="resize-none"
+                                            rows={3}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
+                        {/* Date */}
                         <FormField
                             control={form.control}
                             name="date"
@@ -108,24 +157,89 @@ export default function CreateEventDialog({
                                 <FormItem>
                                     <FormLabel>Event Date</FormLabel>
                                     <FormControl>
-                                        <Input type="date" placeholder="Enter event date" {...field} />
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "w-full justify-start text-left font-normal",
+                                                        !field.value && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0 z-[9999] pointer-events-auto">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={field.value}
+                                                    onSelect={(date) => field.onChange(date)}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
+                        {/* Time */}
+                        <FormField
+                            control={form.control}
+                            name="time"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Event Time</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="time"
+                                            placeholder="Enter event time"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        {/* Duration */}
+                        <FormField
+                            control={form.control}
+                            name="duration"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Duration (minutes)</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            min="1"
+                                            placeholder="Enter duration in minutes"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        {/* Attendance Required */}
                         <FormField
                             control={form.control}
                             name="attendance_required"
                             render={({ field }) => (
-                                <FormItem className="flex items-center space-x-2">
+                                <FormItem>
                                     <FormControl>
-                                        <Checkbox
-                                            checked={field.value}
-                                            onCheckedChange={(checked) => field.onChange(checked)}
-                                        />
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                                checked={field.value}
+                                                onCheckedChange={(checked) => field.onChange(checked)}
+                                                id={field.name}
+                                                className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                            />
+                                            <Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
+                                                Attendance Required
+                                            </Label>
+                                        </div>
                                     </FormControl>
-                                    <FormLabel>Attendance Required</FormLabel>
                                     <FormMessage />
                                 </FormItem>
                             )}

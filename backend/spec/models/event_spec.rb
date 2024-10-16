@@ -10,7 +10,9 @@ RSpec.describe Event, type: :model do
   it { should validate_presence_of(:creator_membership_id) }
   it { should validate_presence_of(:organization_id) }
   it { should validate_presence_of(:name) }
-  it { should validate_presence_of(:date) }
+  it { should validate_presence_of(:start_time) }
+  it { should validate_presence_of(:duration) }
+
 
   it 'has a valid factory' do
     expect(create(:event)).to be_valid

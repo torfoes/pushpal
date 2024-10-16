@@ -1,73 +1,133 @@
-# frozen_string_literal: true
+# app/controllers/notifications_controller.rb
 
 class NotificationsController < ApplicationController
-  before_action :set_notification, only: %i[show edit update destroy]
+  include OrganizationContext
 
-  # GET /notifications or /notifications.json
+  # Set organization and membership context for all actions
+  before_action :set_organization
+  before_action :set_current_member_role
+  before_action :set_current_membership
+
+  # Authorization callbacks
+  before_action :authorize_admin!, only: %i[create update destroy]
+  before_action :authorize_member!, only: %i[index show recent]
+
+  # Set notification context only for actions that need it
+  before_action :set_notification, only: %i[show update destroy]
+
+  # GET /organizations/:organization_id/notifications
   def index
-    @notifications = Notification.all
+    @notifications = @organization.notifications.order(created_at: :desc)
+    render json: @notifications, status: :ok
   end
 
-  # GET /notifications/1 or /notifications/1.json
-  def show; end
-
-  # GET /notifications/new
-  def new
-    @notification = Notification.new
+  # GET /organizations/:organization_id/notifications/:id
+  def show
+    render json: @notification, status: :ok
   end
 
-  # GET /notifications/1/edit
-  def edit; end
-
-  # POST /notifications or /notifications.json
+  # POST /organizations/:organization_id/notifications
   def create
-    @notification = Notification.new(notification_params)
+    @notification = @organization.notifications.build(notification_params)
+    @notification.creator_membership = @current_membership
+    @notification.send_type = :push
+    @notification.status = :pending
 
-    respond_to do |format|
-      if @notification.save
-        PushNotificationJob.perform_later(@notification.id)
+    if @notification.save
+      # Send push notifications
+      result = send_push_notifications(@notification)
 
-        format.html { redirect_to notification_url(@notification), notice: 'Notification was successfully created.' }
-        format.json { render :show, status: :created, location: @notification }
+      if result[:success]
+        @notification.update(status: :sent, sent_at: Time.current)
+        render json: @notification, status: :created, location: [@organization, @notification]
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @notification.errors, status: :unprocessable_entity }
+        @notification.update(status: :failed)
+        render json: { errors: result[:errors] }, status: :unprocessable_entity
       end
+    else
+      render json: { errors: @notification.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /notifications/1 or /notifications/1.json
+  # PATCH/PUT /organizations/:organization_id/notifications/:id
   def update
-    respond_to do |format|
-      if @notification.update(notification_params)
-        format.html { redirect_to notification_url(@notification), notice: 'Notification was successfully updated.' }
-        format.json { render :show, status: :ok, location: @notification }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @notification.errors, status: :unprocessable_entity }
-      end
+    if @notification.update(notification_params)
+      render json: @notification, status: :ok
+    else
+      render json: { errors: @notification.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
-  # DELETE /notifications/1 or /notifications/1.json
+  # DELETE /organizations/:organization_id/notifications/:id
   def destroy
     @notification.destroy
+    render json: { message: 'Notification was successfully destroyed.' }, status: :no_content
+  end
 
-    respond_to do |format|
-      format.html { redirect_to notifications_url, notice: 'Notification was successfully destroyed.' }
-      format.json { head :no_content }
-    end
+  # GET /organizations/:organization_id/notifications/recent
+  def recent
+    @recent_notifications = @organization.notifications
+                                         .where.not(sent_at: nil)
+                                         .order(sent_at: :desc)
+                                         .limit(10)
+
+    render json: @recent_notifications, status: :ok
   end
 
   private
 
-  # Use callbacks to share common setup or constraints between actions.
-  def set_notification
-    @notification = Notification.find(params[:id])
+  # Set the organization based on params[:organization_id]
+  def set_organization
+    @organization = Organization.find_by(id: params[:organization_id])
+    unless @organization
+      render json: { error: 'Organization not found' }, status: :not_found
+    end
   end
 
-  # Only allow a list of trusted parameters through.
+  # Set the notification within the context of the current organization
+  def set_notification
+    @notification = @organization.notifications.find_by(id: params[:id])
+    unless @notification
+      render json: { error: 'Notification not found' }, status: :not_found
+    end
+  end
+
+  # Only allow a list of trusted parameters through
   def notification_params
-    params.require(:notification).permit(:user_id, :event_id, :message, :send_type, :message_type, :sent_at)
+    params.require(:notification).permit(:title, :message)
+  end
+
+  # Send push notifications to all members of the organization
+  def send_push_notifications(notification)
+    title = notification.title
+    body = notification.message
+    data = {}
+
+    member_user_ids = @organization.memberships.pluck(:user_id)
+    push_subscriptions = PushSubscription.where(user_id: member_user_ids)
+
+    if push_subscriptions.empty?
+      return { success: false, errors: ['No subscribers to send notifications to.'] }
+    end
+
+    successes = []
+    failures = []
+
+    push_subscriptions.find_each do |subscription|
+      notification_service = PushNotificationService.new(subscription)
+      result = notification_service.send_notification(title, body, data)
+
+      if result[:success]
+        successes << subscription.id
+      else
+        failures << { subscription_id: subscription.id, error: result[:error] }
+      end
+    end
+
+    if failures.empty?
+      { success: true }
+    else
+      { success: false, errors: failures }
+    end
   end
 end

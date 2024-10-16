@@ -63,7 +63,7 @@ module Authentication
         render json: { error: 'Authentication failed', message: e.message }, status: :unauthorized
       end
     else
-      render json: { error: 'Token missing' }, status: :unauthorized
+      render json: { error: 'Not Authorized' }, status: :unauthorized
     end
   end
 
