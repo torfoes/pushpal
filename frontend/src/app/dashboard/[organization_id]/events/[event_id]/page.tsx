@@ -11,11 +11,11 @@ import { Calendar as CalendarIcon, Clock as ClockIcon } from "lucide-react";
 export default async function EventPage({ params }) {
     const { organization_id, event_id } = params;
     const membership = await fetchMembership(organization_id);
-    console.log("membership", membership);
+    // console.log("membership", membership);
     const admin_rights = membership.role === 'creator' || membership.role === 'manager';
 
     const event = await getEventDetails(organization_id, event_id);
-    console.log(admin_rights);
+    // console.log(admin_rights);
 
     return (
         <div>
@@ -53,9 +53,7 @@ export default async function EventPage({ params }) {
             </div>
 
             {admin_rights ? (
-                <div>
-                    <AttendanceTable attendances={event.attendances} />
-                </div>
+                <AttendanceTable attendances={event.attendances} />
             ) : (
                 <MemberEventView event={event} />
             )}
