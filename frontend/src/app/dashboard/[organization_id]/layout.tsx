@@ -8,11 +8,11 @@ import NavigationBar from "@/app/dashboard/[organization_id]/NavigationBar";
 
 async function sendOrganizationPushNotificationAction(params: SendOrganizationPushParams) {
     'use server';
-    const { organization_id, title, body } = params;
+    const { organization_id, title, message } = params;
     const sessionToken = await getSessionTokenOrRedirect();
 
     const res = await fetch(
-        `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}/send_push_notifications`,
+        `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}/notifications`,
         {
             method: 'POST',
             headers: {
@@ -20,20 +20,24 @@ async function sendOrganizationPushNotificationAction(params: SendOrganizationPu
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                title: title,
-                body: body,
+                notification: {
+                    title: title,
+                    message: message,
+                },
             }),
         }
     );
 
     if (!res.ok) {
         const errorDetails = await res.json();
-        console.error('Failed to send push notifications', errorDetails);
-        throw new Error(`Failed to send push notifications: ${res.status}`);
+        console.error('Failed to send push notification', errorDetails);
+        throw new Error(`Failed to send push notification: ${res.status}`);
     }
 
     redirect(`/dashboard/${organization_id}`);
 }
+
+
 
 export default async function DashboardLayout({
                                                   params,
