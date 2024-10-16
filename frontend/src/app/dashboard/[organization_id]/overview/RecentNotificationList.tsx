@@ -33,7 +33,7 @@ export default function RecentNotificationList({ notifications }: { notification
                             <Badge variant="outline">{notification.send_type}</Badge>
                         </div>
                         <CardDescription>
-                            Sent at {format(new Date(notification.sent_at || notification.created_at), 'PPPpp')}
+                            Sent at {format(new Date(notification.sent_at), 'PPPpp')}
                         </CardDescription>
                     </CardHeader>
 
