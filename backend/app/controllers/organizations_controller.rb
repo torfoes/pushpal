@@ -89,46 +89,6 @@ class OrganizationsController < ApplicationController
     render json: { message: 'Organization was successfully destroyed.' }, status: :no_content
   end
 
-  # POST /organizations/:id/send_push_notifications
-  def send_push_notifications
-    permitted_params = params.permit(:title, :body, data: {})
-
-    title = permitted_params[:title]
-    body = permitted_params[:body]
-    data = permitted_params[:data] || {}
-
-    unless title.present? && body.present?
-      render json: { success: false, errors: ['Title and Body are required.'] }, status: :bad_request and return
-    end
-
-    member_user_ids = @organization.memberships.pluck(:user_id)
-    push_subscriptions = PushSubscription.where(user_id: member_user_ids)
-
-    if push_subscriptions.empty?
-      render json: { message: 'No subscribers to send notifications to.' }, status: :ok and return
-    end
-
-    successes = []
-    failures = []
-
-    push_subscriptions.find_each do |subscription|
-      notification_service = PushNotificationService.new(subscription)
-      result = notification_service.send_notification(title, body, data)
-
-      if result[:success]
-        successes << subscription.id
-      else
-        failures << { subscription_id: subscription.id, error: result[:error] }
-      end
-    end
-
-    render json: {
-      success_count: successes.count,
-      failure_count: failures.count,
-      failures:
-    }, status: :ok
-  end
-
   # GET /organizations/mine
   def mine
     organizations = @current_user.organizations

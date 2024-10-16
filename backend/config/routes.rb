@@ -32,10 +32,6 @@ Rails.application.routes.draw do
         get 'recent'
       end
     end
-
-    member do
-      post 'send_push_notifications'
-    end
   end
 
   resources :push_subscriptions, path: 'push-subscriptions', only: %i[create destroy index show] do
