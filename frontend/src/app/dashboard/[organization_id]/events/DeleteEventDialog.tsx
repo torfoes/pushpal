@@ -4,12 +4,13 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { deleteEvent } from './actions'
+import { redirect } from "next/navigation"
 
 export default function DeleteEventDialog({
-    organization_id,
-    event_id,
-    event_name
-}: {
+                                              organization_id,
+                                              event_id,
+                                              event_name
+                                          }: {
     organization_id: string;
     event_id: string;
     event_name: string;
@@ -21,7 +22,7 @@ export default function DeleteEventDialog({
         try {
             await deleteEvent(organization_id, event_id);
             setIsDeleteModalOpen(false);
-            window.location.reload();
+            redirect(`/dashboard/${organization_id}/events`);
         } catch (error) {
             console.error("Failed to delete event", error);
         }
