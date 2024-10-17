@@ -2,14 +2,17 @@
 
 # spec/rails_helper.rb
 
-# 1. Require SimpleCov and start it before any other code
 require 'simplecov'
 SimpleCov.start 'rails' do
-  # Optional: Add filters to exclude certain directories or files
   add_filter '/bin/'
   add_filter '/db/'
   add_filter '/spec/'
   add_filter '/config/'
+  add_filter '/channels/'
+  add_filter '/mailers/'
+  add_filter '/jobs/'
+
+
   # You can also add custom groups if desired
   # create_group 'Services', 'app/services'
 end

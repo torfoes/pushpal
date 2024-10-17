@@ -31,10 +31,14 @@ class PushSubscriptionsController < ApplicationController
 
   # DELETE /push-subscriptions/:endpoint
   def destroy
-    if @push_subscription.destroy
-      render json: { success: true, message: 'Unsubscribed successfully.' }, status: :ok
+    if @push_subscription
+      if @push_subscription.destroy
+        render json: { success: true, message: 'Unsubscribed successfully.' }, status: :ok
+      else
+        render json: { success: false, errors: @push_subscription.errors.full_messages }, status: :unprocessable_entity
+      end
     else
-      render json: { success: false, errors: @push_subscription.errors.full_messages }, status: :unprocessable_entity
+      render json: { success: false, errors: ['Subscription not found'] }, status: :not_found
     end
   end
 
