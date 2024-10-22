@@ -7,6 +7,8 @@ import DeleteEventDialog from "@/app/dashboard/[organization_id]/events/DeleteEv
 import AttendanceTable from "@/app/dashboard/[organization_id]/events/[event_id]/AttendanceTable";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, Clock as ClockIcon } from "lucide-react";
+import RSVPStatusHeader from "@/app/dashboard/[organization_id]/events/[event_id]/RSVPStatusHeader";
+import {auth} from "@/lib/auth";
 
 export default async function EventPage({ params }) {
     const { organization_id, event_id } = params;
@@ -15,7 +17,16 @@ export default async function EventPage({ params }) {
     const admin_rights = membership.role === 'creator' || membership.role === 'manager';
 
     const event = await getEventDetails(organization_id, event_id);
-    // console.log(admin_rights);
+    const {user} = await auth();
+
+    const currentUserAttendanceModel = event.attendances.find(
+        (attendance) => attendance.user_email === user.email
+    ) || null;
+
+    // console.log(currentUserAttendanceModel);
+
+    // const currentUserAttendanceModel =
+
 
     return (
         <div>
@@ -37,7 +48,7 @@ export default async function EventPage({ params }) {
                         </div>
                     </div>
                 </div>
-                {admin_rights && (
+                {admin_rights ? (
                     <div className="flex space-x-2 mt-4 md:mt-0">
                         <UpdateEventDialog
                             organization_id={organization_id}
@@ -47,6 +58,12 @@ export default async function EventPage({ params }) {
                             organization_id={event.organization_id}
                             event_id={event.id}
                             event_name={event.name}
+                        />
+                    </div>
+                ) : (
+                    <div className="flex space-x-2 mt-4 md:mt-0">
+                        <RSVPStatusHeader
+                            attendance={currentUserAttendanceModel}
                         />
                     </div>
                 )}

@@ -8,7 +8,7 @@ import {QRCode} from "react-qrcode-logo";
 export default function MemberEventView({ event }: { event: EventDetails }) {
     return (
         <div className="flex justify-center">
-            <QRCode value="https://karlosz.com/" size={600} />
+            <QRCode value="640a890f-4f0d-460a-9f4e-fef674f3c364" size={500} />
         </div>
     );
 }
