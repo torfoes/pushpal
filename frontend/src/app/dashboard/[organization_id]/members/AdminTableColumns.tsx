@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Membership } from "@/types";
-import {deleteMemberAction, updateMemberRoleAction} from "@/app/dashboard/[organization_id]/actions";
+import {deleteMemberAction, updateMemberRoleAction, changeDuesPaidAction } from "@/app/dashboard/[organization_id]/actions";
 
 export const adminTableColumns: ColumnDef<Membership>[] = [
     {
@@ -49,6 +49,18 @@ export const adminTableColumns: ColumnDef<Membership>[] = [
         },
     },
     {
+        accessorKey: "dues_paid",
+        header: () => <div className="text-left">Dues Paid</div>,
+        cell: ({ row }) => {
+            const member = row.original;
+            return (
+                <Badge variant={member.dues_paid ? "success" : "destructive"}>
+                    {member.dues_paid ? "Paid" : "Not Paid"}
+                </Badge>
+            );
+        },
+    },
+    {
         id: "actions",
         header: () => <div className="text-left">Actions</div>,
         cell: ({ row }) => {
@@ -78,6 +90,15 @@ export const adminTableColumns: ColumnDef<Membership>[] = [
                             onClick={() => deleteMemberAction(member.id, member.organization_id)}
                         >
                             Remove from Organization
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator/>
+                        <DropdownMenuItem
+                            onClick={() => {
+                                console.log('Changing dues paid status');
+                                changeDuesPaidAction(member.id, member.organization_id, !member.dues_paid)
+                            }}
+                        >
+                            {member.dues_paid ? "Mark as Not Paid" : "Mark as Paid"}
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

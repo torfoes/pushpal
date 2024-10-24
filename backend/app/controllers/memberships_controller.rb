@@ -24,6 +24,12 @@ class MembershipsController < ApplicationController
       render json: {
         id: membership.id,
         role: membership.role,
+        user: {
+          id: membership.user.id,
+          name: membership.user.name,
+          email: membership.user.email,
+          picture: membership.user.picture
+        },
         organization_id: membership.organization_id
       }, status: :ok
     else
@@ -43,7 +49,8 @@ class MembershipsController < ApplicationController
             id: membership.user.id,
             name: membership.user.name,
             email: membership.user.email,
-            picture: membership.user.picture
+            picture: membership.user.picture,
+            dues_paid: membership.dues_paid
           },
           role: membership.role,
           organization_id: membership.organization_id
@@ -118,6 +125,6 @@ class MembershipsController < ApplicationController
   end
 
   def membership_update_params
-    params.require(:membership).permit(:role)
+    params.require(:membership).permit(:role, :dues_paid)
   end
 end

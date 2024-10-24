@@ -1,21 +1,45 @@
 import React from 'react';
 import MemberEventView from './MemberEventView';
-import { fetchOrganization, fetchMembership } from '@/lib/dataFetchers';
-import { getEventDetails } from "@/app/dashboard/[organization_id]/events/[event_id]/actions";
-import UpdateEventDialog from "@/app/dashboard/[organization_id]/events/UpdateEventDialog";
-import DeleteEventDialog from "@/app/dashboard/[organization_id]/events/DeleteEventDialog";
-import AttendanceTable from "@/app/dashboard/[organization_id]/events/[event_id]/AttendanceTable";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, Clock as ClockIcon } from "lucide-react";
+import { fetchMembership } from '@/lib/dataFetchers';
+import { getEventDetails } from '@/app/dashboard/[organization_id]/events/[event_id]/actions';
+import UpdateEventDialog from '@/app/dashboard/[organization_id]/events/UpdateEventDialog';
+import DeleteEventDialog from '@/app/dashboard/[organization_id]/events/DeleteEventDialog';
+import AttendanceTable from '@/app/dashboard/[organization_id]/events/[event_id]/AttendanceTable';
+import { format } from 'date-fns';
+import { Calendar as CalendarIcon, Clock as ClockIcon } from 'lucide-react';
+import RSVPStatusHeader from '@/app/dashboard/[organization_id]/events/[event_id]/RSVPStatusHeader';
+import { auth } from '@/lib/auth';
+import { Attendance, EventDetails, Membership, User } from '@/types';
 
-export default async function EventPage({ params }) {
+interface EventPageParams {
+    organization_id: string;
+    event_id: string;
+}
+
+interface EventPageProps {
+    params: EventPageParams;
+}
+
+export default async function EventPage({ params }: EventPageProps) {
     const { organization_id, event_id } = params;
-    const membership = await fetchMembership(organization_id);
-    // console.log("membership", membership);
-    const admin_rights = membership.role === 'creator' || membership.role === 'manager';
+    const membership = await fetchMembership(params.organization_id);
 
-    const event = await getEventDetails(organization_id, event_id);
-    // console.log(admin_rights);
+    const admin_rights =
+        membership.role === 'creator' || membership.role === 'manager';
+
+    // Fetch event details
+    const event: EventDetails | null = await getEventDetails(
+        organization_id,
+        event_id
+    );
+
+
+
+    // Find the current user's attendance
+    const currentUserAttendanceModel: Attendance | null =
+        event.attendances.find(
+            (attendance) => attendance.user_id === membership.user.id
+        ) || null;
 
     return (
         <div>
@@ -28,7 +52,10 @@ export default async function EventPage({ params }) {
                         <div className="flex items-center space-x-2 mb-2 sm:mb-0">
                             <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                             <span>
-                                {format(new Date(event.start_time), "EEEE, MMMM d, yyyy 'at' h:mm a")}
+                              {format(
+                                  new Date(event.start_time),
+                                  "EEEE, MMMM d, yyyy 'at' h:mm a"
+                              )}
                             </span>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -37,7 +64,7 @@ export default async function EventPage({ params }) {
                         </div>
                     </div>
                 </div>
-                {admin_rights && (
+                {admin_rights ? (
                     <div className="flex space-x-2 mt-4 md:mt-0">
                         <UpdateEventDialog
                             organization_id={organization_id}
@@ -48,6 +75,16 @@ export default async function EventPage({ params }) {
                             event_id={event.id}
                             event_name={event.name}
                         />
+                    </div>
+                ) : (
+                    <div className="flex space-x-2 mt-4 md:mt-0">
+                        {currentUserAttendanceModel ? (
+                            <RSVPStatusHeader
+                                attendance={currentUserAttendanceModel}
+                            />
+                        ) : (
+                            <div>You are not registered for this event.</div>
+                        )}
                     </div>
                 )}
             </div>

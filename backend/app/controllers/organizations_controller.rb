@@ -37,6 +37,7 @@ class OrganizationsController < ApplicationController
                     email: membership.user.email,
                     picture: membership.user.picture,
                     role: membership.role,
+                    dues_paid: membership.dues_paid,
                     organization_id: @organization.id
                   }
                 end
@@ -64,7 +65,8 @@ class OrganizationsController < ApplicationController
         Membership.create!(
           user: @current_user,
           organization: @organization,
-          role: :creator
+          role: :creator,
+          dues_paid: false
         )
 
         render json: @organization, status: :created, location: @organization
