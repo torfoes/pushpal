@@ -119,6 +119,6 @@ class MembershipsController < ApplicationController
   end
 
   def membership_update_params
-    params.require(:membership).permit(:role)
+    params.require(:membership).permit(:role, :dues_paid)
   end
 end
