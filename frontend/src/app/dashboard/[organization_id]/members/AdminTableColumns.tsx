@@ -49,6 +49,18 @@ export const adminTableColumns: ColumnDef<Membership>[] = [
         },
     },
     {
+        accessorKey: "dues_paid",
+        header: () => <div className="text-left">Dues Paid</div>,
+        cell: ({ row }) => {
+            const member = row.original;
+            return (
+                <Badge variant={member.dues_paid ? "default" : "destructive"}>
+                    {member.dues_paid ? "Paid" : "Not Paid"}
+                </Badge>
+            );
+        },
+    },
+    {
         id: "actions",
         header: () => <div className="text-left">Actions</div>,
         cell: ({ row }) => {

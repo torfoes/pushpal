@@ -65,7 +65,8 @@ class OrganizationsController < ApplicationController
         Membership.create!(
           user: @current_user,
           organization: @organization,
-          role: :creator
+          role: :creator,
+          dues_paid: false
         )
 
         render json: @organization, status: :created, location: @organization

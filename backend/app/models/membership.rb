@@ -18,7 +18,9 @@ class Membership < ApplicationRecord
 
   enum role: { member: 0, creator: 1, manager: 2 }
 
-  validates :user_id, :organization_id, :role, :dues_paid, presence: true
+  validates :user_id, :organization_id, :role, presence: true
   validates :role, inclusion: { in: roles.keys }
   validates :user_id, uniqueness: { scope: :organization_id, message: 'already a member of this organization' }
+
+  attribute :dues_paid, :boolean, default: false
 end
