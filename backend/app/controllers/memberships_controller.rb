@@ -43,7 +43,8 @@ class MembershipsController < ApplicationController
             id: membership.user.id,
             name: membership.user.name,
             email: membership.user.email,
-            picture: membership.user.picture
+            picture: membership.user.picture,
+            dues_paid: membership.dues_paid
           },
           role: membership.role,
           organization_id: membership.organization_id

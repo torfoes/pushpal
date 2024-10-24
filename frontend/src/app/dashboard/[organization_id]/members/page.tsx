@@ -8,7 +8,8 @@ export default async function MembersPage({ params }: { params: { organization_i
     const membership = await fetchMembership(params.organization_id);
 
     const admin_rights = membership.role === 'creator' || membership.role === 'manager';
-
+    console.log(organization.members);
+    
     return (
         <div>
             {admin_rights ? (

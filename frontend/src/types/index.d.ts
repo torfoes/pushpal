@@ -13,6 +13,7 @@ export interface Membership extends User{
     id: string;
     organization_id: string;
     role: Role;
+    dues_paid: boolean;
 }
 
 export interface MemberInfo {

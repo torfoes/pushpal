@@ -37,6 +37,7 @@ class OrganizationsController < ApplicationController
                     email: membership.user.email,
                     picture: membership.user.picture,
                     role: membership.role,
+                    dues_paid: membership.dues_paid,
                     organization_id: @organization.id
                   }
                 end
