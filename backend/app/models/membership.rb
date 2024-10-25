@@ -11,11 +11,6 @@ class Membership < ApplicationRecord
            foreign_key: 'creator_membership_id',
            dependent: :destroy
 
-  has_many :notifications_as_recipient,
-           class_name: 'Notification',
-           foreign_key: 'recipient_membership_id',
-           dependent: :destroy
-
   enum role: { member: 0, creator: 1, manager: 2 }
 
   validates :user_id, :organization_id, :role, presence: true
