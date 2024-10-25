@@ -3,6 +3,41 @@
 import { getSessionTokenOrRedirect } from "@/app/utils";
 import { Role } from "@/types";
 import { redirect } from "next/navigation";
+import { Organization, Membership } from '@/types';
+
+export async function checkLastAdmin(organization_id: string) {
+    const sessionToken = await getSessionTokenOrRedirect();
+
+    const res = await fetch(
+        `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}`,
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${sessionToken}`,
+                'Content-Type': 'application/json',
+            },
+            cache: 'no-cache',
+        }
+    );
+
+    if (!res.ok) {
+        const errorDetails = await res.json();
+        console.error('Failed to fetch organization', errorDetails);
+        throw new Error(`Failed to fetch organization: ${res.status}`);
+    }
+
+    const organization: Organization = await res.json();
+
+    if (!organization.members || organization.members.length === 0) {
+        return false; // No members in the organization
+    }
+
+    const adminCount = organization.members.filter(
+        (member: Membership) => member.role === 'creator' || member.role === 'manager'
+    ).length;
+
+    return adminCount === 1; // Returns true if only one admin/creator exists
+}
 
 export async function updateMemberRoleAction(membership_id: string, organization_id: string, newRole: Role) {
     const sessionToken = await getSessionTokenOrRedirect();
