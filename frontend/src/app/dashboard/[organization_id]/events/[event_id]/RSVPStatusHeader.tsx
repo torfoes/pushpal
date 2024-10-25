@@ -1,5 +1,3 @@
-// src/components/RSVPStatusHeader.tsx
-
 "use client";
 
 import React, { useState } from 'react';
@@ -21,10 +19,16 @@ const RSVPStatusHeader: React.FC<RSVPStatusHeaderProps> = ({ attendance }) => {
         setLoading(true);
         setError(null);
         try {
-            await toggleRsvpAction(attendance.id, attendance.organization_id, attendance.event_id);
-            setIsGoing(!isGoing);
-        } catch (err: any) {
-            setError(err.message || 'Failed to toggle RSVP');
+            await toggleRsvpAction(
+                attendance.id,
+                attendance.organization_id,
+                attendance.event_id
+            );
+            setIsGoing((prevIsGoing) => !prevIsGoing);
+        } catch (err: unknown) {
+            const errorMessage =
+                err instanceof Error ? err.message : 'Failed to toggle RSVP';
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -37,23 +41,18 @@ const RSVPStatusHeader: React.FC<RSVPStatusHeaderProps> = ({ attendance }) => {
             ) : (
                 <X className="h-6 w-6 text-red-500" aria-label="Not RSVP'd" />
             )}
-            {/* Display the status text */}
             <span className="text-lg font-semibold ">
-                {isGoing ? "I'm going" : "I'm not going"}
-            </span>
-            {/* Toggle Button */}
+        {isGoing ? "I'm going" : "I'm not going"}
+      </span>
             <Button
-                variant={"outline"}
+                variant="outline"
                 onClick={handleToggleRSVP}
                 disabled={loading}
                 aria-label={isGoing ? 'Cancel RSVP' : 'Confirm RSVP'}
             >
                 {isGoing ? 'Cancel RSVP' : 'RSVP'}
             </Button>
-            {/* Display error message if any */}
-            {error && (
-                <p className="text-red-500 text-sm">{error}</p>
-            )}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
         </div>
     );
 };

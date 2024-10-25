@@ -54,7 +54,7 @@ export const adminTableColumns: ColumnDef<Membership>[] = [
         cell: ({ row }) => {
             const member = row.original;
             return (
-                <Badge variant={member.dues_paid ? "default" : "destructive"}>
+                <Badge variant={member.dues_paid ? "success" : "destructive"}>
                     {member.dues_paid ? "Paid" : "Not Paid"}
                 </Badge>
             );

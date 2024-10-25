@@ -9,7 +9,7 @@ export interface User {
     picture?: string;
 }
 
-export interface Membership extends User{
+export interface Membership extends User {
     id: string;
     organization_id: string;
     role: Role;
@@ -17,8 +17,11 @@ export interface Membership extends User{
 }
 
 export interface MemberInfo {
+    id: string;
+    organization_id: string;
     isMember: boolean;
     role: Role;
+    user: User;
 }
 
 export interface Organization {
