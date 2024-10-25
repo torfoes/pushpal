@@ -1,17 +1,25 @@
 import { getOrganization } from './actions';
-import OrganizationForm from './OrganizationForm'; // This will be the Client Component
+import AdminOrganizationForm from './AdminOrganizationForm';
+import MemberOrganizationForm from './MemberOrganizationForm';
+import { fetchMembership } from '@/lib/dataFetchers';
 
-export default async function Page({ params }: { params: { organization_id: string } }) {
-  const { organization_id } = params;
+export default async function Page({ params }) {
+    const { organization_id } = params;
 
-  // Fetch the organization data
-  const organization = await getOrganization(organization_id);
+    const organization = await getOrganization(organization_id);
 
-  // Pass the organization data to the Client Component
-  return (
-    <div>
-      <h2 className="text-2xl font-semibold">Settings</h2>
-      <OrganizationForm organization={organization} />
-    </div>
-  );
+    const membership = await fetchMembership(organization_id);
+    const admin_rights = membership.role === 'creator' || membership.role === 'manager';
+
+    return (
+        <div>
+            <h2 className="text-2xl font-semibold">Settings</h2>
+
+            {admin_rights ? (
+                <AdminOrganizationForm organization={organization} />
+            ) : (
+                <MemberOrganizationForm organization={organization} />
+            )}
+        </div>
+    );
 }
