@@ -87,8 +87,28 @@ class OrganizationsController < ApplicationController
 
   # DELETE /organizations/:id
   def destroy
-    @organization.destroy
+    ActiveRecord::Base.transaction do
+      # Delete events associated with the organization
+      @organization.events.each do |event|
+        event.attendances.destroy_all
+        event.destroy
+      end
+  
+      # Destroy associated memberships and dependencies
+      @organization.memberships.each do |membership|
+        membership.attendances.destroy_all
+        membership.notifications_as_creator.destroy_all
+        membership.destroy
+      end
+  
+      # Finally, destroy the organization itself
+      @organization.destroy
+    end
+  
     render json: { message: 'Organization was successfully destroyed.' }, status: :no_content
+  rescue => e
+    logger.error "Failed to delete organization: #{e.message}"
+    render json: { error: 'Failed to delete organization', details: e.message }, status: :unprocessable_entity
   end
 
   # GET /organizations/mine
