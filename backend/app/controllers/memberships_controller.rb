@@ -84,7 +84,15 @@ class MembershipsController < ApplicationController
     @membership = @organization.memberships.new(user: @current_user, role: 'member')
 
     if @membership.save
-      render json: { message: 'Membership created successfully', membership: @membership }, status: :created
+      # For each event in the organization, create an attendance record for the new membership
+      @organization.events.each do |event|
+        Attendance.create!(
+          membership: @membership,
+          event: event,
+          rsvp_status: false,
+          checkin_status: false
+        )
+      end
     else
       render json: { errors: @membership.errors.full_messages }, status: :unprocessable_entity
     end

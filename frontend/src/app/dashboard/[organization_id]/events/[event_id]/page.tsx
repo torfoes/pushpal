@@ -5,6 +5,7 @@ import { getEventDetails } from '@/app/dashboard/[organization_id]/events/[event
 import UpdateEventDialog from '@/app/dashboard/[organization_id]/events/UpdateEventDialog';
 import DeleteEventDialog from '@/app/dashboard/[organization_id]/events/DeleteEventDialog';
 import AttendanceTable from '@/app/dashboard/[organization_id]/events/[event_id]/AttendanceTable';
+import NonAttendanceTable  from './NonAttendanceTable';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Clock as ClockIcon } from 'lucide-react';
 import RSVPStatusHeader from '@/app/dashboard/[organization_id]/events/[event_id]/RSVPStatusHeader';
@@ -90,7 +91,11 @@ export default async function EventPage({ params }: EventPageProps) {
             </div>
 
             {admin_rights ? (
-                <AttendanceTable attendances={event.attendances} />
+                event.attendance_required ? (
+                    <AttendanceTable attendances={event.attendances} />
+                ) : (
+                    <NonAttendanceTable attendances={event.attendances} />
+                )
             ) : (
                 <MemberEventView event={event} />
             )}

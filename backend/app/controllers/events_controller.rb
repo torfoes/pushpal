@@ -75,7 +75,7 @@ class EventsController < ApplicationController
     @event.creator_membership = @current_membership
 
     if @event.save
-      create_attendances if @event.attendance_required
+      create_attendances
       render json: @event, status: :created, location: [@organization, @event]
     else
       render json: { errors: @event.errors.full_messages }, status: :unprocessable_entity
