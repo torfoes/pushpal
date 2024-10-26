@@ -18,7 +18,7 @@ export default async function Page({ params }) {
             {admin_rights ? (
                 <AdminOrganizationForm organization={organization} />
             ) : (
-                <MemberOrganizationForm organization={organization} />
+                <MemberOrganizationForm membership={membership} organization={organization} />
             )}
         </div>
     );

@@ -69,6 +69,7 @@ export async function updateMemberRoleAction(membership_id: string, organization
 
 export async function deleteMemberAction(membership_id: string, organization_id: string) {
     const sessionToken = await getSessionTokenOrRedirect();
+    console.log(membership_id, organization_id);
 
     const res = await fetch(
         `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}/memberships/${membership_id}`,
