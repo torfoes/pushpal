@@ -43,26 +43,38 @@ function ActionsMenu({ member }: { member: Membership }) {
                 <DropdownMenuLabel>Update Roles</DropdownMenuLabel>
                 <DropdownMenuSeparator />
 
-                {member.role !== "manager" && (
+                {member.role !== "manager" ? (
                     <DropdownMenuItem
                         onClick={() => updateMemberRoleAction(member.id, member.organization_id, "manager")}
                     >
                         Assign as Manager
                     </DropdownMenuItem>
+                ) : (
+                    <DropdownMenuItem disabled>
+                        Assign as Manager
+                    </DropdownMenuItem>
                 )}
 
-                {isLastAdmin === false && member.role !== "member" && (
+                {isLastAdmin === false && member.role !== "member" ? (
                     <DropdownMenuItem
                         onClick={() => updateMemberRoleAction(member.id, member.organization_id, "member")}
                     >
                         Assign as Member
                     </DropdownMenuItem>
+                ) : (
+                    <DropdownMenuItem disabled>
+                        Assign as Member
+                    </DropdownMenuItem>
                 )}
 
-                {isLastAdmin === false && (
+                {isLastAdmin === false || member.role === "member" ? (
                     <DropdownMenuItem
                         onClick={() => deleteMemberAction(member.id, member.organization_id)}
                     >
+                        Remove from Organization
+                    </DropdownMenuItem>
+                ) : (
+                    <DropdownMenuItem disabled>
                         Remove from Organization
                     </DropdownMenuItem>
                 )}
