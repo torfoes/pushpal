@@ -4,6 +4,7 @@ import { getSessionTokenOrRedirect } from "@/app/utils";
 import { Role } from "@/types";
 import { redirect } from "next/navigation";
 import { Organization, Membership } from '@/types';
+import {revalidatePath} from "next/cache";
 
 export async function checkLastAdmin(organization_id: string) {
     const sessionToken = await getSessionTokenOrRedirect();
@@ -115,5 +116,5 @@ export async function changeDuesPaidAction(membership_id: string, organization_i
         throw new Error(`Failed to update dues paid status: ${res.status}`);
     }
 
-    redirect(`/dashboard/${organization_id}/members`);
+    revalidatePath(`/dashboard/${organization_id}/members`);
 }
