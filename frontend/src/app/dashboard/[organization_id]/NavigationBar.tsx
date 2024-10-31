@@ -12,7 +12,7 @@ export default function NavigationBar({ organization_id, admin_rights }) {
         { name: 'Members', href: `/dashboard/${organization_id}/members`, icon: Users },
         { name: 'Events', href: `/dashboard/${organization_id}/events`, icon: Calendar },
 
-        // Conditionally include the 'Scan' link if admin_rights is true
+        // conditionally include the 'Scan' link if admin_rights is true
         ...(admin_rights ? [{ name: 'Scan', href: `/dashboard/${organization_id}/scan`, icon: Scan }] : []),
         { name: 'Settings', href: `/dashboard/${organization_id}/settings`, icon: Settings },
     ];
