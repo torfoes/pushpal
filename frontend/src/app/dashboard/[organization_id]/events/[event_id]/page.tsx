@@ -9,7 +9,7 @@ import NonAttendanceTable from './NonAttendanceTable';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Clock as ClockIcon } from 'lucide-react';
 import RSVPStatusHeader from '@/app/dashboard/[organization_id]/events/[event_id]/RSVPStatusHeader';
-import { Attendance, EventDetails, Membership } from '@/types';
+import {Attendance, EventDetails, MemberInfo, Membership} from '@/types';
 
 interface EventPageParams {
     organization_id: string;
@@ -24,7 +24,7 @@ export default async function EventPage({ params }: EventPageProps) {
     const { organization_id, event_id } = params;
 
     // Fetch membership and event details
-    const membership: Membership | null = await fetchMembership(organization_id);
+    const membership: MemberInfo | null = await fetchMembership(organization_id);
     const event: EventDetails | null = await getEventDetails(organization_id, event_id);
 
     // Handle cases where data might not be available
@@ -38,10 +38,10 @@ export default async function EventPage({ params }: EventPageProps) {
 
     const admin_rights = membership.role === 'creator' || membership.role === 'manager';
 
-    // Find the current user's attendance
     const currentUserAttendanceModel: Attendance | null =
-        event.attendances.find((attendance) => attendance.user_id === membership.user.id) ||
-        null;
+        event.attendances.find(
+            (attendance) => attendance.user_id === membership.user.id
+        ) || null;
 
     return (
         <div>
