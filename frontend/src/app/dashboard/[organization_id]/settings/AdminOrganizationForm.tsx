@@ -46,7 +46,7 @@ export default function AdminOrganizationForm({ membership, organization }: Orga
                 setIsLastAdmin(result);
             } catch (error) {
                 console.error("Failed to check last admin status", error);
-                setIsLastAdmin(true); // Assume true if the check fails to prevent unintended behavior
+                setIsLastAdmin(true);
             }
         };
         handleLeaveButtonCheck();
@@ -132,17 +132,17 @@ export default function AdminOrganizationForm({ membership, organization }: Orga
                         >
                             Update Organization
                         </Button>
-
+                        <div className={'space-x-3'}>
                         <Dialog open={isLeaveModalOpen} onOpenChange={setIsLeaveModalOpen}>
                             <DialogTrigger asChild>
                                 <Button 
-                                    variant="destructive"
-                                    disabled={isLastAdmin} // Disable the button if the user is the last admin
-                                    className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-red-600 text-white hover:bg-red-700 h-10 px-4 py-2 disabled:pointer-events-none disabled:opacity-50"
+                                    variant="outline"
+                                    disabled={isLastAdmin}
                                 >
                                     Leave Organization
                                 </Button>
                             </DialogTrigger>
+
                             <DialogContent>
                                 <DialogHeader>
                                     <DialogTitle>Leave Organization</DialogTitle>
@@ -187,6 +187,7 @@ export default function AdminOrganizationForm({ membership, organization }: Orga
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
+                        </div>
                     </div>
                 </form>
             </Form>
