@@ -66,7 +66,7 @@ export default async function DashboardLayout({
 
             <p className="text-lg mb-4">Members: {organization.member_count}</p>
 
-            <NavigationBar organization_id={params.organization_id}/>
+            <NavigationBar organization_id={params.organization_id} admin_rights={admin_rights} />
 
             <div className="border-t border-gray-500 my-4"></div>
 
