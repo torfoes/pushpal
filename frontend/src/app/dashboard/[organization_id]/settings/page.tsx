@@ -16,9 +16,9 @@ export default async function Page({ params }) {
             <h2 className="text-2xl font-semibold">Settings</h2>
 
             {admin_rights ? (
-                <AdminOrganizationForm organization={organization} />
+                <AdminOrganizationForm membership={membership} organization={organization} />
             ) : (
-                <MemberOrganizationForm organization={organization} />
+                <MemberOrganizationForm membership={membership} organization={organization} />
             )}
         </div>
     );

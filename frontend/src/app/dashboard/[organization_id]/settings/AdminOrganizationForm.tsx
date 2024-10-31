@@ -1,9 +1,10 @@
+// AdminOrganizationForm.tsx
 'use client';
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,10 +19,12 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { updateOrganization, deleteOrganization } from './actions';
 import { useRouter } from 'next/navigation';
-import { Organization } from '@/types';
-import {toast} from "sonner";
+import { MemberInfo, Organization } from '@/types';
+import { toast } from "sonner";
+import { deleteMemberAction, checkLastAdmin } from '../actions';
 
 interface OrganizationFormProps {
+    membership: MemberInfo;
     organization: Organization;
 }
 
@@ -30,9 +33,24 @@ const formSchema = z.object({
     description: z.string().max(500, { message: "Description must not exceed 500 characters." }),
 });
 
-export default function AdminOrganizationForm({ organization }: OrganizationFormProps) {
+export default function AdminOrganizationForm({ membership, organization }: OrganizationFormProps) {
     const router = useRouter();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+    const [isLastAdmin, setIsLastAdmin] = useState(false);
+
+    useEffect(() => {
+        const handleLeaveButtonCheck = async () => {
+            try {
+                const result = await checkLastAdmin(organization.id);
+                setIsLastAdmin(result);
+            } catch (error) {
+                console.error("Failed to check last admin status", error);
+                setIsLastAdmin(true);
+            }
+        };
+        handleLeaveButtonCheck();
+    }, [organization.id]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -45,7 +63,7 @@ export default function AdminOrganizationForm({ organization }: OrganizationForm
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
             await updateOrganization(organization.id, values.name, values.description);
-            toast("Organization updated successfully")
+            toast("Organization updated successfully");
             router.refresh();
         } catch (error) {
             console.error('Failed to update organization', error);
@@ -55,7 +73,7 @@ export default function AdminOrganizationForm({ organization }: OrganizationForm
     async function handleDelete() {
         try {
             await deleteOrganization(organization.id);
-            toast.error("Organization deleted")
+            toast.error("Organization deleted");
 
             setIsDeleteModalOpen(false);
             router.push('/dashboard');
@@ -63,6 +81,11 @@ export default function AdminOrganizationForm({ organization }: OrganizationForm
             console.error('Failed to delete organization', error);
         }
     }
+
+    const handleLeaveOrganization = () => {
+        deleteMemberAction(membership.id, membership.organization_id);
+        router.push('/dashboard');
+    };
 
     return (
         <>
@@ -109,6 +132,34 @@ export default function AdminOrganizationForm({ organization }: OrganizationForm
                         >
                             Update Organization
                         </Button>
+                        <div className={'space-x-3'}>
+                        <Dialog open={isLeaveModalOpen} onOpenChange={setIsLeaveModalOpen}>
+                            <DialogTrigger asChild>
+                                <Button 
+                                    variant="outline"
+                                    disabled={isLastAdmin}
+                                >
+                                    Leave Organization
+                                </Button>
+                            </DialogTrigger>
+
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Leave Organization</DialogTitle>
+                                    <DialogDescription>
+                                        Are you sure you want to leave {organization.name}? This action cannot be undone.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                    <Button variant="outline" onClick={() => setIsLeaveModalOpen(false)}>
+                                        No, Cancel
+                                    </Button>
+                                    <Button variant="destructive" onClick={handleLeaveOrganization}>
+                                        Yes, Leave
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
 
                         <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
                             <DialogTrigger asChild>
@@ -136,6 +187,7 @@ export default function AdminOrganizationForm({ organization }: OrganizationForm
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
+                        </div>
                     </div>
                 </form>
             </Form>

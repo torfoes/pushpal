@@ -10,7 +10,7 @@ class MembershipsController < ApplicationController
   before_action :set_current_membership
 
   # Adjust authorization callbacks
-  before_action :authorize_admin!, only: %i[update destroy]
+  before_action :authorize_admin!, only: %i[update]
   # Exclude :current from authorize_member!
   before_action :authorize_member!, only: %i[index show]
 
@@ -84,7 +84,15 @@ class MembershipsController < ApplicationController
     @membership = @organization.memberships.new(user: @current_user, role: 'member')
 
     if @membership.save
-      render json: { message: 'Membership created successfully', membership: @membership }, status: :created
+      # For each event in the organization, create an attendance record for the new membership
+      @organization.events.each do |event|
+        Attendance.create!(
+          membership: @membership,
+          event: event,
+          rsvp_status: false,
+          checkin_status: false
+        )
+      end
     else
       render json: { errors: @membership.errors.full_messages }, status: :unprocessable_entity
     end
@@ -101,8 +109,12 @@ class MembershipsController < ApplicationController
 
   # DELETE /organizations/:organization_id/memberships/:id
   def destroy
-    @membership.destroy
-    render json: { message: 'Membership successfully destroyed' }, status: :no_content
+    if @membership.user == @current_user || @current_member_role == 'admin'
+      @membership.destroy
+      render json: { message: 'Membership successfully destroyed' }, status: :no_content
+    else
+      render json: { error: 'You are not authorized to delete this membership' }, status: :forbidden
+    end
   end
 
   private

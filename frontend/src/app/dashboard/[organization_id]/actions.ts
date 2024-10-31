@@ -4,6 +4,7 @@ import { getSessionTokenOrRedirect } from "@/app/utils";
 import { Role } from "@/types";
 import { redirect } from "next/navigation";
 import { Organization, Membership } from '@/types';
+import {revalidatePath} from "next/cache";
 
 export async function checkLastAdmin(organization_id: string) {
     const sessionToken = await getSessionTokenOrRedirect();
@@ -69,6 +70,7 @@ export async function updateMemberRoleAction(membership_id: string, organization
 
 export async function deleteMemberAction(membership_id: string, organization_id: string) {
     const sessionToken = await getSessionTokenOrRedirect();
+    console.log(membership_id, organization_id);
 
     const res = await fetch(
         `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}organizations/${organization_id}/memberships/${membership_id}`,
@@ -114,5 +116,5 @@ export async function changeDuesPaidAction(membership_id: string, organization_i
         throw new Error(`Failed to update dues paid status: ${res.status}`);
     }
 
-    redirect(`/dashboard/${organization_id}/members`);
+    revalidatePath(`/dashboard/${organization_id}/members`);
 }
