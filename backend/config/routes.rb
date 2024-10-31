@@ -23,6 +23,7 @@ Rails.application.routes.draw do
         member do
           post 'toggle_rsvp'
           post 'toggle_checkin'
+          post 'check_in'
         end
       end
     end

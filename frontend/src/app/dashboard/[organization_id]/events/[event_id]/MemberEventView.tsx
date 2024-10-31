@@ -1,14 +1,34 @@
 'use client';
 
-import { getEventDetails, toggleRsvpAction, getAttendance } from "./actions";
-import { useEffect, useState } from "react";
-import { EventDetails, Attendance } from "@/types";
-import {QRCode} from "react-qrcode-logo";
+import React, { useState, useEffect } from "react";
+import { Attendance } from "@/types";
+import { QRCode } from "react-qrcode-logo";
 
-export default function MemberEventView({ event }: { event: EventDetails }) {
+interface MemberEventViewProps {
+    attendance: Attendance;
+}
+
+const MemberEventView: React.FC<MemberEventViewProps> = ({ attendance }) => {
+    const [qrSize, setQrSize] = useState(500);
+
+    useEffect(() => {
+        const updateSize = () => {
+            const screenWidth = window.innerWidth;
+            const newSize = Math.min(screenWidth * 0.8, 500);
+            setQrSize(newSize);
+        };
+
+        updateSize();
+
+        window.addEventListener('resize', updateSize);
+        return () => window.removeEventListener('resize', updateSize);
+    }, []);
+
     return (
         <div className="flex justify-center">
-            <QRCode value="640a890f-4f0d-460a-9f4e-fef674f3c364" size={500} />
+            <QRCode value={attendance.event_id+"/"+attendance.id} size={qrSize} />
         </div>
     );
-}
+};
+
+export default MemberEventView;
