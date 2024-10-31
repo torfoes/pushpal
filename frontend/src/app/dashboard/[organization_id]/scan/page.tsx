@@ -1,73 +1,84 @@
 'use client';
-import React, { useCallback, useEffect, useState } from 'react';
-import QrScanner from '../../../../components/QrScanner'; // Adjust the path based on your file structure
-import { toast } from 'sonner'; // Assuming sonner is installed for toast notifications
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import QrScanner from '@/components/QrScanner';
+import { useParams } from 'next/navigation';
+import { toast } from 'sonner';
+import { Html5QrcodeResult } from 'html5-qrcode';
+import debounce from 'lodash.debounce';
+import { checkInAction } from './actions'; // Import the new action
 
-const Page: React.FC = () => {
-  const [hasPermission, setHasPermission] = useState(false); // State to track permission status
-  const [isScanning, setIsScanning] = useState(false); // State to manage scanning
-  const [isDialogOpen, setIsDialogOpen] = useState(true); // State to control dialog open state
+const ScanPage: React.FC = () => {
+    const [errorMessage, setErrorMessage] = useState('');
+    const params = useParams();
+    const organization_id = params.organization_id as string;
 
-  // Callback function to handle successful QR code scan
-  const handleScanSuccess = useCallback((decodedText: string) => {
-    toast(`Success: ${decodedText}`); // Show toast notification on success
-  }, []);
+    // Debounced scan success handler
+    const debouncedHandleScanSuccess = useMemo(() => {
+        return debounce(async (decodedText: string, decodedResult: Html5QrcodeResult) => {
+            try {
+                const [event_id, attendance_id] = decodedText.split('/');
 
-  // Optional callback function to handle scan errors
-  const handleScanError = useCallback((errorMessage: string) => {
-    console.error("QR Scan Error: ", errorMessage);
-  }, []);
+                if (!event_id || !attendance_id) {
+                    setErrorMessage('Invalid QR code format.');
+                    toast.error('Invalid QR code format.');
+                    return;
+                }
 
-  // Handle camera permission request
-  const handlePermissionClick = () => {
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then((stream) => {
-        // Permission granted
-        setHasPermission(true);
-        stream.getTracks().forEach(track => track.stop()); // Stop the camera stream immediately
-      })
-      .catch((err) => {
-        console.error("Permission denied", err);
-      });
-  };
+                // Show toast notification for scanned QR code
+                toast('QR code scanned. Processing check-in...');
 
-  useEffect(() => {
-    // Automatically show the dialog when the page loads
-    setIsDialogOpen(true);
-  }, []);
+                // Call the server action
+                const attendance = await checkInAction(attendance_id, organization_id, event_id);
 
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        {/* Dialog opens automatically when the page loads */}
-        <DialogContent
-          className="sm:max-w-[600px]"
-          style={{ backgroundColor: 'black', zIndex: 9999 }}  // Set a high z-index
-        >
-          <DialogHeader>
-            <DialogTitle>QR Code Scanner</DialogTitle>
-            <DialogDescription>
-              Scan the member&apos;s QR code
-            </DialogDescription>
-          </DialogHeader>
-          <QrScanner
-            fps={10}
-            qrbox={250}
-            disableFlip={false}
-            onScanSuccess={handleScanSuccess}
-            onScanError={handleScanError}
-          />
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
+                // Show success message
+                toast.success(`Checked in: ${attendance.user_name}`);
+                setErrorMessage('');
+            } catch (error: unknown) {
+                console.error('Error during check-in:', error);
+
+                let errorMsg: string;
+
+                if (error instanceof Error) {
+                    errorMsg = error.message;
+                } else {
+                    errorMsg = 'An unexpected error occurred.';
+                }
+
+                setErrorMessage(errorMsg);
+                toast.error(errorMsg);
+            }
+        }, 1000); // Debounce delay of 1000ms
+    }, [organization_id]);
+
+    // Cleanup the debounced function when the component unmounts
+    useEffect(() => {
+        return () => {
+            debouncedHandleScanSuccess.cancel();
+        };
+    }, [debouncedHandleScanSuccess]);
+
+    // Suppress logging in handleScanError
+    const handleScanError = useCallback(() => {
+        // Do nothing to suppress logging
+    }, []);
+
+    return (
+        <div className="flex flex-col items-center justify-center p-4">
+            <h2 className="text-xl font-bold mb-4">Scan QR Code to Check In Members</h2>
+            <QrScanner
+                fps={10}
+                qrbox={250}
+                disableFlip={false}
+                onScanSuccess={debouncedHandleScanSuccess}
+                onScanError={handleScanError}
+            />
+            {errorMessage && (
+                <p className="text-red-500 mt-4">
+                    {errorMessage}
+                </p>
+            )}
+        </div>
+    );
 };
 
-export default Page;
+export default ScanPage;
