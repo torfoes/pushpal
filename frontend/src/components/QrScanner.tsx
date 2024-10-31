@@ -1,105 +1,82 @@
 'use client';
-import React, { useEffect, useRef } from 'react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
-
-const qrcodeRegionId = 'html5qr-code-full-region';
+import React, { useEffect } from 'react';
+import {
+    Html5QrcodeScanner,
+    Html5QrcodeScanType,
+    Html5QrcodeSupportedFormats,
+    Html5QrcodeResult,
+} from 'html5-qrcode';
 
 interface QrScannerProps {
-  fps?: number;
-  qrbox?: number;
-  aspectRatio?: number;
-  disableFlip?: boolean;
-  verbose?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onScanSuccess: (decodedText: string, decodedResult: any) => void;
-  onScanError?: (errorMessage: string) => void;
+    fps?: number;
+    qrbox?: number | { width: number; height: number };
+    aspectRatio?: number;
+    disableFlip?: boolean;
+    verbose?: boolean;
+    supportedScanTypes?: Html5QrcodeScanType[];
+    formatsToSupport?: Html5QrcodeSupportedFormats[];
+    onScanSuccess: (decodedText: string, decodedResult: Html5QrcodeResult) => void;
+    onScanError?: (errorMessage: string, error: unknown) => void;
 }
 
-// Only extract config-related properties
-const createConfig = ({ fps, qrbox, aspectRatio, disableFlip }: Partial<QrScannerProps>) => {
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const config: any = {};
-  if (fps) config.fps = fps;
-  if (qrbox) config.qrbox = qrbox;
-  if (aspectRatio) config.aspectRatio = aspectRatio;
-  if (disableFlip !== undefined) config.disableFlip = disableFlip;
-  config.rememberLastUsedCamera = false; // Prevents the last used camera from being remembered
-  return config;
-};
-
 const QrScanner: React.FC<QrScannerProps> = ({
-  fps,
-  qrbox,
-  aspectRatio,
-  disableFlip,
-  verbose,
-  onScanSuccess,
-  onScanError,
-}) => {
-  const html5QrCodeScannerRef = useRef<Html5QrcodeScanner | null>(null);
+                                                 fps = 10,
+                                                 qrbox = 250,
+                                                 aspectRatio,
+                                                 disableFlip = false,
+                                                 verbose = false,
+                                                 supportedScanTypes = [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
+                                                 formatsToSupport = [Html5QrcodeSupportedFormats.QR_CODE],
+                                                 onScanSuccess,
+                                                 onScanError,
+                                             }) => {
+    const scannerId = 'html5qr-code-scanner';
 
-  const removeScanFileOption = () => {
-    const scanFileSpan = document.getElementById('html5-qrcode-anchor-scan-type-change');
-    if (scanFileSpan) {
-      scanFileSpan.style.display = 'none'; // Alternatively, scanFileSpan.remove() can be used
-    }
-  };
-
-  const removeQrCodeImage = () => {
-    const qrImage = document.querySelector(`#${qrcodeRegionId} img`); // Target the image inside the QR scanner region
-    if (qrImage) {
-      qrImage.remove(); // Remove the image
-    }
-  };
-
-  const observeDomChanges = () => {
-    const observer = new MutationObserver(() => {
-      removeScanFileOption();
-      removeQrCodeImage(); // Continuously attempt to remove the image in case it's re-added
-    });
-
-    const readerElement = document.getElementById(qrcodeRegionId);
-    if (readerElement) {
-      observer.observe(readerElement, { childList: true, subtree: true });
-    }
-  };
-
-  useEffect(() => {
-    const initScanner = () => {
-      const config = createConfig({ fps, qrbox, aspectRatio, disableFlip });
-      const scannerVerbose = verbose === true;
-
-      if (!onScanSuccess) {
-        throw new Error('onScanSuccess callback is required.');
-      }
-
-      html5QrCodeScannerRef.current = new Html5QrcodeScanner(qrcodeRegionId, config, scannerVerbose);
-      if (html5QrCodeScannerRef.current instanceof Html5QrcodeScanner) {
-        html5QrCodeScannerRef.current.render(onScanSuccess, onScanError);
-      }
-
-      setTimeout(() => {
-        removeScanFileOption();
-        removeQrCodeImage();
-        observeDomChanges();
-      }, 0);
-    };
-
-    initScanner();
-
-    return () => {
-      if (html5QrCodeScannerRef.current) {
-        if (html5QrCodeScannerRef.current instanceof Html5QrcodeScanner) {
-          html5QrCodeScannerRef.current.clear().catch((error) => {
-            console.error('Failed to clear QR code scanner', error);
-          });
+    useEffect(() => {
+        if (!onScanSuccess) {
+            throw new Error('onScanSuccess callback is required.');
         }
-      }
-    };
-  }, [fps, qrbox, aspectRatio, disableFlip, verbose, onScanSuccess, onScanError]);
 
-  return <div id={qrcodeRegionId} />;
+        const config = {
+            fps,
+            qrbox,
+            aspectRatio,
+            disableFlip,
+            supportedScanTypes,
+            formatsToSupport,
+        };
+
+        // Initialize the scanner
+        const html5QrCodeScanner = new Html5QrcodeScanner(scannerId, config, verbose);
+
+        html5QrCodeScanner.render(
+            onScanSuccess,
+            (errorMessage, error) => {
+                if (onScanError) {
+                    onScanError(errorMessage, error);
+                }
+            }
+        );
+
+        // Cleanup function
+        return () => {
+            html5QrCodeScanner.clear().catch((error) => {
+                console.error('Failed to clear QR code scanner', error);
+            });
+        };
+    }, [
+        fps,
+        qrbox,
+        aspectRatio,
+        disableFlip,
+        verbose,
+        supportedScanTypes,
+        formatsToSupport,
+        onScanSuccess,
+        onScanError,
+    ]);
+
+    return <div id={scannerId} />;
 };
 
 export default QrScanner;

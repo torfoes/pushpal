@@ -11,8 +11,8 @@ class AttendancesController < ApplicationController
   before_action :set_current_member_role
   before_action :authorize_member!
 
-  before_action :set_attendance, only: %i[show update destroy toggle_rsvp toggle_checkin]
-  before_action :authorize_attendance_modification, only: %i[update destroy toggle_rsvp toggle_checkin]
+  before_action :set_attendance, only: %i[show update destroy toggle_rsvp toggle_checkin check_in]
+  before_action :authorize_attendance_modification, only: %i[update destroy toggle_rsvp toggle_checkin check_in]
 
   # GET /organizations/:organization_id/events/:event_id/attendances
   def index
@@ -72,6 +72,21 @@ class AttendancesController < ApplicationController
       render json: attendance_json(@attendance), status: :ok
     else
       render json: @attendance.errors, status: :unprocessable_entity
+    end
+  end
+
+  def check_in
+    if @attendance.checkin_status
+      render json: attendance_json(@attendance), status: :ok
+    else
+      @attendance.checkin_status = true
+      @attendance.time = Time.current
+
+      if @attendance.save
+        render json: attendance_json(@attendance), status: :ok
+      else
+        render json: @attendance.errors, status: :unprocessable_entity
+      end
     end
   end
 
