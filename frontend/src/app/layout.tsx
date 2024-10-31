@@ -24,7 +24,16 @@ export default async function RootLayout({
           <body className={inter.className}>
           <Header session={session}/>
           {children}
-          <Toaster />
+          <Toaster
+              toastOptions={{
+                  classNames: {
+                      error: 'bg-red-400',
+                      success: 'text-green-400',
+                      warning: 'text-yellow-400',
+                      info: 'bg-blue-400',
+                  },
+              }}
+          />
           <ServiceWorker/>
           </body>
         </html>

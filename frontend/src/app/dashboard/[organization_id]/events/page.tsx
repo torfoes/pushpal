@@ -15,7 +15,7 @@ export default async function Page({ params }: { params: { organization_id: stri
                 <h2 className="text-2xl font-semibold">Events</h2>
 
                 <div className="flex items-center space-x-4">
-                    {membership && (membership.role === 'creator' || membership.role === 'creator') && (
+                    {membership && (membership.role === 'manager' || membership.role === 'creator') && (
                         <CreateEventDialog organization_id={organization_id} />
                     )}
                 </div>
