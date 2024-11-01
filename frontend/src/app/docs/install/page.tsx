@@ -1,48 +1,43 @@
-'use client';
-
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import QRModal from '../../../components/InstallModal';
-import SubscriptionStatus from "@/app/subscriptions/SubscriptionStatus";
-import Image from 'next/image'
+import React from 'react';
+import Image from 'next/image';
+import { Share } from 'lucide-react';
 
 const Page = () => {
-    const [isQRModalOpen, setIsQRModalOpen] = useState(false);
-
-    const handleInstall = () => {
-        setIsQRModalOpen(true);  // Open the modal when Install is clicked
-    };
-
     return (
         <div className="container mx-auto p-4 max-w-5xl">
-            {/* PWA Installation Section */}
-            {/*<SubscriptionStatus />*/}
-            <br />
-            {/* Install Button */}
-            <div className="mt-8 flex justify-center">
-                <Button 
-                    onClick={handleInstall} 
-                    className="py-4 px-8 text-white bg-black hover:text-black hover:bg-white font-semibold rounded-md transition-colors duration-300"
-                >
-                    How To Install
-                </Button>
-            </div>
-            <br />
-            {/* Demo GIF Section */}
-            <div className="flex flex-col items-center justify-center w-full max-w-xs space-y-12 mx-auto">
-                <div className="w-full max-w-xs">
+            {/* Two-Column Layout */}
+            <div className="flex flex-col md:flex-row items-start md:space-x-8">
+                {/* Installation Instructions */}
+                <div className="w-full md:w-1/2">
+                    {/* Installation Instructions */}
+                    <div className="my-4">
+                        <h2 className="text-xl font-semibold text-white mb-4">Install the app</h2>
+                        <ol className="list-decimal list-outside pl-6 space-y-4 text-white">
+                            <li className="text-lg">
+                                <div className="flex items-center">
+                                    Tap on <Share className="h-5 w-5 mx-2 inline" /> in the browser menu.
+                                </div>
+                            </li>
+                            <li className="text-lg">
+                                Scroll down and select <strong>Add to Home Screen</strong>.
+                            </li>
+                            <li className="text-lg">
+                                Look for the app icon on your home screen.
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div className="w-full md:w-1/2 mt-8 md:mt-0 flex justify-center">
                     <Image
                         src="/demo.gif"
                         alt="Push Pal Demo"
-                        className="rounded-lg shadow-lg w-full h-auto"
-                        width={500}
-                        height={500}
+                        className="rounded-lg shadow-lg w-full h-auto max-w-xs"
+                        width={300}
+                        height={300}
                     />
-
                 </div>
             </div>
-            {/* QR Modal */}
-            <QRModal isOpen={isQRModalOpen} onClose={() => setIsQRModalOpen(false)} />
         </div>
     );
 };
