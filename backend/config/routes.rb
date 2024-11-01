@@ -35,8 +35,9 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :push_subscriptions, path: 'push-subscriptions', only: %i[create destroy index show] do
+  resources :push_subscriptions, path: 'push-subscriptions', param: :endpoint, constraints: { endpoint: /.+/ }, only: %i[create destroy index show] do
     member do
+      get 'view'
       post 'send_notification'
     end
   end
