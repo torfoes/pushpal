@@ -96,7 +96,7 @@ RSpec.describe 'PushSubscriptions API', type: :request do
         expect(json['success']).to be true
         expect(json['subscriptions']).not_to be_empty
         expect(json['subscriptions'].size).to eq(1)
-        expect(json['subscriptions'][0]['id']).to eq(push_subscription.id)
+        expect(json['subscriptions'][0]['endpoint']).to eq(push_subscription.endpoint)
       end
     end
   end
@@ -154,7 +154,7 @@ RSpec.describe 'PushSubscriptions API', type: :request do
 
         it 'does not create a duplicate subscription' do
           expect(json['success']).to be true
-          expect(json['subscription']['id']).not_to eq(push_subscription.id)
+          expect(json['subscription']['endpoint']).to eq(valid_attributes[:push_subscription][:endpoint])
         end
 
         it 'returns status code 201 Created' do
@@ -165,13 +165,11 @@ RSpec.describe 'PushSubscriptions API', type: :request do
   end
 
   # ===========================
-  # Tests for DELETE /push-subscriptions/:id
+  # Tests for DELETE /push-subscriptions/:endpoint
   # ===========================
-  # spec/requests/push_subscriptions_spec.rb
-
-  describe 'DELETE /push-subscriptions/:id' do
-    let(:subscription_id) { push_subscription.id }
-    let(:delete_endpoint) { "#{endpoint}/#{subscription_id}" }
+  describe 'DELETE /push-subscriptions/:endpoint' do
+    let(:subscription_endpoint_value) { push_subscription.endpoint }
+    let(:delete_endpoint) { "#{endpoint}/#{CGI.escape(subscription_endpoint_value)}" }
 
     context 'when the request is unauthorized' do
       before { delete delete_endpoint, headers: unauthorized_headers }
@@ -199,14 +197,16 @@ RSpec.describe 'PushSubscriptions API', type: :request do
         end
 
         it 'actually removes the subscription from the database' do
-          expect(PushSubscription.find_by(id: subscription_id)).to be_nil
+          expect(PushSubscription.find_by(endpoint: subscription_endpoint_value)).to be_nil
         end
       end
 
       context 'when the subscription does not exist' do
-        # Generate a random UUID that does not exist in the database
-        let(:subscription_id) { SecureRandom.uuid }
-        before { delete "#{endpoint}/#{subscription_id}", headers: headers }
+        # Generate a random endpoint that does not exist in the database
+        let(:non_existent_endpoint) { 'https://example.com/non-existent-endpoint' }
+        let(:delete_endpoint) { "#{endpoint}/#{CGI.escape(non_existent_endpoint)}" }
+
+        before { delete delete_endpoint, headers: headers }
 
         it 'returns status code 404 Not Found' do
           expect(response).to have_http_status(:not_found)
@@ -219,11 +219,13 @@ RSpec.describe 'PushSubscriptions API', type: :request do
       end
     end
   end
+
   # ===========================
-  # Tests for POST /push-subscriptions/:id/send_notification (send_notification action)
+  # Tests for POST /push-subscriptions/:endpoint/send_notification
   # ===========================
-  describe 'POST /push-subscriptions/:id/send_notification' do
-    let(:send_notification_endpoint) { "#{endpoint}/#{push_subscription.id}/send_notification" }
+  describe 'POST /push-subscriptions/:endpoint/send_notification' do
+    let(:subscription_endpoint_value) { push_subscription.endpoint }
+    let(:send_notification_endpoint) { "#{endpoint}/#{CGI.escape(subscription_endpoint_value)}/send_notification" }
     let(:notification_params) do
       {
         notification: {
@@ -284,10 +286,10 @@ RSpec.describe 'PushSubscriptions API', type: :request do
       end
 
       context 'when the subscription does not exist' do
-        let(:non_existent_id) { SecureRandom.uuid }
-        let(:send_notification_endpoint_non_existent) { "#{endpoint}/#{non_existent_id}/send_notification" }
+        let(:non_existent_endpoint) { 'https://example.com/non-existent-endpoint' }
+        let(:send_notification_endpoint) { "#{endpoint}/#{CGI.escape(non_existent_endpoint)}/send_notification" }
 
-        before { post send_notification_endpoint_non_existent, params: notification_params.to_json, headers: headers }
+        before { post send_notification_endpoint, params: notification_params.to_json, headers: headers }
 
         it 'returns status code 404 Not Found' do
           expect(response).to have_http_status(:not_found)
@@ -301,11 +303,104 @@ RSpec.describe 'PushSubscriptions API', type: :request do
     end
   end
 
-
-
   # ===========================
-  # Additional Tests (Optional)
+  # Additional Tests for SHOW and VIEW
   # ===========================
+  describe 'GET /push-subscriptions/:endpoint' do
+    let(:subscription_endpoint_value) { push_subscription.endpoint }
+    let(:show_endpoint) { "#{endpoint}/#{CGI.escape(subscription_endpoint_value)}" }
 
-  # You can add more tests for other actions like SHOW, VIEW, and SEND_NOTIFICATION here.
+    context 'when the request is unauthorized' do
+      before { get show_endpoint, headers: unauthorized_headers }
+
+      it 'returns status code 401 Unauthorized' do
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it 'returns an error message' do
+        expect(json['error']).to eq('Not Authorized')
+      end
+    end
+
+    context 'when the request is authorized' do
+      context 'when the subscription exists' do
+        before { get show_endpoint, headers: headers }
+
+        it 'returns the subscription' do
+          expect(json['success']).to be true
+          expect(json['subscription']).not_to be_nil
+          expect(json['subscription']['endpoint']).to eq(subscription_endpoint_value)
+        end
+
+        it 'returns status code 200 OK' do
+          expect(response).to have_http_status(:ok)
+        end
+      end
+
+      context 'when the subscription does not exist' do
+        let(:non_existent_endpoint) { 'https://example.com/non-existent-endpoint' }
+        let(:show_endpoint) { "#{endpoint}/#{CGI.escape(non_existent_endpoint)}" }
+
+        before { get show_endpoint, headers: headers }
+
+        it 'returns status code 404 Not Found' do
+          expect(response).to have_http_status(:not_found)
+        end
+
+        it 'returns an error message' do
+          expect(json['success']).to be false
+          expect(json['errors']).to include('Subscription not found')
+        end
+      end
+    end
+  end
+
+  describe 'GET /push-subscriptions/:endpoint/view' do
+    let(:subscription_endpoint_value) { push_subscription.endpoint }
+    let(:view_endpoint) { "#{endpoint}/#{CGI.escape(subscription_endpoint_value)}/view" }
+
+    context 'when the request is unauthorized' do
+      before { get view_endpoint, headers: unauthorized_headers }
+
+      it 'returns status code 401 Unauthorized' do
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it 'returns an error message' do
+        expect(json['error']).to eq('Not Authorized')
+      end
+    end
+
+    context 'when the request is authorized' do
+      context 'when the subscription exists' do
+        before { get view_endpoint, headers: headers }
+
+        it 'returns the subscription' do
+          expect(json['success']).to be true
+          expect(json['subscription']).not_to be_nil
+          expect(json['subscription']['endpoint']).to eq(subscription_endpoint_value)
+        end
+
+        it 'returns status code 200 OK' do
+          expect(response).to have_http_status(:ok)
+        end
+      end
+
+      context 'when the subscription does not exist' do
+        let(:non_existent_endpoint) { 'https://example.com/non-existent-endpoint' }
+        let(:view_endpoint) { "#{endpoint}/#{CGI.escape(non_existent_endpoint)}/view" }
+
+        before { get view_endpoint, headers: headers }
+
+        it 'returns status code 404 Not Found' do
+          expect(response).to have_http_status(:not_found)
+        end
+
+        it 'returns an error message' do
+          expect(json['success']).to be false
+          expect(json['errors']).to include('Subscription not found.')
+        end
+      end
+    end
+  end
 end
