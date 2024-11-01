@@ -30,7 +30,7 @@ export default async function RootLayout({
             <AppSidebar session={session} />
 
             <main className="flex-1">
-                {!session && <DesktopHeader session={session} />}
+                {/*{!session && <DesktopHeader session={session} />}*/}
 
                 <MobileHeader session={session} />
                 <div className={'p-2'}>
