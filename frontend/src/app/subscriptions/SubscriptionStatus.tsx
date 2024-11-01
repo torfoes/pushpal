@@ -6,11 +6,17 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { subscribeUser, unsubscribeUser } from "@/app/subscriptions/actions";
 
 function arrayBufferToBase64Url(buffer: ArrayBuffer): string {
-    return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+    const uint8Array = new Uint8Array(buffer);
+    let binary = '';
+    for (let i = 0; i < uint8Array.length; i++) {
+        binary += String.fromCharCode(uint8Array[i]);
+    }
+    return btoa(binary)
         .replace(/\+/g, '-')
         .replace(/\//g, '_')
         .replace(/=+$/, '');
 }
+
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -19,8 +25,15 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
         .replace(/_/g, '/');
 
     const rawData = atob(base64);
-    return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
+    const uint8Array = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; i++) {
+        uint8Array[i] = rawData.charCodeAt(i);
+    }
+
+    return uint8Array;
 }
+
 
 
 
@@ -105,6 +118,7 @@ export default function SubscriptionStatus() {
 
             // Send subscription details to the server
             await subscribeUser(subscriptionJson);
+
 
             setIsSubscribed(true);
         } catch (error) {

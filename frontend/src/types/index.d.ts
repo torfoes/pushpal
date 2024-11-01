@@ -115,3 +115,9 @@ export interface Notification {
     sent_at: string;
     status: NotificationStatus;
 }
+
+interface PushSubscriptionJSONServer {
+    endpoint?: string;
+    expirationTime?: EpochTimeStamp | null;
+    keys?: Record<string, string>;
+}

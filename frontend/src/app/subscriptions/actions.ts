@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { userAgent } from 'next/server';
 import { getSessionTokenOrRedirect } from '@/app/utils';
 import {revalidatePath} from "next/cache";
-
+import {PushSubscriptionJSONServer} from '@/types';
 // Ensure VAPID keys are set
 if (
     !process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
@@ -23,25 +23,22 @@ webpush.setVapidDetails(
     process.env.VAPID_PRIVATE_KEY!
 );
 
-// Define an interface for the subscription JSON
-interface PushSubscriptionJSON {
-    endpoint: string;
-    expirationTime: number | null;
-    keys: {
-        p256dh: string;
-        auth: string;
-    };
-}
-
 /**
  * Subscribes the user to push notifications.
  * @param subscriptionJson - The PushSubscription JSON object from the client.
  */
-export async function subscribeUser(subscriptionJson: PushSubscriptionJSON) {
+export async function subscribeUser(subscriptionJson: PushSubscriptionJSONServer) {
     const sessionToken = await getSessionTokenOrRedirect();
 
     const headersList = headers();
     const userAgentData = userAgent({ headers: headersList });
+
+    if (!subscriptionJson.keys) {
+        throw new Error('Subscription keys are missing.');
+    }
+    if (!subscriptionJson.endpoint) {
+        throw new Error('Subscription endpoint is missing.');
+    }
 
     // Prepare the payload to send to the backend
     const pushSub = {
