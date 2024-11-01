@@ -42,8 +42,9 @@ export default async function Page() {
                 <p className="mt-2 text-gray-400">
                     These are the devices where you can receive push notifications.
                 </p>
-
-                <SubscriptionStatus/>
+                <div className={'py-2'}>
+                    <SubscriptionStatus/>
+                </div>
 
                 <DataTable<PushSubscription, unknown> columns={columns} data={push_subscriptions} />
             </div>

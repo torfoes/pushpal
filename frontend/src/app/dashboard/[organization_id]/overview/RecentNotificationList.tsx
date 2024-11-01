@@ -17,7 +17,7 @@ import { BellIcon } from "lucide-react";
 
 export default function RecentNotificationList({ notifications }: { notifications: Notification[] }) {
     if (!notifications || notifications.length === 0) {
-        return <p>No recent notifications.</p>;
+        return <p>No recent pushes.</p>;
     }
 
     return (

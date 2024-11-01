@@ -63,11 +63,8 @@ export const columns: ColumnDef<PushSubscription>[] = [
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => sendPushNotification(subscription.id, "PushPal Test Push!!", "This is a test notification.")}>
+                        <DropdownMenuItem onClick={() => sendPushNotification(subscription.endpoint, "PushPal Test Push!!", "This is a test notification.")}>
                             Send Test Push
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => unsubscribeUser(subscription.id)}>
-                            Remove subscription
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

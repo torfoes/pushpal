@@ -74,16 +74,17 @@ export default async function OverviewPage({ params }: { params: { organization_
             {/*<h2 className="text-2xl font-semibold">Overview</h2>*/}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <h2 className="text-1xl">
+                    <h2 className="text-2xl font-semibold pb-2" >
                         Upcoming Events
                     </h2>
+
                     <UpcomingEventsList events={upcomingEvents}/>
 
                 </div>
 
                 <div>
-                    <h2 className="text-1xl">
-                        Recent Notifications
+                    <h2 className="text-2xl font-semibold pb-2">
+                        Recent Pushes
                     </h2>
 
                     <RecentNotificationList notifications={recentNotifications} />

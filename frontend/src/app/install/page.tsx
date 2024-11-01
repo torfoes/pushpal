@@ -16,7 +16,7 @@ const Page = () => {
     return (
         <div className="container mx-auto p-4 max-w-5xl">
             {/* PWA Installation Section */}
-            <SubscriptionStatus />
+            {/*<SubscriptionStatus />*/}
             <br />
             {/* Install Button */}
             <div className="mt-8 flex justify-center">
@@ -32,10 +32,13 @@ const Page = () => {
             <div className="flex flex-col items-center justify-center w-full max-w-xs space-y-12 mx-auto">
                 <div className="w-full max-w-xs">
                     <Image
-                        src="/demo.gif" 
-                        alt="Push Pal Demo" 
-                        className="rounded-lg shadow-lg w-full h-auto" 
+                        src="/demo.gif"
+                        alt="Push Pal Demo"
+                        className="rounded-lg shadow-lg w-full h-auto"
+                        width={500}
+                        height={500}
                     />
+
                 </div>
             </div>
             {/* QR Modal */}
