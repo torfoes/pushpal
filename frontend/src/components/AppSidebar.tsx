@@ -14,13 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import { Session } from "next-auth";
-import {
-    Bell,
-    Calendar,
-    HomeIcon,
-    HelpCircle,
-    User,
-} from "lucide-react";
+import { Bell, Info, HomeIcon, HelpCircle, User } from "lucide-react";
 import Link from "next/link";
 import AvatarFullDropdown from "./AvatarFullDropdown";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -46,9 +40,16 @@ export function AppSidebar({ session }: AppSidebarProps) {
             { title: "Guides", url: "/documentation", icon: HelpCircle },
         ]
         : [
-            { title: "Install", url: "/install", icon: Calendar },
+            { title: "Home", url: "/", icon: HomeIcon },
+            { title: "How it Works", url: "/how-it-works", icon: Info },
             { title: "Login", url: "/login", icon: User },
         ];
+
+    const shouldRenderSidebar = session || isMobile;
+
+    if (!shouldRenderSidebar) {
+        return null;
+    }
 
     return (
         <Sidebar collapsible="icon">
