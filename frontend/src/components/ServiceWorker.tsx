@@ -1,8 +1,7 @@
-'use client'
+'use client';
 
-import {useEffect} from 'react';
+import { useEffect } from 'react';
 
-// This registers the service worker early in the application so that it can be used across when subscribing.
 const ServiceWorker = () => {
     useEffect(() => {
         if ('serviceWorker' in navigator) {
