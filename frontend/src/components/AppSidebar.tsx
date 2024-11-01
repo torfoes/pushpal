@@ -25,7 +25,9 @@ import {
     Building,
     Send,
     LifeBuoy,
+    Layout
 } from "lucide-react";
+
 import Link from "next/link";
 import AvatarFullDropdown from "./AvatarFullDropdown";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -56,10 +58,11 @@ export function AppSidebar({ session }: AppSidebarProps) {
         ];
 
     const docsNavigationItems = [
-        { title: "Overview", url: "/docs", icon: Book },
+        { title: "Overview", url: "/docs", icon: Layout },
         { title: "Install", url: "/docs/install", icon: Download },
-        { title: "Create an Event", url: "/docs/create-an-event", icon: CalendarPlus },
+        { title: "How to Subscribe", url: "/docs/how-to-subscribe", icon: Book },
         { title: "Create an Org", url: "/docs/create-an-org", icon: Building },
+        { title: "Create an Event", url: "/docs/create-an-event", icon: CalendarPlus },
         { title: "Send a Push", url: "/docs/send-a-push", icon: Send },
         { title: "Support", url: "/docs/support", icon: LifeBuoy },
     ];
