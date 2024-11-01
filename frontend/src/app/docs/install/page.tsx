@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import QRModal from '../../components/InstallModal';
+import QRModal from '../../../components/InstallModal';
 import SubscriptionStatus from "@/app/subscriptions/SubscriptionStatus";
 import Image from 'next/image'
 
