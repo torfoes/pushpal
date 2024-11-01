@@ -1,34 +1,55 @@
-'use server'
+'use server';
 
-import webpush from 'web-push'
-import {headers} from "next/headers";
-import {redirect} from "next/navigation";
-import {userAgent} from "next/server";
-import {getSessionTokenOrRedirect} from "@/app/utils";
+import webpush from 'web-push';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { userAgent } from 'next/server';
+import { getSessionTokenOrRedirect } from '@/app/utils';
+import {revalidatePath} from "next/cache";
 
-if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_SUBJECT) {
+// Ensure VAPID keys are set
+if (
+    !process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
+    !process.env.VAPID_PRIVATE_KEY ||
+    !process.env.VAPID_SUBJECT
+) {
     throw new Error('VAPID keys are not defined in environment variables.');
 }
 
-// xxx! - means non-null assertion
+// Set VAPID details for web-push
 webpush.setVapidDetails(
     process.env.VAPID_SUBJECT!,
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
     process.env.VAPID_PRIVATE_KEY!
-)
+);
 
+// Define an interface for the subscription JSON
+interface PushSubscriptionJSON {
+    endpoint: string;
+    expirationTime: number | null;
+    keys: {
+        p256dh: string;
+        auth: string;
+    };
+}
 
-export async function subscribeUser(p256dh: string, auth: string, endpoint: string) {
+/**
+ * Subscribes the user to push notifications.
+ * @param subscriptionJson - The PushSubscription JSON object from the client.
+ */
+export async function subscribeUser(subscriptionJson: PushSubscriptionJSON) {
     const sessionToken = await getSessionTokenOrRedirect();
 
     const headersList = headers();
     const userAgentData = userAgent({ headers: headersList });
 
+    // Prepare the payload to send to the backend
     const pushSub = {
         push_subscription: {
-            endpoint: endpoint,
-            p256dh_key: p256dh,
-            auth_key: auth,
+            endpoint: subscriptionJson.endpoint,
+            p256dh_key: subscriptionJson.keys.p256dh,
+            auth_key: subscriptionJson.keys.auth,
+            expirationTime: subscriptionJson.expirationTime,
             is_bot: userAgentData.isBot,
             browser_name: userAgentData.browser.name,
             browser_version: userAgentData.browser.version,
@@ -41,18 +62,21 @@ export async function subscribeUser(p256dh: string, auth: string, endpoint: stri
             device_type: userAgentData.device.type,
             cpu_architecture: userAgentData.cpu.architecture,
             user_agent: userAgentData.ua,
-        }
+        },
     };
 
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}push-subscriptions`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${sessionToken}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(pushSub)
-        });
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}push-subscriptions`,
+            {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${sessionToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(pushSub),
+            }
+        );
 
         if (!res.ok) {
             const errorData = await res.json();
@@ -61,80 +85,99 @@ export async function subscribeUser(p256dh: string, auth: string, endpoint: stri
         }
 
         const data = await res.json();
-
-        if (!data.success) {
-            console.error('Failed to save subscription', data.errors);
-            throw new Error(`Failed to save subscription: ${data.errors.join(', ')}`);
-        }
+        console.log('Subscription saved successfully:', data);
+        revalidatePath('/subscriptions')
 
     } catch (error) {
         console.error('Error saving subscription:', error);
-        return { success: false, error: 'Failed to save subscription' };
-    }
-
-    redirect('/subscriptions')
-}
-
-export async function sendPushNotification(pushSubscriptionId, title, body, data = {}) {
-    const sessionToken = await getSessionTokenOrRedirect();
-
-    try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}push-subscriptions/${pushSubscriptionId}/send_notification`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${sessionToken}`,
-            },
-            body: JSON.stringify({
-                notification: {
-                    title,
-                    body,
-                    data,
-                },
-            }),
-        });
-
-        // console.log(response)
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Failed to send push notification', errorData);
-            throw new Error(`Failed to send push notification: ${response.status}`);
-        }
-
-        const successData = await response.json();
-        console.log('Push notification sent successfully:', successData);
-        redirect('/subscriptions')
-    } catch (error) {
-        console.error('Error sending push notification:', error);
         throw error;
     }
 }
 
-export async function unsubscribeUser(pushSubscriptionId) {
+/**
+ * Unsubscribes the user from push notifications.
+ * @param endpoint - The endpoint URL of the push subscription.
+ */
+export async function unsubscribeUser(endpoint: string) {
     const sessionToken = await getSessionTokenOrRedirect();
 
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}push-subscriptions/${pushSubscriptionId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${sessionToken}`,
-            },
-        });
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}push-subscriptions/${encodeURIComponent(endpoint)}`,
+            {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${sessionToken}`,
+                },
+            }
+        );
 
         if (!response.ok) {
             const errorData = await response.json();
             console.error('Failed to unsubscribe push subscription', errorData);
-            throw new Error(`Failed to unsubscribe push subscription: ${response.status}`);
+            throw new Error(
+                `Failed to unsubscribe push subscription: ${response.status}`
+            );
         }
 
         const successData = await response.json();
         console.log('Successfully unsubscribed push subscription:', successData);
-
-        redirect('/subscriptions')
+        revalidatePath('/subscriptions');
     } catch (error) {
         console.error('Error during unsubscription:', error);
+        throw error;
+    }
+}
+
+/**
+ * Sends a push notification to a specific subscription.
+ * @param endpoint - The endpoint URL of the push subscription.
+ * @param title - The notification title.
+ * @param body - The notification body.
+ * @param data - Additional data to send with the notification.
+ */
+export async function sendPushNotification(
+    endpoint: string,
+    title: string,
+    body: string,
+    data = {}
+) {
+    const sessionToken = await getSessionTokenOrRedirect();
+
+    try {
+        const encodedEndpoint = encodeURIComponent(endpoint);
+
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_RAILS_SERVER_URL}push-subscriptions/${encodedEndpoint}/send_notification`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${sessionToken}`,
+                },
+                body: JSON.stringify({
+                    notification: {
+                        title,
+                        body,
+                        data,
+                    },
+                }),
+            }
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Failed to send push notification', errorData);
+            throw new Error(
+                `Failed to send push notification: ${response.statusText}`
+            );
+        }
+
+        const successData = await response.json();
+        console.log('Push notification sent successfully:', successData);
+    } catch (error) {
+        console.error('Error sending push notification:', error);
         throw error;
     }
 }
