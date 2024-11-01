@@ -14,7 +14,18 @@ import {
 } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import { Session } from "next-auth";
-import { Bell, Info, HomeIcon, HelpCircle, User } from "lucide-react";
+import {
+    Bell,
+    Info,
+    HomeIcon,
+    User,
+    Book,
+    Download,
+    CalendarPlus,
+    Building,
+    Send,
+    LifeBuoy,
+} from "lucide-react";
 import Link from "next/link";
 import AvatarFullDropdown from "./AvatarFullDropdown";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -37,7 +48,6 @@ export function AppSidebar({ session }: AppSidebarProps) {
         ? [
             { title: "Dashboard", url: "/dashboard", icon: HomeIcon },
             { title: "Subscriptions", url: "/subscriptions", icon: Bell },
-            { title: "Guides", url: "/documentation", icon: HelpCircle },
         ]
         : [
             { title: "Home", url: "/", icon: HomeIcon },
@@ -45,11 +55,14 @@ export function AppSidebar({ session }: AppSidebarProps) {
             { title: "Login", url: "/login", icon: User },
         ];
 
-    const shouldRenderSidebar = session || isMobile;
-
-    if (!shouldRenderSidebar) {
-        return null;
-    }
+    const docsNavigationItems = [
+        { title: "Overview", url: "/docs", icon: Book },
+        { title: "Install", url: "/docs/install", icon: Download },
+        { title: "Create an Event", url: "/docs/create-an-event", icon: CalendarPlus },
+        { title: "Create an Org", url: "/docs/create-an-org", icon: Building },
+        { title: "Send a Push", url: "/docs/send-a-push", icon: Send },
+        { title: "Support", url: "/docs/support", icon: LifeBuoy },
+    ];
 
     return (
         <Sidebar collapsible="icon">
@@ -63,11 +76,34 @@ export function AppSidebar({ session }: AppSidebarProps) {
 
             {/* Sidebar Content */}
             <SidebarContent>
+                {/* Main Navigation */}
                 <SidebarGroup>
                     <SidebarGroupLabel>Main</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {navigationItems.map((item) => (
+                                <SidebarMenuItem key={item.title}>
+                                    <SidebarMenuButton
+                                        asChild
+                                        isActive={pathname === item.url}
+                                    >
+                                        <Link href={item.url} onClick={handleNavClick}>
+                                            <item.icon />
+                                            <span>{item.title}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            ))}
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
+                {/* Documentation Section */}
+                <SidebarGroup>
+                    <SidebarGroupLabel>Documentation</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            {docsNavigationItems.map((item) => (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton
                                         asChild
