@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from "next/link";
-import Image from "next/image";
 
 const Page = () => {
     return (
@@ -26,7 +25,7 @@ const Page = () => {
                                 </Link>
                                 <Link
                                     className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                                    href="./docs"
+                                    href="./how-it-works"
                                 >
                                     How it works
                                 </Link>
@@ -34,13 +33,9 @@ const Page = () => {
                         </div>
 
                         <div className="flex justify-center">
-                            <Image
-                                src="/iphone_push.png"
-                                alt="Push Pal Demo"
-                                className="rounded-lg shadow-lg w-full h-auto max-w-sm"
-                                width={400}
-                                height={400}
-                            />
+                            <div className="text-center text-gray-500">
+                                put a push notification gif or photo of app here
+                            </div>
                         </div>
 
                     </div>
