@@ -8,7 +8,7 @@ const Page = () => {
             <div className="flex flex-col md:flex-row items-start md:space-x-8">
                 {/* Subscription Instructions */}
                 <div className="w-full md:w-1/2">
-                    <h1 className="text-3xl font-bold mb-4">How to Subscribe to Push Notifications</h1>
+                    <h1 className="text-3xl font-bold mb-4">How to install PushPal</h1>
                     <p className="text-lg mb-4">
                         Follow these steps to enable push notifications on PushPal:
                     </p>
