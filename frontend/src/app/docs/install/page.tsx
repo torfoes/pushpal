@@ -15,24 +15,24 @@ const Page = () => {
 
                     <ol className="list-decimal list-outside pl-6 space-y-4">
                         <li>
-                            <strong>Open the Menu:</strong> If you're on a mobile device, tap the hamburger menu icon 
+                            <strong>Open the Menu:</strong> If you are on a mobile device, tap the hamburger menu icon 
                             at the top left. Otherwise, use the sidebar menu on the left side of the screen.
                         </li>
                         <li>
-                            <strong>Select "Subscriptions" under the Main section:</strong> In the menu, locate the "Subscriptions" 
+                            <strong>Select &quot;Subscriptions&quot; under the Main section:</strong> In the menu, locate the &quot;Subscriptions&quot; 
                             option and click on it to open the subscriptions page.
                         </li>
                         <li>
-                            <strong>Click "Enable Notifications":</strong> On the Subscriptions page, click the yellow "Enable Notifications" 
+                            <strong>Click &quot;Enable Notifications&quot;:</strong> On the Subscriptions page, click the yellow &quot;Enable Notifications&quot; 
                             button to start the process.
                         </li>
                         <li>
-                            <strong>Allow Notifications:</strong> When prompted, select "Allow" to give PushPal permission to send notifications 
+                            <strong>Allow Notifications:</strong> When prompted, select &quot;Allow&quot; to give PushPal permission to send notifications 
                             to your device.
                         </li>
                         <li>
-                            <strong>Verify Your Device:</strong> After enabling notifications, your device should appear under the "Device" section. 
-                            This confirms that you've successfully subscribed to notifications.
+                            <strong>Verify Your Device:</strong> After enabling notifications, your device should appear under the &quot;Device&quot; section. 
+                            This confirms that you have successfully subscribed to notifications.
                         </li>
                     </ol>
 

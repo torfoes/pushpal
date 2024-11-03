@@ -28,7 +28,7 @@ const Page = () => {
             {/* Log Out Instructions */}
             <ol className="list-decimal list-outside pl-6 space-y-4">
                 <li>
-                    <strong>Open the Menu:</strong> If you're on a mobile device, tap on the menu icon 
+                    <strong>Open the Menu:</strong> If you are on a mobile device, tap on the menu icon 
                     <Menu className="h-5 w-5 mx-2 inline" /> at the top left of your screen. Otherwise, use the sidebar menu on the left side of the screen.
                 </li>
                 <li>
@@ -64,7 +64,7 @@ const Page = () => {
                             className="inline-flex items-center px-3 py-1 bg-gray-800 text-white font-semibold rounded-md shadow hover:bg-gray-700"
                         >
                             RSVP
-                        </button> button. By clicking this button, your RSVP status will change to "Yes".
+                        </button> button. By clicking this button, your RSVP status will change to &quot;Yes&quot;.
                     </li>
                     <li>
                         If you need to cancel your RSVP, simply click on the <button className="inline-flex items-center px-3 py-1 bg-gray-800 text-white font-semibold rounded-md shadow hover:bg-gray-700">Cancel RSVP</button> button.

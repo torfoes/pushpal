@@ -13,12 +13,12 @@ const Page = () => {
 
             <ol className="list-decimal list-outside pl-6 space-y-4">
                 <li>
-                    <strong>Open the Menu:</strong> If you're on a mobile device, tap on the menu icon 
+                    <strong>Open the Menu:</strong> If you are on a mobile device, tap on the menu icon 
                     <Menu className="h-5 w-5 mx-2 inline" /> at the top left of your screen. Otherwise, use the sidebar menu on the left side of the screen.
                 </li>
                 
                 <li>
-                    <strong>Go to the Dashboard:</strong> In the menu, locate and click on "Dashboard" under the Main section.
+                    <strong>Go to the Dashboard:</strong> In the menu, locate and click on &quot;Dashboard&quot; under the Main section.
                 </li>
 
                 <li>
@@ -30,7 +30,7 @@ const Page = () => {
                 </li>
 
                 <li>
-                    <strong>Fill Out Organization Details:</strong> A pop-up will appear where you can name your new organization. Optionally, you can provide a description. When you're ready, click on the 
+                    <strong>Fill Out Organization Details:</strong> A pop-up will appear where you can name your new organization. Optionally, you can provide a description. When you are ready, click on the 
                     <Button variant="default" className="mx-2 inline-flex items-center px-3 py-1 bg-gray-200 text-black font-medium rounded-md shadow hover:bg-gray-300">
                         Create Organization
                     </Button>
@@ -118,7 +118,7 @@ const Page = () => {
             </div>
 
             <p className="text-lg mt-4">
-                Congratulations! You've successfully created and managed an organization in PushPal. You can now add members, organize events, and manage your organization effectively.
+                Congratulations! You have successfully created and managed an organization in PushPal. You can now add members, organize events, and manage your organization effectively.
             </p>
         </div>
     );

@@ -13,12 +13,12 @@ const Page = () => {
 
             <ol className="list-decimal list-outside pl-6 space-y-6">
                 <li>
-                    <strong>Open the Menu:</strong> If you're on a mobile device, tap on the menu icon 
+                    <strong>Open the Menu:</strong> If you are on a mobile device, tap on the menu icon 
                     <Menu className="h-5 w-5 mx-2 inline" /> at the top left of your screen. Otherwise, use the sidebar menu on the left side of the screen.
                 </li>
                 
                 <li>
-                    <strong>Go to the Dashboard:</strong> In the menu, locate and click on "Dashboard" under the Main section.
+                    <strong>Go to the Dashboard:</strong> In the menu, locate and click on &quotDashboard&quot under the Main section.
                 </li>
                 
                 <li>
@@ -44,7 +44,7 @@ const Page = () => {
                             Send Notification
                         </Button>
                     </div>
-                    <p>Your notification will be sent to all members and will appear under the "Recent Pushes" section in the <Activity className="h-5 w-5 mx-2 inline" /> Overview tab.</p>
+                    <p>Your notification will be sent to all members and will appear under the &quotRecent Pushes&quot section in the <Activity className="h-5 w-5 mx-2 inline" /> Overview tab.</p>
                 </li>
             </ol>
 
