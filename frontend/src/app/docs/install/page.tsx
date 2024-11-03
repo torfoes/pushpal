@@ -45,7 +45,7 @@ const Page = () => {
                 {/* GIF Display */}
                 <div className="w-full md:w-1/2 mt-8 md:mt-0 flex justify-center">
                     <Image
-                        src="/demo.gif"  {/* Update the path to your actual GIF file */}
+                        src="/demo.gif"
                         alt="PushPal Subscription Demo"
                         className="rounded-lg shadow-lg w-full h-auto max-w-xs"
                         width={300}
