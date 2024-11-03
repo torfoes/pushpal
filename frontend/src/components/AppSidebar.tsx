@@ -53,12 +53,11 @@ export function AppSidebar({ session }: AppSidebarProps) {
         ]
         : [
             { title: "Home", url: "/", icon: HomeIcon },
-            { title: "How it Works", url: "/how-it-works", icon: Info },
             { title: "Login", url: "/login", icon: User },
         ];
 
     const docsNavigationItems = [
-        { title: "Overview", url: "/docs", icon: Layout },
+        { title: "Overview", url: "/docs", icon: Info },
         { title: "Install", url: "/docs/install", icon: Download },
         { title: "How to Subscribe", url: "/docs/how-to-subscribe", icon: Book },
         { title: "Create an Org", url: "/docs/create-an-org", icon: Building },
