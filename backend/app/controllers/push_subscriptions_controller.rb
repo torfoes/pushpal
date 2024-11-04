@@ -48,7 +48,7 @@ class PushSubscriptionsController < ApplicationController
   # GET /push-subscriptions
   def index
     subscriptions = @current_user.push_subscriptions
-    render json: { success: true, subscriptions: subscriptions }, status: :ok
+    render json: { success: true, subscriptions: }, status: :ok
   end
 
   # GET /push-subscriptions/:endpoint
@@ -71,9 +71,7 @@ class PushSubscriptionsController < ApplicationController
 
   # POST /push-subscriptions/:endpoint/send_notification
   def send_notification
-    unless @push_subscription
-      return render json: { success: false, errors: ['Subscription not found.'] }, status: :not_found
-    end
+    return render json: { success: false, errors: ['Subscription not found.'] }, status: :not_found unless @push_subscription
 
     notification_params = params.require(:notification).permit(:title, :body, data: {})
     title = notification_params[:title] || 'Default Title'

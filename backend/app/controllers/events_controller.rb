@@ -53,7 +53,7 @@ class EventsController < ApplicationController
       organization_id: @event.organization_id,
       creator_membership_id: @event.creator_membership_id,
       attendance_required: @event.attendance_required,
-      attendances: attendances
+      attendances:
     }
 
     render json: response, status: :ok
@@ -119,7 +119,7 @@ class EventsController < ApplicationController
   # Create attendances for all members if attendance is required
   def create_attendances
     @organization.memberships.each do |membership|
-      Attendance.create!(membership: membership, event: @event)
+      Attendance.create!(membership:, event: @event)
     end
   end
 end

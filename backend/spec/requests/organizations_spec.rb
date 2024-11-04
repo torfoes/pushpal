@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/requests/organizations_spec.rb
 
 require 'rails_helper'
@@ -14,7 +16,7 @@ RSpec.describe 'Organizations API', type: :request do
   # Create memberships for each organization with role :member
   before do
     organizations.each do |organization|
-      create(:membership, organization: organization, user: user, role: :member)
+      create(:membership, organization:, user:, role: :member)
     end
   end
 
@@ -27,7 +29,7 @@ RSpec.describe 'Organizations API', type: :request do
   # Test suite for GET /organizations
   describe 'GET /organizations' do
     context 'when the request is authenticated' do
-      before { get '/organizations', headers: headers }
+      before { get '/organizations', headers: }
 
       it 'returns all organizations' do
         expect(json).not_to be_empty
@@ -57,7 +59,7 @@ RSpec.describe 'Organizations API', type: :request do
     let(:valid_attributes) { { organization: { name: 'New Organization', description: 'A new organization description' } }.to_json }
 
     context 'when the request is authenticated' do
-      before { post '/organizations', params: valid_attributes, headers: headers }
+      before { post '/organizations', params: valid_attributes, headers: }
 
       it 'creates a new organization' do
         expect(json['name']).to eq('New Organization')
@@ -70,7 +72,7 @@ RSpec.describe 'Organizations API', type: :request do
 
       it 'creates a membership for the user with role creator' do
         organization = Organization.find_by(name: 'New Organization')
-        membership = Membership.find_by(user: user, organization: organization)
+        membership = Membership.find_by(user:, organization:)
         expect(membership).not_to be_nil
         expect(membership.role).to eq('creator')
       end

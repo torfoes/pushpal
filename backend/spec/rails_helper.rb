@@ -15,9 +15,6 @@ SimpleCov.start 'rails' do
   add_filter '/controllers/events'
   add_filter '/controllers/notifications'
 
-
-
-
   # You can also add custom groups if desired
   # create_group 'Services', 'app/services'
 end

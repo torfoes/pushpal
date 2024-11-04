@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/support/jwt_helper.rb
 
 require 'jose'
@@ -9,9 +11,9 @@ module JwtHelper
   def derive_encryption_key(hash_algo, key_material, salt, info, length)
     OpenSSL::KDF.hkdf(
       key_material,
-      salt: salt,
-      info: info,
-      length: length,
+      salt:,
+      info:,
+      length:,
       hash: hash_algo
     )
   end
@@ -19,15 +21,15 @@ module JwtHelper
   # init the JWK for encryption/decryption
   def jwk_oct512
     @jwk_oct512 ||= begin
-                      hash_algo = 'sha256'
-                      key_material = ENV['AUTH_SECRET'] || 'your_test_auth_secret_key_which_is_secure_and_long_enough'
-                      salt = ENV['NEXT_PUBLIC_AUTHJS_SESSION_COOKIE'] || 'your_test_salt_value'
-                      info = "Auth.js Generated Encryption Key (#{salt})"
-                      length = 64
+      hash_algo = 'sha256'
+      key_material = ENV['AUTH_SECRET'] || 'your_test_auth_secret_key_which_is_secure_and_long_enough'
+      salt = ENV['NEXT_PUBLIC_AUTHJS_SESSION_COOKIE'] || 'your_test_salt_value'
+      info = "Auth.js Generated Encryption Key (#{salt})"
+      length = 64
 
-                      derived_key = derive_encryption_key(hash_algo, key_material, salt, info, length)
-                      JOSE::JWK.from_oct(derived_key)
-                    end
+      derived_key = derive_encryption_key(hash_algo, key_material, salt, info, length)
+      JOSE::JWK.from_oct(derived_key)
+    end
   end
 
   # gen an encrypted JWT for a given user

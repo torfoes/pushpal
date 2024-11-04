@@ -1,2 +1,8 @@
 Layout/LineLength:
   Max: 750
+
+Metrics/MethodLength:
+  Max: 200
+
+Style/Documentation:
+  Enabled: false
