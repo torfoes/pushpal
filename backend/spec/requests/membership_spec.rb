@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/requests/memberships_spec.rb
 
 require 'rails_helper'
@@ -10,7 +12,7 @@ RSpec.describe 'Memberships API', type: :request do
   # Initialize test data
   let!(:organization) { create(:organization) }
   let!(:user) { create(:user) }
-  let!(:membership) { create(:membership, organization: organization, user: user) }
+  let!(:membership) { create(:membership, organization:, user:) }
 
   # Define the base endpoint
   let(:base_endpoint) { "/organizations/#{organization.id}/memberships" }

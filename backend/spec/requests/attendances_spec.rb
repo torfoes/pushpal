@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/requests/attendances_spec.rb
 
 require 'rails_helper'
@@ -9,8 +11,8 @@ RSpec.describe 'Attendances API', type: :request do
 
   # Initialize test data
   let!(:organization) { create(:organization) }
-  let!(:event) { create(:event, organization: organization) }
-  let!(:attendance) { create(:attendance, event: event) }
+  let!(:event) { create(:event, organization:) }
+  let!(:attendance) { create(:attendance, event:) }
 
   # Define the base endpoint
   let(:base_endpoint) { "/organizations/#{organization.id}/events/#{event.id}/attendances" }

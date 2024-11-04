@@ -11,7 +11,7 @@ RSpec.describe 'PushSubscriptions API', type: :request do
 
   # Initialize test data
   let!(:user) { create(:user) }
-  let!(:push_subscription) { create(:push_subscription, user: user) }
+  let!(:push_subscription) { create(:push_subscription, user:) }
 
   # Define the endpoint
   let(:endpoint) { '/push-subscriptions' }
@@ -86,7 +86,7 @@ RSpec.describe 'PushSubscriptions API', type: :request do
     end
 
     context 'when the request is authorized' do
-      before { get endpoint, headers: headers }
+      before { get endpoint, headers: }
 
       it 'returns status code 200 OK' do
         expect(response).to have_http_status(:ok)
@@ -119,7 +119,7 @@ RSpec.describe 'PushSubscriptions API', type: :request do
 
     context 'when the request is authorized' do
       context 'with valid attributes' do
-        before { post endpoint, params: valid_attributes.to_json, headers: headers }
+        before { post endpoint, params: valid_attributes.to_json, headers: }
 
         it 'creates a new push subscription' do
           expect(json['success']).to be true
@@ -133,7 +133,7 @@ RSpec.describe 'PushSubscriptions API', type: :request do
       end
 
       context 'with invalid attributes' do
-        before { post endpoint, params: invalid_attributes.to_json, headers: headers }
+        before { post endpoint, params: invalid_attributes.to_json, headers: }
 
         it 'does not create a new push subscription' do
           expect(json['success']).to be false
@@ -148,8 +148,8 @@ RSpec.describe 'PushSubscriptions API', type: :request do
       context 'when the subscription already exists' do
         before do
           # Create a subscription with the same endpoint
-          create(:push_subscription, user: user, endpoint: valid_attributes[:push_subscription][:endpoint])
-          post endpoint, params: valid_attributes.to_json, headers: headers
+          create(:push_subscription, user:, endpoint: valid_attributes[:push_subscription][:endpoint])
+          post endpoint, params: valid_attributes.to_json, headers:
         end
 
         it 'does not create a duplicate subscription' do
@@ -185,7 +185,7 @@ RSpec.describe 'PushSubscriptions API', type: :request do
 
     context 'when the request is authorized' do
       context 'when the subscription exists' do
-        before { delete delete_endpoint, headers: headers }
+        before { delete delete_endpoint, headers: }
 
         it 'deletes the subscription' do
           expect(json['success']).to be true
@@ -206,7 +206,7 @@ RSpec.describe 'PushSubscriptions API', type: :request do
         let(:non_existent_endpoint) { 'https://example.com/non-existent-endpoint' }
         let(:delete_endpoint) { "#{endpoint}/#{CGI.escape(non_existent_endpoint)}" }
 
-        before { delete delete_endpoint, headers: headers }
+        before { delete delete_endpoint, headers: }
 
         it 'returns status code 404 Not Found' do
           expect(response).to have_http_status(:not_found)
@@ -254,7 +254,7 @@ RSpec.describe 'PushSubscriptions API', type: :request do
           before do
             # Mock the PushNotificationService to return a successful result
             allow_any_instance_of(PushNotificationService).to receive(:send_notification).and_return({ success: true })
-            post send_notification_endpoint, params: notification_params.to_json, headers: headers
+            post send_notification_endpoint, params: notification_params.to_json, headers:
           end
 
           it 'sends the notification' do
@@ -271,7 +271,7 @@ RSpec.describe 'PushSubscriptions API', type: :request do
           before do
             # Mock the PushNotificationService to return a failure result
             allow_any_instance_of(PushNotificationService).to receive(:send_notification).and_return({ success: false, error: 'Failed to send notification.' })
-            post send_notification_endpoint, params: notification_params.to_json, headers: headers
+            post send_notification_endpoint, params: notification_params.to_json, headers:
           end
 
           it 'does not send the notification' do
@@ -289,7 +289,7 @@ RSpec.describe 'PushSubscriptions API', type: :request do
         let(:non_existent_endpoint) { 'https://example.com/non-existent-endpoint' }
         let(:send_notification_endpoint) { "#{endpoint}/#{CGI.escape(non_existent_endpoint)}/send_notification" }
 
-        before { post send_notification_endpoint, params: notification_params.to_json, headers: headers }
+        before { post send_notification_endpoint, params: notification_params.to_json, headers: }
 
         it 'returns status code 404 Not Found' do
           expect(response).to have_http_status(:not_found)
@@ -324,7 +324,7 @@ RSpec.describe 'PushSubscriptions API', type: :request do
 
     context 'when the request is authorized' do
       context 'when the subscription exists' do
-        before { get show_endpoint, headers: headers }
+        before { get show_endpoint, headers: }
 
         it 'returns the subscription' do
           expect(json['success']).to be true
@@ -341,7 +341,7 @@ RSpec.describe 'PushSubscriptions API', type: :request do
         let(:non_existent_endpoint) { 'https://example.com/non-existent-endpoint' }
         let(:show_endpoint) { "#{endpoint}/#{CGI.escape(non_existent_endpoint)}" }
 
-        before { get show_endpoint, headers: headers }
+        before { get show_endpoint, headers: }
 
         it 'returns status code 404 Not Found' do
           expect(response).to have_http_status(:not_found)
@@ -373,7 +373,7 @@ RSpec.describe 'PushSubscriptions API', type: :request do
 
     context 'when the request is authorized' do
       context 'when the subscription exists' do
-        before { get view_endpoint, headers: headers }
+        before { get view_endpoint, headers: }
 
         it 'returns the subscription' do
           expect(json['success']).to be true
@@ -390,7 +390,7 @@ RSpec.describe 'PushSubscriptions API', type: :request do
         let(:non_existent_endpoint) { 'https://example.com/non-existent-endpoint' }
         let(:view_endpoint) { "#{endpoint}/#{CGI.escape(non_existent_endpoint)}/view" }
 
-        before { get view_endpoint, headers: headers }
+        before { get view_endpoint, headers: }
 
         it 'returns status code 404 Not Found' do
           expect(response).to have_http_status(:not_found)

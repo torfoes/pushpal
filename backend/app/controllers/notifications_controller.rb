@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # app/controllers/notifications_controller.rb
 
 class NotificationsController < ApplicationController
@@ -79,17 +81,17 @@ class NotificationsController < ApplicationController
   # Set the organization based on params[:organization_id]
   def set_organization
     @organization = Organization.find_by(id: params[:organization_id])
-    unless @organization
-      render json: { error: 'Organization not found' }, status: :not_found
-    end
+    return if @organization
+
+    render json: { error: 'Organization not found' }, status: :not_found
   end
 
   # Set the notification within the context of the current organization
   def set_notification
     @notification = @organization.notifications.find_by(id: params[:id])
-    unless @notification
-      render json: { error: 'Notification not found' }, status: :not_found
-    end
+    return if @notification
+
+    render json: { error: 'Notification not found' }, status: :not_found
   end
 
   # Only allow a list of trusted parameters through
@@ -106,9 +108,7 @@ class NotificationsController < ApplicationController
     member_user_ids = @organization.memberships.pluck(:user_id)
     push_subscriptions = PushSubscription.where(user_id: member_user_ids)
 
-    if push_subscriptions.empty?
-      return { success: false, errors: ['No subscribers to send notifications to.'] }
-    end
+    return { success: false, errors: ['No subscribers to send notifications to.'] } if push_subscriptions.empty?
 
     successes = []
     failures = []

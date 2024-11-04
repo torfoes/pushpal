@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/requests/users_spec.rb
 
 require 'rails_helper'
@@ -18,7 +20,7 @@ RSpec.describe 'Users API', type: :request do
   # Test suite for GET /users
   describe 'GET /users' do
     context 'when the request is authenticated' do
-      before { get '/users', headers: headers }
+      before { get '/users', headers: }
 
       it 'returns all users' do
         expect(json).not_to be_empty
@@ -47,7 +49,7 @@ RSpec.describe 'Users API', type: :request do
   describe 'GET /users/:id' do
     context 'when the request is authenticated' do
       context 'and the user exists' do
-        before { get "/users/#{user_id}", headers: headers }
+        before { get "/users/#{user_id}", headers: }
 
         it 'returns the user' do
           expect(json).not_to be_empty
@@ -61,7 +63,7 @@ RSpec.describe 'Users API', type: :request do
 
       context 'and the user does not exist' do
         let(:user_id) { 'non-existent-id' }
-        before { get "/users/#{user_id}", headers: headers }
+        before { get "/users/#{user_id}", headers: }
 
         it 'returns status code 404 Not Found' do
           expect(response).to have_http_status(:not_found)

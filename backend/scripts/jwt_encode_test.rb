@@ -10,9 +10,9 @@ require 'openssl'
 def derive_encryption_key(hash_algo, key_material, salt, info, length)
   OpenSSL::KDF.hkdf(
     key_material,
-    salt: salt,
-    info: info,
-    length: length,
+    salt:,
+    info:,
+    length:,
     hash: hash_algo
   )
 end

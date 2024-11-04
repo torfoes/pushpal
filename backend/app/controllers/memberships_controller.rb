@@ -77,9 +77,7 @@ class MembershipsController < ApplicationController
   # POST /organizations/:organization_id/memberships
   def create
     existing_membership = @organization.memberships.find_by(user: @current_user)
-    if existing_membership
-      render json: { error: 'You are already a member of this organization.' }, status: :unprocessable_entity and return
-    end
+    render json: { error: 'You are already a member of this organization.' }, status: :unprocessable_entity and return if existing_membership
 
     @membership = @organization.memberships.new(user: @current_user, role: 'member')
 
@@ -88,7 +86,7 @@ class MembershipsController < ApplicationController
       @organization.events.each do |event|
         Attendance.create!(
           membership: @membership,
-          event: event,
+          event:,
           rsvp_status: false,
           checkin_status: false
         )
