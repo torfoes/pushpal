@@ -1,17 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import {
     ColumnDef,
-    FilterFn,
-    SortingFn,
-    sortingFns,
 } from "@tanstack/react-table";
-import {
-    RankingInfo,
-    rankItem,
-    compareItems,
-} from "@tanstack/match-sorter-utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { MoreHorizontal } from "lucide-react";
@@ -26,40 +17,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Membership } from "@/types";
 import { deleteMemberAction, updateMemberRoleAction, changeDuesPaidAction, checkLastAdmin } from "@/app/dashboard/[organization_id]/actions";
+import { useState } from "react";
 
-declare module '@tanstack/react-table' {
-    interface FilterFns {
-        fuzzy: FilterFn<unknown>
-    }
-    interface FilterMeta {
-        itemRank: RankingInfo
-    }
-}
-
-export const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
-    const itemRank = rankItem(row.getValue(columnId), value)
-
-    addMeta({
-        itemRank,
-    })
-
-    return itemRank.passed
-}
-
-const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
-    let dir = 0
-
-    if (rowA.columnFiltersMeta[columnId]) {
-        dir = compareItems(
-            rowA.columnFiltersMeta[columnId]?.itemRank!,
-            rowB.columnFiltersMeta[columnId]?.itemRank!
-        )
-    }
-
-    return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir
-}
-
-// Handles action menu logic
 function ActionsMenu({ member }: { member: Membership }) {
     const [isLastAdmin, setIsLastAdmin] = useState<boolean | null>(null);
 
@@ -69,7 +28,7 @@ function ActionsMenu({ member }: { member: Membership }) {
             setIsLastAdmin(result);
         } catch (error) {
             console.error("Failed to check last admin status", error);
-            setIsLastAdmin(true); 
+            setIsLastAdmin(true);
         }
     };
 
@@ -137,9 +96,9 @@ function ActionsMenu({ member }: { member: Membership }) {
 
 export const adminTableColumns: ColumnDef<Membership>[] = [
     {
-        accessorFn: (row) => `${row.name} ${row.email}`,
+        accessorFn: (row) => row.name,
         id: 'member',
-        header: () => <div className="text-left">Member</div>,
+        header: () => <div className="text-left">Name</div>,
         cell: ({ row }) => {
             const member = row.original;
             return (
@@ -155,7 +114,7 @@ export const adminTableColumns: ColumnDef<Membership>[] = [
                 </div>
             );
         },
-        filterFn: 'fuzzy',
+        filterFn: 'includesString',
     },
     {
         accessorKey: "role",

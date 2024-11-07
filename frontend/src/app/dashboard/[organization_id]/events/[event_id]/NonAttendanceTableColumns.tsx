@@ -22,26 +22,25 @@ import { toggleRsvpAction, toggleCheckinAction } from "@/app/dashboard/[organiza
 
 export const NonAttendanceTableColumns: ColumnDef<Attendance>[] = [
     {
-        accessorKey: "member",
+        accessorFn: (row) => row.user_name,
+        id: 'member',
         header: () => <div className="text-left">Member</div>,
         cell: ({ row }) => {
-            const attendance = row.original;
+            const member = row.original;
             return (
                 <div className="flex items-center space-x-2">
                     <Avatar>
-                        <AvatarImage
-                            src={attendance.user_picture || undefined}
-                            alt={attendance.user_name}
-                        />
-                        <AvatarFallback>{attendance.user_name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={member.user_picture} alt={member.user_name} />
+                        <AvatarFallback>{member.user_name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div>
-                        <p className="font-medium">{attendance.user_name}</p>
-                        <p className="text-sm text-gray-500">{attendance.user_email}</p>
+                        <p className="font-medium">{member.user_name}</p>
+                        <p className="text-sm text-gray-500">{member.user_email}</p>
                     </div>
                 </div>
             );
         },
+        filterFn: 'includesString',
     },
     {
         accessorKey: "rsvp_status",
