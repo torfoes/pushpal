@@ -175,5 +175,22 @@ https://chat.openai.com
 https://guides.rubyonrails.org/index.html
 
 ## Extra Help
-Please contact Karlos at karlos.zurutuza@tamu.edu with any questions about this
-application.
+
+For additional assistance with the PushPal application, please feel free to contact any of our development team members:
+
+- **Karlos Zurutuza**
+  karlos.zurutuza@tamu.edu
+- **Jack Roehr**
+  jroehr@tamu.edu
+- **Darren Collingwood**
+  dlcollingwood@tamu.edu
+- **Ali Mahdavi**
+  a.mahdavi@tamu.edu
+
+### Additional Support
+
+More detailed support information can be found in the Developer Support Guide:
+
+[PushPal Developer Support Guide](https://drive.google.com/file/d/1MIv5h_KS2uDZ0SBOo-1xTVZ4Clc7G8rW/view?usp=sharing)
+
+If you still have questions or need further assistance, don't hesitate to reach out to our development team.
