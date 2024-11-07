@@ -7,7 +7,8 @@ import { Membership } from "@/types";
 
 export const memberTableColumns: ColumnDef<Membership>[] = [
     {
-        accessorKey: "member",
+        accessorFn: (row) => row.name,
+        id: 'member',
         header: () => <div className="text-left">Member</div>,
         cell: ({ row }) => {
             const member = row.original;
@@ -24,6 +25,7 @@ export const memberTableColumns: ColumnDef<Membership>[] = [
                 </div>
             );
         },
+        filterFn: 'includesString',
     },
     {
         accessorKey: "role",

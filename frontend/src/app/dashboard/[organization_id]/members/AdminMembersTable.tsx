@@ -29,7 +29,7 @@ export default function AdminMembersTable({ organization }: { organization: Orga
     return (
         <div className="w-full">
             {/* Header Section */}
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-semibold">Members</h2>
 
                 {/* Dialog with Icon Button Trigger */}
