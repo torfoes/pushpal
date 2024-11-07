@@ -61,7 +61,7 @@ export function AppSidebar({ session }: AppSidebarProps) {
         { title: "Install", url: "/docs/install", icon: Download },
         { title: "How to Subscribe", url: "/docs/how-to-subscribe", icon: Book },
         { title: "Create an Org", url: "/docs/create-an-org", icon: Building },
-        { title: "Create an Event", url: "/docs/create-an-event", icon: CalendarPlus },
+        { title: "Manage an Event", url: "/docs/event-management", icon: CalendarPlus },
         { title: "Send a Push", url: "/docs/send-a-push", icon: Send },
         { title: "Support", url: "/docs/support", icon: LifeBuoy },
     ];

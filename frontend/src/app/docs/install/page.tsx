@@ -1,44 +1,38 @@
-import React from 'react';
-import Image from 'next/image';
+import Image from "next/image";
 
 const Page = () => {
     return (
         <div className="container mx-auto p-4 max-w-5xl">
             {/* Two-Column Layout */}
             <div className="flex flex-col md:flex-row items-start md:space-x-8">
-                {/* Subscription Instructions */}
+                {/* Installation Instructions */}
                 <div className="w-full md:w-1/2">
-                    <h1 className="text-3xl font-bold mb-4">How to install PushPal</h1>
+                    <h1 className="text-3xl font-bold mb-4">Install PushPal</h1>
                     <p className="text-lg mb-4">
-                        Follow these steps to enable push notifications on PushPal:
+                        Add PushPal to your home screen for quick access and to receive notifications:
                     </p>
 
                     <ol className="list-decimal list-outside pl-6 space-y-4">
                         <li>
-                            <strong>Open the Menu:</strong> If you are on a mobile device, tap the hamburger menu icon 
-                            at the top left. Otherwise, use the sidebar menu on the left side of the screen.
+                            <strong>Open PushPal</strong> in your mobile browser.
                         </li>
                         <li>
-                            <strong>Select &quot;Subscriptions&quot; under the Main section:</strong> In the menu, locate the &quot;Subscriptions&quot; 
-                            option and click on it to open the subscriptions page.
+                            <strong>Tap the Share Icon:</strong>
+                            <ul className="list-disc list-inside pl-4 space-y-2">
+                                <li>On <strong>iOS</strong>, tap the <em>Share</em> button.</li>
+                                <li>On <strong>Android</strong>, tap the three-dot menu.</li>
+                            </ul>
                         </li>
                         <li>
-                            <strong>Click &quot;Enable Notifications&quot;:</strong> On the Subscriptions page, click the yellow &quot;Enable Notifications&quot; 
-                            button to start the process.
+                            <strong>Select &quot;Add to Home Screen&quot;.</strong>
                         </li>
                         <li>
-                            <strong>Allow Notifications:</strong> When prompted, select &quot;Allow&quot; to give PushPal permission to send notifications 
-                            to your device.
-                        </li>
-                        <li>
-                            <strong>Verify Your Device:</strong> After enabling notifications, your device should appear under the &quot;Device&quot; section. 
-                            This confirms that you have successfully subscribed to notifications.
+                            <strong>Confirm:</strong> Tap <em>Add</em> when prompted.
                         </li>
                     </ol>
 
                     <p className="text-lg mt-4">
-                        You are now subscribed to receive push notifications from PushPal. You’ll stay updated on important event notifications 
-                        and updates directly on your device!
+                        PushPal is now installed on your device!
                     </p>
                 </div>
 
@@ -46,7 +40,7 @@ const Page = () => {
                 <div className="w-full md:w-1/2 mt-8 md:mt-0 flex justify-center">
                     <Image
                         src="/demo.gif"
-                        alt="PushPal Subscription Demo"
+                        alt="PushPal Installation Demo"
                         className="rounded-lg shadow-lg w-full h-auto max-w-xs"
                         width={300}
                         height={300}

@@ -18,7 +18,7 @@ const Page = () => {
                 </li>
                 
                 <li>
-                    <strong>Go to the Dashboard:</strong> In the menu, locate and click on &quotDashboard&quot under the Main section.
+                    <strong>Go to the Dashboard:</strong> In the menu, locate and click on &quot;Dashboard&quot; under the Main section.
                 </li>
                 
                 <li>
@@ -44,14 +44,14 @@ const Page = () => {
                             Send Notification
                         </Button>
                     </div>
-                    <p>Your notification will be sent to all members and will appear under the &quotRecent Pushes&quot section in the <Activity className="h-5 w-5 mx-2 inline" /> Overview tab.</p>
+                    <p>Your notification will be sent to all members and will appear under the &quot;Recent Pushes&quot; section in the <Activity className="h-5 w-5 mx-2 inline" /> Overview tab.</p>
                 </li>
             </ol>
 
             {/* Add Image Below the List */}
             <div className="w-full mt-8 flex justify-center">
                 <Image
-                    src="/Notif.gif" // Replace with the actual path to your GIF
+                    src="/Notif.gif"
                     alt="Push Notification Demo"
                     className="rounded-lg shadow-lg w-full h-auto max-w-2xl"
                     width={800}
