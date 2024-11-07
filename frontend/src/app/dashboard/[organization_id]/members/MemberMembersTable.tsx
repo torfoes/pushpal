@@ -75,7 +75,7 @@ export default function MemberMembersTable({ organization }: { organization: Org
                 </Dialog>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto w-full">
                 <DataTable<Membership, unknown> columns={memberTableColumns} data={organization.members ?? []} />
             </div>
         </div>

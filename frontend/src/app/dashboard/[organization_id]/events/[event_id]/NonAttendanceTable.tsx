@@ -14,7 +14,7 @@ export default function NonAttendanceTable({ attendances  }: { attendances: Atte
                 <h2 className="text-2xl font-semibold">Attendances</h2>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto w-full">
                 <DataTable<Attendance, unknown>
                     columns={NonAttendanceTableColumns}
                     data={attendances}

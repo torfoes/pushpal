@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -8,7 +8,7 @@ import {
     getCoreRowModel,
     getFilteredRowModel,
     useReactTable,
-} from "@tanstack/react-table"
+} from "@tanstack/react-table";
 
 import {
     Table,
@@ -17,17 +17,21 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<TData, TValue>[]
-    data: TData[]
+    columns: ColumnDef<TData, TValue>[];
+    data: TData[];
 }
 
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+export function DataTable<TData, TValue>({
+                                             columns,
+                                             data,
+                                         }: DataTableProps<TData, TValue>) {
+    const [columnFilters, setColumnFilters] =
+        React.useState<ColumnFiltersState>([]);
 
     const table = useReactTable({
         data,
@@ -38,7 +42,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         state: {
             columnFilters,
         },
-    })
+    });
 
     return (
         <div>
@@ -46,17 +50,19 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
             <div className="flex items-center py-2">
                 <Input
                     placeholder="Filter by member..."
-                    value={(table.getColumn("member")?.getFilterValue() as string) ?? ""}
+                    value={
+                        (table.getColumn("member")?.getFilterValue() as string) ?? ""
+                    }
                     onChange={(event) => {
-                        table.getColumn("member")?.setFilterValue(event.target.value)
+                        table.getColumn("member")?.setFilterValue(event.target.value);
                     }}
                     className="max-w-sm"
                 />
             </div>
 
             {/* Table */}
-            <div className="rounded-md border">
-                <Table>
+            <div className="rounded-md border overflow-x-auto w-full">
+                <Table className="table-auto w-full">
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
@@ -65,9 +71,12 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                                         <TableHead key={header.id}>
                                             {header.isPlaceholder
                                                 ? null
-                                                : flexRender(header.column.columnDef.header, header.getContext())}
+                                                : flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
                                         </TableHead>
-                                    )
+                                    );
                                 })}
                             </TableRow>
                         ))}
@@ -77,15 +86,24 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        <TableCell
+                                            key={cell.id}
+                                            className="max-w-[150px] overflow-hidden"
+                                        >
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
                                         </TableCell>
                                     ))}
                                 </TableRow>
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="h-24 text-center"
+                                >
                                     No results.
                                 </TableCell>
                             </TableRow>
@@ -114,5 +132,5 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                 </Button>
             </div>
         </div>
-    )
+    );
 }

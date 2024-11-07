@@ -76,7 +76,7 @@ export default function AdminMembersTable({ organization }: { organization: Orga
             </div>
 
             {/* Data Table Section - i am not proud of the line below. i was just trying to get typescript to shut up*/}
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto w-full">
                 <DataTable<Membership, unknown> columns={adminTableColumns} data={organization.members ?? []} />
             </div>
         </div>
