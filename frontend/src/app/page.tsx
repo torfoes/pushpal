@@ -5,8 +5,9 @@ import Image from "next/image";
 const Page = () => {
     return (
         <main className="flex-1">
-            <section className="w-full h-screen flex items-center justify-center">
-                <div className="container px-4 md:px-6">
+            <section className="w-full flex items-center justify-center">
+                {/* Removed h-screen class */}
+                <div className="container px-4 md:px-6 mt-16"> {/* Added mt-16 to create space */}
                     <div className="grid gap-6 md:grid-cols-2 lg:gap-12">
                         <div className="flex flex-col justify-center space-y-4">
                             <div className="space-y-2">
