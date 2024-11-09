@@ -4,6 +4,8 @@ import {Organization} from "@/types";
 import * as z from "zod";
 import OrganizationList from "@/components/OrganizationList";
 import {getSessionTokenOrRedirect} from "@/app/utils";
+import { Button } from "@/components/ui/button";
+import { Camera } from "lucide-react";
 
 async function getCurrentUserOrganizations(): Promise<Organization[]> {
     const sessionToken = await getSessionTokenOrRedirect();
@@ -71,6 +73,12 @@ export default async function Page() {
                 <h1 className="text-3xl font-bold">PushPal Dashboard</h1>
                 <div className="flex items-center space-x-4">
                    <CreateOrganizationDialog createNewOrgAction={createNewOrgAction}/>
+                </div>
+                <div className="flex items-center space-x-4">
+                    <Button variant="outline" onClick={() => (window.location.href='/invite/scan')}>
+                        <Camera className="mr-2 h-4 w-4" />
+                        Scan QR Invite
+                    </Button>
                 </div>
             </div>
             <div>
