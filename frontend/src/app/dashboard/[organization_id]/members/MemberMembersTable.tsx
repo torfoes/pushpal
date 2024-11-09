@@ -7,6 +7,7 @@ import {Membership, Organization} from "@/types";
 import { DataTable } from "@/components/ui/data-table";
 import {Copy, UserPlus} from "lucide-react";
 import {memberTableColumns} from "@/app/dashboard/[organization_id]/members/MemberTableColumns";
+import QrInviteCode from './QrInviteCode';
 
 export default function MemberMembersTable({ organization }: { organization: Organization }) {
     const [copySuccess, setCopySuccess] = useState('');
@@ -70,6 +71,9 @@ export default function MemberMembersTable({ organization }: { organization: Org
                             {copySuccess && (
                                 <p className="text-green-500 text-sm">{copySuccess}</p>
                             )}
+                        </div>
+                        <div className="flex items-center p-2 rounded">
+                            <QrInviteCode organization={organization}/>
                         </div>
                     </DialogContent>
                 </Dialog>
