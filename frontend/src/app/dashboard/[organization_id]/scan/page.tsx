@@ -57,6 +57,13 @@ const ScanPage: React.FC = () => {
         };
     }, [debouncedHandleScanSuccess]);
 
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            debouncedHandleScanSuccess.cancel();
+        };
+    }, [debouncedHandleScanSuccess]);
+
     // Suppress logging in handleScanError
     const handleScanError = useCallback(() => {
         // Do nothing to suppress logging

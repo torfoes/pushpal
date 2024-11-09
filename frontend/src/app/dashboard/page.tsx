@@ -4,8 +4,7 @@ import {Organization} from "@/types";
 import * as z from "zod";
 import OrganizationList from "@/components/OrganizationList";
 import {getSessionTokenOrRedirect} from "@/app/utils";
-import { Button } from "@/components/ui/button";
-import { Camera } from "lucide-react";
+import ScanInviteButton from "./ScanInviteButton";
 
 async function getCurrentUserOrganizations(): Promise<Organization[]> {
     const sessionToken = await getSessionTokenOrRedirect();
@@ -62,7 +61,6 @@ async function createNewOrgAction({ name, description }: z.infer<typeof formSche
     redirect('/dashboard');
 }
 
-
 export default async function Page() {
     const organizations = await getCurrentUserOrganizations();
     // console.log(organizations);
@@ -71,14 +69,9 @@ export default async function Page() {
         <div className="container mx-auto p-4">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold">PushPal Dashboard</h1>
-                <div className="flex items-center space-x-4">
+                <div className="flex-column items-center space-x-4 space-y-4">
                    <CreateOrganizationDialog createNewOrgAction={createNewOrgAction}/>
-                </div>
-                <div className="flex items-center space-x-4">
-                    <Button variant="outline" onClick={() => (window.location.href='/invite/scan')}>
-                        <Camera className="mr-2 h-4 w-4" />
-                        Scan QR Invite
-                    </Button>
+                    <ScanInviteButton/>
                 </div>
             </div>
             <div>

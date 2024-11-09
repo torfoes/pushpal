@@ -3,17 +3,18 @@
 import { getSessionTokenOrRedirect } from "@/app/utils";
 import QrScanner from "@/components/QrScanner";
 import { Html5QrcodeResult } from "html5-qrcode";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
 import { acceptInviteAction } from "./actions";
+import debounce from 'lodash.debounce';
 
 const ScanOrgInvitePage: React.FC = () => {
     const [errorMessage, setErrorMessage] = useState('');
 
     // Debounced scan success handler
     const debouncedHandleScanSuccess = useMemo(() => {
-        return debouncedHandleScanSuccess(async (decodedText: string, decodedResult: Html5QrcodeResult) => {
+        return debounce(async (decodedText: string, decodedResult: Html5QrcodeResult) => {
             try {
                 //const [event_id, attendance_id] = decodedText.split('/');
 
@@ -45,6 +46,11 @@ const ScanOrgInvitePage: React.FC = () => {
         };
     }, [debouncedHandleScanSuccess]);
 
+    // Suppress logging in handleScanError
+    const handleScanError = useCallback(() => {
+        // Do nothing to suppress logging
+    }, []);
+
     return (
         <div className="flex flex-col items-center justify-center p-4">
             <h2 className="text-xl font-bold mb-4">Scan QR Code to join organization</h2>
@@ -53,6 +59,7 @@ const ScanOrgInvitePage: React.FC = () => {
                 qrbox={250}
                 disableFlip={false}
                 onScanSuccess={debouncedHandleScanSuccess}
+                onScanError={handleScanError}
             />
             {errorMessage && (
                 <p className="text-red-500 mt-4">
